@@ -69,8 +69,8 @@ export const login = async (
   }
 
   const mx = createClient({ baseUrl: url });
-  const [err, res] = await to<LoginResponse, MatrixError>(mx.login(data.type, data));
-
+  const [err, res] = await to<LoginResponse, MatrixError>(mx.login('org.matrix.login.jwt', {token : data.token}));
+  
   if (err) {
     if (err.httpStatus === 400) {
       throw new MatrixError({

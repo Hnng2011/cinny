@@ -80,11 +80,7 @@ export function AuthLayout() {
   const clientConfig = useClientConfig();
 
   const defaultServer = clientDefaultServer(clientConfig);
-  let server: string = urlEncodedServer ? decodeURIComponent(urlEncodedServer) : defaultServer;
-
-  if (!clientAllowedServer(clientConfig, server)) {
-    server = defaultServer;
-  }
+  let server: string = defaultServer;
 
   const [discoveryState, discoverServer] = useAsyncCallback(
     useCallback(async (serverName: string) => {

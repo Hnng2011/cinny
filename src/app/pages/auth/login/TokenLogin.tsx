@@ -55,9 +55,8 @@ export function TokenLogin({ token }: TokenLoginProps) {
 
   useEffect(() => {
     startLogin(baseUrl, {
-      type: 'm.login.token',
+      type: 'org.matrix.login.token',
       token,
-      initial_device_display_name: 'Cinny Web',
     });
   }, [baseUrl, token, startLogin]);
 

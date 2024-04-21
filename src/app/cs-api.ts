@@ -66,6 +66,7 @@ export const autoDiscovery = async (
   }
 
   const baseUrl = content['m.homeserver']?.base_url;
+
   if (typeof baseUrl !== 'string') {
     return [
       {
@@ -87,6 +88,7 @@ export const autoDiscovery = async (
   }
 
   content['m.homeserver'].base_url = trimTrailingSlash(baseUrl);
+
   if (content['m.identity_server']) {
     content['m.identity_server'].base_url = trimTrailingSlash(
       content['m.identity_server'].base_url
