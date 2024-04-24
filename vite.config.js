@@ -7,6 +7,7 @@ import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfil
 import inject from '@rollup/plugin-inject';
 import { svgLoader } from './viteSvgLoader'
 import buildConfig from "./build.config"
+import { Buffer } from 'buffer';
 
 const copyFiles = {
   targets: [
@@ -52,13 +53,18 @@ export default defineConfig({
     wasm(),
     react(),
   ],
+  define: {
+    global: 'globalThis', // Ensures global scope is set
+    Buffer: Buffer, // Directly set Buffer globally
+  },
   optimizeDeps: {
     esbuildOptions: {
       define: {
-        global: 'globalThis'
+        'global.Buffer': 'Buffer',
       },
       plugins: [
         NodeGlobalsPolyfillPlugin({
+          process: false,
           buffer: true,
         }),
       ]
@@ -76,11 +82,6 @@ export default defineConfig({
       ]
     }
   },
-  define: {
-    'global': 'globalThis',
-    'Buffer': 'buffer.Buffer' // Ensure Buffer is available globally
-  },
-
   resolve: {
     alias: {
       'buffer': require.resolve('buffer/'),
