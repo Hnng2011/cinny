@@ -26,6 +26,7 @@ import HomeIC from '../../../../public/res/ic/outlined/home.svg';
 import UserIC from '../../../../public/res/ic/outlined/user.svg';
 import AddPinIC from '../../../../public/res/ic/outlined/add-pin.svg';
 import SearchIC from '../../../../public/res/ic/outlined/search.svg';
+import Verify from '../../../../public/res/ic/outlined/verify.svg';
 import InviteIC from '../../../../public/res/ic/outlined/invite.svg';
 import ShieldUserIC from '../../../../public/res/ic/outlined/shield-user.svg';
 
@@ -69,6 +70,7 @@ function ProfileAvatarMenu() {
       setNewProfile(info.avatar_url, info.displayname);
     });
     user.on('User.avatarUrl', onAvatarChange);
+    user.on('User.displayName', onAvatarChange);
     return () => {
       user.removeListener('User.avatarUrl', onAvatarChange);
     };
@@ -371,7 +373,7 @@ function SideBar() {
             onClick={() => openSearch()}
             avatar={<Avatar iconSrc={SearchIC} size="normal" />}
           />
-          { totalInvites !== 0 && (
+          {totalInvites !== 0 && (
             <SidebarAvatar
               tooltip="Invites"
               onClick={() => openInviteList()}
@@ -379,7 +381,13 @@ function SideBar() {
               notificationBadge={<NotificationBadge alert content={totalInvites} />}
             />
           )}
+
           <CrossSigninAlert />
+          <SidebarAvatar
+            tooltip="Proof of Twitter"
+            onClick={() => openSearch()}
+            avatar={<Avatar iconSrc={Verify} size="normal" />}
+          />
           <ProfileAvatarMenu />
         </div>
       </div>

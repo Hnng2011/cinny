@@ -54,16 +54,16 @@ export default defineConfig({
   ],
   optimizeDeps: {
     esbuildOptions: {
-        define: {
-          global: 'globalThis'
-        },
-        plugins: [
-          // Enable esbuild polyfill plugins
-          NodeGlobalsPolyfillPlugin({
-            process: false,
-            buffer: true,
-          }),
-        ]
+      define: {
+        global: 'globalThis'
+      },
+      plugins: [
+        // Enable esbuild polyfill plugins
+        NodeGlobalsPolyfillPlugin({
+          process: false,
+          buffer: true,
+        }),
+      ]
     }
   },
   build: {
@@ -75,5 +75,10 @@ export default defineConfig({
         inject({ Buffer: ['buffer', 'Buffer'] })
       ]
     }
+  },
+  resolve: {
+    alias: {
+      '@': '/node_modules', // Thay '/src' bằng đường dẫn tương đối hoặc tuyệt đối tới thư mục bạn muốn
+    },
   },
 });

@@ -44,7 +44,7 @@ export const AuthCardContent = style({
   margin: 'auto',
   padding: config.space.S400,
   paddingTop: config.space.S700,
-  paddingBottom: toRem(44),
+  // paddingBottom: toRem(44),
   gap: toRem(44),
 });
 

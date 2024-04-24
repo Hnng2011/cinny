@@ -59,6 +59,9 @@
     height: 28px;
   }
   &--active .avatar-container {
-    background-color: var(--bg-surface);
+    background-color: color-mix(in srgb, red 80%, var(--bg-surface) 20%) ;
+  } 
+  &--active .avatar-container .ic-raw{
+    background-color: var(--bg-surface) ;
   }
 }
