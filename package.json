@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "vite",
-    "build": "vite build && cp -R .well-known dist/.well-known",
+    "build": "vite build && cp -R .well-known dist/",
     "lint": "yarn check:eslint && yarn check:prettier",
     "check:eslint": "eslint src/*",
     "check:prettier": "prettier --check .",
