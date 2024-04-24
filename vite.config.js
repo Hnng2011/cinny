@@ -7,7 +7,6 @@ import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfil
 import inject from '@rollup/plugin-inject';
 import { svgLoader } from './viteSvgLoader'
 import buildConfig from "./build.config"
-import { Buffer } from 'buffer';
 
 const copyFiles = {
   targets: [
@@ -46,6 +45,9 @@ export default defineConfig({
     port: 8080,
     host: true,
   },
+  define: {
+    'global.Buffer': 'Buffer',  // Define Buffer globally
+  },
   plugins: [
     viteStaticCopy(copyFiles),
     vanillaExtractPlugin(),
@@ -53,16 +55,13 @@ export default defineConfig({
     wasm(),
     react(),
   ],
-  define: {
-    global: 'globalThis', // Ensures global scope is set
-    Buffer: Buffer, // Directly set Buffer globally
-  },
   optimizeDeps: {
     esbuildOptions: {
       define: {
-        'global.Buffer': 'Buffer',
+        global: 'globalThis'
       },
       plugins: [
+        // Enable esbuild polyfill plugins
         NodeGlobalsPolyfillPlugin({
           process: false,
           buffer: true,
@@ -76,15 +75,13 @@ export default defineConfig({
     copyPublicDir: false,
     rollupOptions: {
       plugins: [
-        inject({
-          Buffer: ['buffer', 'Buffer']
-        })
+        inject({ Buffer: ['buffer', 'Buffer'] })
       ]
     }
   },
   resolve: {
     alias: {
-      'buffer': require.resolve('buffer/'),
+      'buffer': 'buffer',
       '@': '/node_modules', // Thay '/src' bằng đường dẫn tương đối hoặc tuyệt đối tới thư mục bạn muốn
     },
   },
