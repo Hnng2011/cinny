@@ -45,9 +45,6 @@ export default defineConfig({
     port: 8080,
     host: true,
   },
-  define: {
-    'global.Buffer': 'Buffer',  // Define Buffer globally
-  },
   plugins: [
     viteStaticCopy(copyFiles),
     vanillaExtractPlugin(),
@@ -57,16 +54,16 @@ export default defineConfig({
   ],
   optimizeDeps: {
     esbuildOptions: {
-      define: {
-        global: 'globalThis'
-      },
-      plugins: [
-        // Enable esbuild polyfill plugins
-        NodeGlobalsPolyfillPlugin({
-          process: false,
-          buffer: true,
-        }),
-      ]
+        define: {
+          global: 'globalThis'
+        },
+        plugins: [
+          // Enable esbuild polyfill plugins
+          NodeGlobalsPolyfillPlugin({
+            process: false,
+            buffer: true,
+          }),
+        ]
     }
   },
   build: {
@@ -78,11 +75,5 @@ export default defineConfig({
         inject({ Buffer: ['buffer', 'Buffer'] })
       ]
     }
-  },
-  resolve: {
-    alias: {
-      'buffer': 'buffer',
-      '@': '/node_modules', // Thay '/src' bằng đường dẫn tương đối hoặc tuyệt đối tới thư mục bạn muốn
-    },
   },
 });

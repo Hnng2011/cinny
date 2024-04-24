@@ -4,6 +4,7 @@ import {
   LoaderFunction,
   Outlet,
   generatePath,
+  matchPath,
   redirect,
   useLocation,
   useNavigate,
@@ -16,14 +17,14 @@ import * as css from './styles.css';
 import * as PatternsCss from '../../styles/Patterns.css';
 import { isAuthenticated } from '../../../client/state/auth';
 import {
-  // clientAllowedServer,
+  clientAllowedServer,
   clientDefaultServer,
   useClientConfig,
 } from '../../hooks/useClientConfig';
 import { AsyncStatus, useAsyncCallback } from '../../hooks/useAsyncCallback';
-import { LOGIN_PATH } from '../paths';
+import { LOGIN_PATH, REGISTER_PATH } from '../paths';
 import CinnySVG from '../../../../public/res/svg/cinny.svg';
-// import { ServerPicker } from './ServerPicker';
+import { ServerPicker } from './ServerPicker';
 import { AutoDiscoveryAction, autoDiscovery } from '../../cs-api';
 import { SpecVersionsLoader } from '../../components/SpecVersionsLoader';
 import { SpecVersionsProvider } from '../../hooks/useSpecVersions';
@@ -38,6 +39,16 @@ export const authLayoutLoader: LoaderFunction = () => {
   }
 
   return null;
+};
+
+const currentAuthPath = (pathname: string): string => {
+  if (matchPath(LOGIN_PATH, pathname)) {
+    return LOGIN_PATH;
+  }
+  if (matchPath(REGISTER_PATH, pathname)) {
+    return REGISTER_PATH;
+  }
+  return LOGIN_PATH;
 };
 
 function AuthLayoutLoading({ message }: { message: string }) {
@@ -89,7 +100,7 @@ export function AuthLayout() {
   useEffect(() => {
     if (!urlEncodedServer || decodeURIComponent(urlEncodedServer) !== server) {
       navigate(
-        generatePath(LOGIN_PATH, {
+        generatePath(currentAuthPath(location.pathname), {
           server: encodeURIComponent(server),
         }),
         { replace: true }
@@ -97,19 +108,19 @@ export function AuthLayout() {
     }
   }, [urlEncodedServer, navigate, location, server]);
 
-  // const selectServer = useCallback(
-  //   (newServer: string) => {
-  //     if (newServer === server) {
-  //       if (discoveryState.status === AsyncStatus.Loading) return;
-  //       discoverServer(server);
-  //       return;
-  //     }
-  //     navigate(
-  //       generatePath(LOGIN_PATH, { server: encodeURIComponent(newServer) })
-  //     );
-  //   },
-  //   [navigate, location, discoveryState, server, discoverServer]
-  // );
+  const selectServer = useCallback(
+    (newServer: string) => {
+      if (newServer === server) {
+        if (discoveryState.status === AsyncStatus.Loading) return;
+        discoverServer(server);
+        return;
+      }
+      navigate(
+        generatePath(currentAuthPath(location.pathname), { server: encodeURIComponent(newServer) })
+      );
+    },
+    [navigate, location, discoveryState, server, discoverServer]
+  );
 
   const [autoDiscoveryError, autoDiscoveryInfo] =
     discoveryState.status === AsyncStatus.Success ? discoveryState.data.response : [];
@@ -131,9 +142,9 @@ export function AuthLayout() {
             </Box>
           </Header>
           <Box className={css.AuthCardContent} direction="Column">
-            {/* <Box direction="Column" gap="100">
-              <Text as="label" size="L400" priority="300" align="center">
-                Homeserver : <span style={{ fontSize: '16px' }}>{server}</span>
+            <Box direction="Column" gap="100">
+              <Text as="label" size="L400" priority="300">
+                Homeserver
               </Text>
               <ServerPicker
                 server={server}
@@ -141,7 +152,7 @@ export function AuthLayout() {
                 allowCustomServer={clientConfig.allowCustomHomeservers}
                 onServerChange={selectServer}
               />
-            </Box> */}
+            </Box>
             {discoveryState.status === AsyncStatus.Loading && (
               <AuthLayoutLoading message="Looking for homeserver..." />
             )}

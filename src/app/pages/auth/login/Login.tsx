@@ -1,13 +1,11 @@
-import React, { useState } from 'react';
-
-import '@particle-network/connectkit/dist/index.css';
-
-import ConnectKitDemo from './connectKitDemo';
-
+import React from 'react';
+import { useLocation } from 'react-router-dom';
+import { TokenLogin } from './TokenLogin';
 
 export function Login() {
-  const [token, setToken] = useState<string | null>(null);
+  const location = useLocation();
+  const token = location.search.replace('?loginToken=', '');
   return (
-    <ConnectKitDemo />
+    <TokenLogin token={token} />
   );
 }
