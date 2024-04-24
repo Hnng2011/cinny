@@ -1,7 +1,6 @@
 {
-  "defaultHomeserver": 1,
+  "defaultHomeserver": 0,
   "homeserverList": [
-    "matrix.org",
     "matrixai.click"
   ],
   "allowCustomHomeservers": true,
