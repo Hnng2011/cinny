@@ -64,7 +64,6 @@ const createRouter = (clientConfig: ClientConfig) => {
   });
 };
 
-// TODO: app crash boundary
 function App() {
   return (
     <FeatureCheck>
@@ -75,36 +74,34 @@ function App() {
         )}
       >
         {(clientConfig) => (
-
-          <ClientConfigProvider value={clientConfig}>
-            <JotaiProvider>
-              <ModalProvider
-                options={{
-                  projectId,
-                  clientKey,
-                  appId,
-                  chains: [EthereumSepolia],
-                  connectors: [
-                    ...evmWallets({ projectId: '2b508ce9975b8f0ccd539a24438696e2', showQrModal: true }),
-                  ],
-                  erc4337: {
-                    name: 'SIMPLE',
-                    version: '1.0.0',
-                  },
-                  wallet: {
-                    topMenuType: 'close',
-                    customStyle: {
-                      supportChains: [EthereumSepolia],
-                    },
-                  },
-                }}
-                theme='dark'
-              >
+          <ModalProvider
+            options={{
+              projectId,
+              clientKey,
+              appId,
+              chains: [EthereumSepolia],
+              connectors: [
+                ...evmWallets({ projectId: '2b508ce9975b8f0ccd539a24438696e2', showQrModal: true }),
+              ],
+              erc4337: {
+                name: 'SIMPLE',
+                version: '1.0.0',
+              },
+              wallet: {
+                topMenuType: 'close',
+                customStyle: {
+                  supportChains: [EthereumSepolia],
+                },
+              },
+            }}
+            theme='dark'
+          >
+            <ClientConfigProvider value={clientConfig}>
+              <JotaiProvider>
                 <RouterProvider router={createRouter(clientConfig)} />
-              </ModalProvider>
-            </JotaiProvider>
-          </ClientConfigProvider>
-
+              </JotaiProvider>
+            </ClientConfigProvider>
+          </ModalProvider>
         )}
       </ClientConfigLoader>
     </FeatureCheck>
