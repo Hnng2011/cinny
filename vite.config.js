@@ -54,26 +54,25 @@ export default defineConfig({
   ],
   optimizeDeps: {
     esbuildOptions: {
-        define: {
-          global: 'globalThis'
-        },
-        plugins: [
-          // Enable esbuild polyfill plugins
-          NodeGlobalsPolyfillPlugin({
-            process: false,
-            buffer: true,
-          }),
-        ]
+      define: {
+        global: 'globalThis'
+      },
+      plugins: [
+        NodeGlobalsPolyfillPlugin({
+          process: false,
+          buffer: true,
+        }),
+      ]
     }
   },
   build: {
     outDir: 'dist',
     sourcemap: true,
     copyPublicDir: false,
-    rollupOptions: {
-      plugins: [
-        inject({ Buffer: ['buffer', 'Buffer'] })
-      ]
-    }
+    // rollupOptions: {
+    //   plugins: [
+    //     inject({ Buffer: ['buffer', 'Buffer'] })
+    //   ]
+    // }
   },
 });
