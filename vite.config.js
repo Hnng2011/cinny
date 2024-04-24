@@ -58,9 +58,7 @@ export default defineConfig({
         global: 'globalThis'
       },
       plugins: [
-        // Enable esbuild polyfill plugins
         NodeGlobalsPolyfillPlugin({
-          process: false,
           buffer: true,
         }),
       ]
@@ -72,12 +70,20 @@ export default defineConfig({
     copyPublicDir: false,
     rollupOptions: {
       plugins: [
-        inject({ Buffer: ['buffer', 'Buffer'] })
+        inject({
+          Buffer: ['buffer', 'Buffer']
+        })
       ]
     }
   },
+  define: {
+    'global': 'globalThis',
+    'Buffer': 'buffer.Buffer' // Ensure Buffer is available globally
+  },
+
   resolve: {
     alias: {
+      'buffer': require.resolve('buffer/'),
       '@': '/node_modules', // Thay '/src' bằng đường dẫn tương đối hoặc tuyệt đối tới thư mục bạn muốn
     },
   },
