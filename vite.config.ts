@@ -1,12 +1,14 @@
-import { defineConfig } from 'vite';
+import { defineConfig, Plugin, ConfigEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+
 import { wasm } from '@rollup/plugin-wasm';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 import { vanillaExtractPlugin } from "@vanilla-extract/vite-plugin";
 import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
-import inject from '@rollup/plugin-inject';
 import { svgLoader } from './viteSvgLoader'
 import buildConfig from "./build.config"
+import fs from 'fs';
+import path from 'path';
 
 const copyFiles = {
   targets: [
@@ -37,8 +39,30 @@ const copyFiles = {
   ],
 }
 
+const particleWasmPlugin: Plugin | undefined = {
+  name: 'particle-wasm',
+  apply: (_, env: ConfigEnv) => {
+    return env.mode === 'development';
+  },
+  buildStart: () => {
+    const copiedPath = path.join(
+      __dirname,
+      'node_modules/@particle-network/thresh-sig/wasm/thresh_sig_wasm_bg.wasm'
+    );
+    const dir = path.join(__dirname, 'node_modules/.vite/wasm');
+    const resultPath = path.join(dir, 'thresh_sig_wasm_bg.wasm');
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.copyFileSync(copiedPath, resultPath);
+  },
+};
+
 export default defineConfig({
   appType: 'spa',
+  define: {
+    'process.env': process.env
+  },
   publicDir: false,
   base: buildConfig.base,
   server: {
@@ -61,6 +85,7 @@ export default defineConfig({
     svgLoader(),
     wasm(),
     react(),
+    particleWasmPlugin,
   ],
   optimizeDeps: {
     esbuildOptions: {

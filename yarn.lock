@@ -2000,6 +2000,16 @@
     "@walletconnect/modal" "~2.6.0"
     eventemitter3 "^4.0.0"
 
+"@particle-network/thresh-sig@0.7.8":
+  version "0.7.8"
+  resolved "https://registry.yarnpkg.com/@particle-network/thresh-sig/-/thresh-sig-0.7.8.tgz#1036446eb1082e39721c38d9267bb3e00b82c961"
+  integrity sha512-Xe9yxt9s1ZnUpdwNPEHK9jMDg3Mjl9WePbmUMC4w7rZ+nxTE7gk0F+Q5mrEgwjmFAtDod0bCpzHygOOObF5QgQ==
+  dependencies:
+    "@ethereumjs/tx" "^4.2.0"
+    "@types/elliptic" "^6.4.14"
+    buffer "^6.0.3"
+    elliptic "^6.5.4"
+
 "@particle-network/thresh-sig@^0.7.8":
   version "0.7.8"
   resolved "https://registry.npmjs.org/@particle-network/thresh-sig/-/thresh-sig-0.7.8.tgz"
@@ -9385,15 +9395,7 @@ std-env@^3.7.0:
   resolved "https://registry.npmjs.org/std-env/-/std-env-3.7.0.tgz"
   integrity sha512-JPbdCEQLj1w5GilpiHAx3qJvFndqybBysA3qUOnznweH4QbNYUsW/ea8QzSrnh0vNsezMMw5bcVool8lM0gwzg==
 
-stream-browserify@3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/stream-browserify/-/stream-browserify-3.0.0.tgz#22b0a2850cdf6503e73085da1fc7b7d0c2122f2f"
-  integrity sha512-H73RAHsVBapbim0tU2JwwOiXUj+fikfiaoYAKHF3VJfA0pe2BCzkhAHBlLG6REzE+2WNZcxOXjK7lkso+9euLA==
-  dependencies:
-    inherits "~2.0.4"
-    readable-stream "^3.5.0"
-
-stream-browserify@^3.0.0:
+stream-browserify@3.0.0, stream-browserify@^3.0.0:
   version "3.0.0"
   resolved "https://registry.npmjs.org/stream-browserify/-/stream-browserify-3.0.0.tgz"
   integrity sha512-H73RAHsVBapbim0tU2JwwOiXUj+fikfiaoYAKHF3VJfA0pe2BCzkhAHBlLG6REzE+2WNZcxOXjK7lkso+9euLA==
