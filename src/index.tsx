@@ -5,6 +5,9 @@ import { enableMapSet } from 'immer';
 import '@fontsource/inter/variable.css';
 import 'folds/dist/style.css';
 import { configClass, varsClass } from 'folds';
+import('buffer').then(({ Buffer }) => {
+  window.Buffer = Buffer;
+});
 
 enableMapSet();
 
