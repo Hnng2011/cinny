@@ -67,7 +67,7 @@ export function Login() {
       const add = await smartAccount.getAddress();
       const msg = await getNonce(add);
 
-      await particleProvider.request({
+      const signature = await particleProvider.request({
         method: 'personal_sign',
         params: [`0x${Buffer.from(msg).toString('hex')}`, account],
       });
