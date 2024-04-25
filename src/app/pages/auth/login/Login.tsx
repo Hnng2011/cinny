@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { TokenLogin } from './TokenLogin';
-import { ConnectButton, useAccountInfo, useParticleProvider } from '@particle-network/connectkit';
+import { ConnectButton, useAccountInfo } from '@particle-network/connectkit';
 import { SmartAccount } from '@particle-network/aa';
 import { EthereumSepolia } from '@particle-network/chains';
+import { Buffer } from 'buffer';
 
 const getNonce = async (address: any) => {
   const add = address.toString().toLowerCase();
@@ -45,20 +46,17 @@ async function postNonce(msg: any, setSignedMessage: any, setToken: any) {
   postData();
 };
 
-const config = {
-  projectId: import.meta.env.VITE_APP_PROJECT_ID as string,
-  clientKey: import.meta.env.VITE_APP_CLIENT_KEY as string,
-  appId: import.meta.env.VITE_APP_APP_ID as string,
-}
 
 export function Login() {
   const [msg, setMsg] = useState<string>('');
+
   const [signedMessage, setSignedMessage] = useState<string>('');
   const [token, setToken] = useState<string | null>(null);
-  const { account } = useAccountInfo();
-  const provider = useParticleProvider();
-  const smartAccount = new SmartAccount(provider, {
-    ...config,
+  const { account, particleProvider } = useAccountInfo();
+  const smartAccount = new SmartAccount(particleProvider!, {
+    projectId: import.meta.env.VITE_APP_PROJECT_ID as string,
+    clientKey: import.meta.env.VITE_APP_CLIENT_KEY as string,
+    appId: import.meta.env.VITE_APP_APP_ID as string,
     aaOptions: {
       simple: [{ chainId: EthereumSepolia.id, version: '1.0.0' }]
     }
@@ -68,20 +66,21 @@ export function Login() {
     async function LoadToken() {
       const add = await smartAccount.getAddress();
       const msg = await getNonce(add);
-      const signature = await provider?.request({
+
+      await particleProvider.request({
         method: 'personal_sign',
-        params: [msg, account],
+        params: [`0x${Buffer.from(msg).toString('hex')}`, account],
       });
+
       setMsg(msg);
       setSignedMessage(signature);
     }
 
-    if (account && provider) {
+    if (account && particleProvider) {
       LoadToken();
     }
 
-  }, [account, provider]);
-
+  }, [account, particleProvider]);
 
 
   useEffect(() => {

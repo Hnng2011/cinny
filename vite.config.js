@@ -45,6 +45,16 @@ export default defineConfig({
     port: 8080,
     host: true,
   },
+  resolve: {
+    alias: {
+      http: 'stream-http',
+      https: 'https-browserify',
+      stream: 'stream-browserify',
+      zlib: 'browserify-zlib',
+      url: 'url',
+      assert: 'assert'
+    }
+  },
   plugins: [
     viteStaticCopy(copyFiles),
     vanillaExtractPlugin(),
@@ -62,6 +72,7 @@ export default defineConfig({
           process: false,
           buffer: true,
         }),
+
       ]
     }
   },
@@ -69,10 +80,10 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true,
     copyPublicDir: false,
-    // rollupOptions: {
-    //   plugins: [
-    //     inject({ Buffer: ['buffer', 'Buffer'] })
-    //   ]
-    // }
+    rollupOptions: {
+      plugins: [
+        inject({ Buffer: ['buffer', 'Buffer'] })
+      ]
+    }
   },
 });
