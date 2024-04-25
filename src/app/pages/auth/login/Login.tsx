@@ -49,7 +49,6 @@ async function postNonce(msg: any, setSignedMessage: any, setToken: any) {
 
 export function Login() {
   const [msg, setMsg] = useState<string>('');
-
   const [signedMessage, setSignedMessage] = useState<string>('');
   const [token, setToken] = useState<string | null>(null);
   const { account, particleProvider } = useAccountInfo();
@@ -66,7 +65,6 @@ export function Login() {
     async function LoadToken() {
       const add = await smartAccount.getAddress();
       const msg = await getNonce(add);
-
       const signature = await particleProvider.request({
         method: 'personal_sign',
         params: [`0x${Buffer.from(msg).toString('hex')}`, account],
@@ -97,7 +95,7 @@ export function Login() {
 
   return (
     <>
-      <ConnectButton />
+      {!account && <ConnectButton />}
       {token && <TokenLogin token={token} />}
     </>
 
