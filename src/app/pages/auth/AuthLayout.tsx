@@ -42,6 +42,12 @@ export const authLayoutLoader: LoaderFunction = () => {
 };
 
 const currentAuthPath = (pathname: string): string => {
+  if (matchPath(LOGIN_PATH, pathname)) {
+    return LOGIN_PATH;
+  }
+  if (matchPath(REGISTER_PATH, pathname)) {
+    return REGISTER_PATH;
+  }
   return LOGIN_PATH;
 };
 

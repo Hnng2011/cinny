@@ -22,7 +22,6 @@ import { EthereumSepolia } from '@particle-network/chains';
 import { ModalProvider } from '@particle-network/connectkit';
 import '@particle-network/connectkit/dist/index.css';
 import { evmWallets } from '@particle-network/connectors';
-import { AuthType } from '@particle-network/auth-core';
 
 const ConnectKit = ({ children }: any) => {
   return (
@@ -31,7 +30,6 @@ const ConnectKit = ({ children }: any) => {
         projectId: import.meta.env.VITE_APP_PROJECT_ID as string,
         clientKey: import.meta.env.VITE_APP_CLIENT_KEY as string,
         appId: import.meta.env.VITE_APP_APP_ID as string,
-        authTypes: [AuthType.facebook, AuthType.google, AuthType.twitter, AuthType.github, AuthType.email],
         chains: [EthereumSepolia],
         connectors: [
           ...evmWallets({ projectId: '2b508ce9975b8f0ccd539a24438696e2', showQrModal: true }),
@@ -100,25 +98,24 @@ const createRouter = (clientConfig: ClientConfig) => {
 // TODO: app crash boundary
 function App() {
   return (
-    <FeatureCheck>
-      <ClientConfigLoader
-        fallback={() => <ConfigConfigLoading />}
-        error={(err, retry, ignore) => (
-          <ConfigConfigError error={err} retry={retry} ignore={ignore} />
-        )}
-      >
-        {(clientConfig) => (
-
-          <ClientConfigProvider value={clientConfig}>
-            <JotaiProvider>
-              <ConnectKit>
+    <ConnectKit>
+      <FeatureCheck>
+        <ClientConfigLoader
+          fallback={() => <ConfigConfigLoading />}
+          error={(err, retry, ignore) => (
+            <ConfigConfigError error={err} retry={retry} ignore={ignore} />
+          )}
+        >
+          {(clientConfig) => (
+            <ClientConfigProvider value={clientConfig}>
+              <JotaiProvider>
                 <RouterProvider router={createRouter(clientConfig)} />
-              </ConnectKit>
-            </JotaiProvider>
-          </ClientConfigProvider>
-        )}
-      </ClientConfigLoader>
-    </FeatureCheck>
+              </JotaiProvider>
+            </ClientConfigProvider>
+          )}
+        </ClientConfigLoader>
+      </FeatureCheck>
+    </ConnectKit>
   );
 }
 

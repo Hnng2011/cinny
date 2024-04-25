@@ -52,17 +52,18 @@ export function Login() {
   const [signedMessage, setSignedMessage] = useState<string>('');
   const [token, setToken] = useState<string | null>(null);
   const { account, particleProvider } = useAccountInfo();
-  const smartAccount = new SmartAccount(particleProvider!, {
-    projectId: import.meta.env.VITE_APP_PROJECT_ID as string,
-    clientKey: import.meta.env.VITE_APP_CLIENT_KEY as string,
-    appId: import.meta.env.VITE_APP_APP_ID as string,
-    aaOptions: {
-      simple: [{ chainId: EthereumSepolia.id, version: '1.0.0' }]
-    }
-  });
 
   useEffect(() => {
     async function LoadToken() {
+      const smartAccount = new SmartAccount(particleProvider!, {
+        projectId: import.meta.env.VITE_APP_PROJECT_ID as string,
+        clientKey: import.meta.env.VITE_APP_CLIENT_KEY as string,
+        appId: import.meta.env.VITE_APP_APP_ID as string,
+        aaOptions: {
+          simple: [{ chainId: EthereumSepolia.id, version: '1.0.0' }]
+        }
+      });
+
       const add = await smartAccount.getAddress();
       const msg = await getNonce(add);
       const signature = await particleProvider.request({
