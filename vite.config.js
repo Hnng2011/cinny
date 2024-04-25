@@ -80,10 +80,10 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true,
     copyPublicDir: false,
-    rollupOptions: {
-      plugins: [
-        inject({ Buffer: ['buffer', 'Buffer'] })
-      ]
-    }
+    // rollupOptions: {
+    //   plugins: [
+    //     inject({ Buffer: ['buffer', 'Buffer'] })
+    //   ]
+    // }
   },
 });
