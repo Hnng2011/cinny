@@ -24,6 +24,9 @@ import '@particle-network/connectkit/dist/index.css';
 import { evmWallets } from '@particle-network/connectors';
 
 const ConnectKit = ({ children }: any) => {
+  console.log(import.meta.env.VITE_APP_PROJECT_ID as string)
+  console.log(import.meta.env.VITE_APP_CLIENT_KEY as string)
+  console.log(import.meta.env.VITE_APP_APP_ID as string)
   return (
     <ModalProvider
       options={{
