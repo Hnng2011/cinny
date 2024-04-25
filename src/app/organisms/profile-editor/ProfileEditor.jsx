@@ -16,6 +16,11 @@ import { confirmDialog } from '../../molecules/confirm-dialog/ConfirmDialog';
 
 import './ProfileEditor.scss';
 
+const TruncateText = (text) => {
+  const truncatedText = (text?.length > 24) ? `...${text?.substring(text.length - 24)}` : text;
+  return truncatedText
+}
+
 function ProfileEditor({ userId }) {
   const [isEditing, setIsEditing] = useState(false);
   const mx = initMatrix.matrixClient;
@@ -95,7 +100,7 @@ function ProfileEditor({ userId }) {
   const renderInfo = () => (
     <div className="profile-editor__info" style={{ marginBottom: avatarSrc ? '24px' : '0' }}>
       <div>
-        <Text variant="h2" primary weight="medium">{twemojify(username) ?? userId}</Text>
+        <Text variant="h2" primary weight="medium">{TruncateText(twemojify(username) ?? userId)}</Text>
         <IconButton
           src={PencilIC}
           size="extra-small"
