@@ -23,6 +23,8 @@ import { ClientContent } from './ClientContent';
 import { useSetting } from '../../state/hooks/settings';
 import { settingsAtom } from '../../state/settings';
 
+import { useConnectKit } from '@particle-network/connectkit';
+
 function SystemEmojiFeature() {
   const [twitterEmoji] = useSetting(settingsAtom, 'twitterEmoji');
 
@@ -36,6 +38,7 @@ function SystemEmojiFeature() {
 }
 
 function Client() {
+  const connectKit = useConnectKit();
   const [isLoading, changeLoading] = useState(true);
   const [loadingMsg, setLoadingMsg] = useState('Heating up');
   const classNameHidden = 'client__item-hidden';
@@ -62,6 +65,7 @@ function Client() {
     };
   }, []);
 
+
   useEffect(() => {
     changeLoading(true);
     let counter = 0;
@@ -75,14 +79,19 @@ function Client() {
       setLoadingMsg(msgList[counter]);
       counter += 1;
     }, 15000);
-    initMatrix.once('init_loading_finished', () => {
+
+    initMatrix.once('init_loading_finished', async () => {
       clearInterval(iId);
       initHotkeys();
       initRoomListListener(initMatrix.roomList);
+      connectKit.connectToCachedProvider().then((provider) => { provider.request({ method: 'eth_accounts', jsonrpc: '2.0' }) });
       changeLoading(false);
     });
+
+
     initMatrix.init();
   }, []);
+
 
   if (isLoading) {
     return (

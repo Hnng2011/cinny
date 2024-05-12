@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Provider as JotaiProvider } from 'jotai';
 import {
   Route,
@@ -24,9 +24,6 @@ import '@particle-network/connectkit/dist/index.css';
 import { evmWallets } from '@particle-network/connectors';
 
 const ConnectKit = ({ children }: any) => {
-  console.log(import.meta.env.VITE_APP_PROJECT_ID as string)
-  console.log(import.meta.env.VITE_APP_CLIENT_KEY as string)
-  console.log(import.meta.env.VITE_APP_APP_ID as string)
   return (
     <ModalProvider
       options={{
@@ -49,6 +46,7 @@ const ConnectKit = ({ children }: any) => {
         },
       }}
       theme='dark'
+      cacheProvider={true}
     >
       {children}
     </ModalProvider>
@@ -59,7 +57,6 @@ const ConnectKit = ({ children }: any) => {
 
 const createRouter = (clientConfig: ClientConfig) => {
   const { hashRouter } = clientConfig;
-
   const routes = createRoutesFromElements(
     <Route>
       <Route

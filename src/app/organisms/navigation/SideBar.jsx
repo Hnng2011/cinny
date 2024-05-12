@@ -354,11 +354,11 @@ function SideBar() {
             <div className="sidebar-divider" />
             <div className="space-container">
               <SpaceShortcut />
-              <SidebarAvatar
+              {/* <SidebarAvatar
                 tooltip="Pin spaces"
                 onClick={() => openShortcutSpaces()}
                 avatar={<Avatar iconSrc={AddPinIC} size="normal" />}
-              />
+              /> */}
             </div>
           </div>
         </ScrollView>
@@ -371,7 +371,7 @@ function SideBar() {
             onClick={() => openSearch()}
             avatar={<Avatar iconSrc={SearchIC} size="normal" />}
           />
-          { totalInvites !== 0 && (
+          {totalInvites !== 0 && (
             <SidebarAvatar
               tooltip="Invites"
               onClick={() => openInviteList()}

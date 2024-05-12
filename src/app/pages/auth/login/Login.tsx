@@ -99,6 +99,5 @@ export function Login() {
       {!account && <ConnectButton />}
       {token && <TokenLogin token={token} />}
     </>
-
   );
 }
