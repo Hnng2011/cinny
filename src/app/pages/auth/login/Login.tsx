@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { TokenLogin } from './TokenLogin';
-import { ConnectButton, useAccountInfo } from '@particle-network/connectkit';
+import { ConnectButton, useAccountInfo, useConnectKit } from '@particle-network/connectkit';
 import { SmartAccount } from '@particle-network/aa';
 import { EthereumSepolia } from '@particle-network/chains';
 import { Buffer } from 'buffer';
+import Spinner from '../../../atoms/spinner/Spinner';
+import { Box, Text, color } from 'folds';
+
 
 const getNonce = async (address: any) => {
   const add = address.toString().toLowerCase();
@@ -48,10 +51,12 @@ async function postNonce(msg: any, setSignedMessage: any, setToken: any) {
 
 
 export function Login() {
-  const [msg, setMsg] = useState<string>('');
-  const [signedMessage, setSignedMessage] = useState<string>('');
+  const connectKit = useConnectKit();
+  const [err, setErr] = useState<string | null>(null);
+  const [msg, setMsg] = useState<string | null>(null);
+  const [signedMessage, setSignedMessage] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const { account, particleProvider } = useAccountInfo();
+  const { account, particleProvider }: { particleProvider: any, account: string | undefined } = useAccountInfo();
 
   useEffect(() => {
     async function LoadToken() {
@@ -66,16 +71,27 @@ export function Login() {
 
       const add = await smartAccount.getAddress();
       const msg = await getNonce(add);
-      const signature = await particleProvider.request({
-        method: 'personal_sign',
-        params: [`0x${Buffer.from(msg).toString('hex')}`, account],
-      });
 
-      setMsg(msg);
-      setSignedMessage(signature);
+      try {
+        const signature = await particleProvider.request({
+          method: 'personal_sign',
+          params: [`0x${Buffer.from(msg).toString('hex')}`, account],
+        });
+
+        setMsg(msg);
+        setSignedMessage(signature);
+
+      } catch (error: any) {
+        setErr(error?.message.toString());
+        console.log('error', error?.message.toString());
+      }
     }
 
     if (account && particleProvider) {
+      if (err) {
+        setErr(null);
+      }
+
       LoadToken();
     }
 
@@ -93,9 +109,23 @@ export function Login() {
 
   }, [signedMessage, msg]);
 
+  useEffect(() => {
+    if (err) {
+      connectKit.disconnect();
+    }
+  }, [err])
+
 
   return (
     <>
+      {account && !err && <Spinner />}
+      {err &&
+        <Box justifyContent="Center" alignItems="Center" gap="200">
+          <Text align="Center" style={{ color: color.Critical.Main }} size="T300">
+            {err}
+          </Text>
+        </Box>
+      }
       {!account && <ConnectButton />}
       {token && <TokenLogin token={token} />}
     </>
