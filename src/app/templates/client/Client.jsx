@@ -23,7 +23,11 @@ import { ClientContent } from './ClientContent';
 import { useSetting } from '../../state/hooks/settings';
 import { settingsAtom } from '../../state/settings';
 
-import { useParticleConnect } from '@particle-network/connectkit';
+import { useAccountInfo, useParticleConnect } from '@particle-network/connectkit';
+import { SmartAccount } from '@particle-network/aa';
+import { EthereumSepolia } from '@particle-network/chains';
+import { SmartAccountAtom } from '../../state/smartAccount';
+import { useAtom } from 'jotai';
 
 function SystemEmojiFeature() {
   const [twitterEmoji] = useSetting(settingsAtom, 'twitterEmoji');
@@ -39,6 +43,9 @@ function SystemEmojiFeature() {
 
 function Client() {
   const particleConnect = useParticleConnect();
+  const { particleProvider, account } = useAccountInfo();
+  const [smartAccount, setSmartAccount] = useAtom(SmartAccountAtom);
+
   const [isLoading, changeLoading] = useState(true);
   const [loadingMsg, setLoadingMsg] = useState('Heating up');
   const classNameHidden = 'client__item-hidden';
@@ -84,12 +91,25 @@ function Client() {
       clearInterval(iId);
       initHotkeys();
       initRoomListListener(initMatrix.roomList);
-      await particleConnect.cacheconnect();
+      !account && await particleConnect.cacheconnect();
       changeLoading(false);
     });
 
     initMatrix.init();
   }, []);
+
+  useEffect(() => {
+    !smartAccount && particleProvider &&
+      setSmartAccount(new SmartAccount(particleProvider, {
+        projectId: String(import.meta.env.VITE_APP_PROJECT_ID),
+        clientKey: String(import.meta.env.VITE_APP_CLIENT_KEY),
+        appId: String(import.meta.env.VITE_APP_APP_ID),
+        aaOptions: {
+          simple: [{ chainId: EthereumSepolia.id, version: '1.0.0' }]
+        }
+      }));
+
+  }, [particleProvider])
 
 
   if (isLoading) {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useAtom } from 'jotai';
 import PropTypes from 'prop-types';
 import './SideBar.scss';
 
@@ -24,7 +25,7 @@ import SpaceOptions from '../../molecules/space-options/SpaceOptions';
 
 import HomeIC from '../../../../public/res/ic/outlined/home.svg';
 import UserIC from '../../../../public/res/ic/outlined/user.svg';
-import AddPinIC from '../../../../public/res/ic/outlined/add-pin.svg';
+// import AddPinIC from '../../../../public/res/ic/outlined/add-pin.svg';
 import SearchIC from '../../../../public/res/ic/outlined/search.svg';
 import InviteIC from '../../../../public/res/ic/outlined/invite.svg';
 import ShieldUserIC from '../../../../public/res/ic/outlined/shield-user.svg';
@@ -33,6 +34,7 @@ import { useSelectedTab } from '../../hooks/useSelectedTab';
 import { useDeviceList } from '../../hooks/useDeviceList';
 
 import { tabText as settingTabText } from '../settings/Settings';
+
 
 function useNotificationUpdate() {
   const { notifications } = initMatrix;
@@ -158,7 +160,7 @@ function FeaturedTab() {
           />
         ) : null}
       />
-      <SidebarAvatar
+      {/* <SidebarAvatar
         tooltip="People"
         active={selectedTab === cons.tabs.DIRECTS}
         onClick={() => selectTab(cons.tabs.DIRECTS)}
@@ -169,7 +171,7 @@ function FeaturedTab() {
             content={abbreviateNumber(dmsNoti.total) || null}
           />
         ) : null}
-      />
+      /> */}
     </>
   );
 }

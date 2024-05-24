@@ -19,6 +19,7 @@ export const allRoomsAtom = atom<string[], [RoomsAction], undefined>(
     });
   }
 );
+
 export const useBindAllRoomsAtom = (mx: MatrixClient, allRooms: typeof allRoomsAtom) => {
   useBindRoomsWithMembershipsAtom(
     mx,

@@ -1,8 +1,6 @@
 {
   "defaultHomeserver": 0,
-  "homeserverList": [
-    "matrixai.click"
-  ],
+  "homeserverList": ["ubiw.space"],
   "allowCustomHomeservers": true,
   "hashRouter": {
     "enabled": false,

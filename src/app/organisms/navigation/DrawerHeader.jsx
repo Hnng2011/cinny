@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import './DrawerHeader.scss';
 
@@ -23,12 +23,59 @@ import SpaceOptions from '../../molecules/space-options/SpaceOptions';
 
 import PlusIC from '../../../../public/res/ic/outlined/plus.svg';
 import HashPlusIC from '../../../../public/res/ic/outlined/hash-plus.svg';
-import HashGlobeIC from '../../../../public/res/ic/outlined/hash-globe.svg';
 import HashSearchIC from '../../../../public/res/ic/outlined/hash-search.svg';
 import SpacePlusIC from '../../../../public/res/ic/outlined/space-plus.svg';
 import ChevronBottomIC from '../../../../public/res/ic/outlined/chevron-bottom.svg';
 
+import { SmartAccountAtom } from '../../state/smartAccount';
+import { useAtom } from 'jotai';
+import { Interface } from 'ethers/lib/utils';
+
 export function HomeSpaceOptions({ spaceId, afterOptionSelect }) {
+  const [verify, setVerify] = useState(0);
+  const [smartAccount] = useAtom(SmartAccountAtom);
+
+  useEffect(() => {
+    if (verify === 1) {
+      const createSpace = async () => {
+        const contractAddress = '0xA428A805310A82BD8cf060725882128C4Bb602A1';
+        const ABI = [{
+          "inputs": [],
+          "name": "createSpace",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }];
+
+        const callData = new Interface(ABI).encodeFunctionData('createSpace', []);
+
+        const tx = {
+          to: contractAddress,
+          data: callData,
+        }
+
+        const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
+        const userOp = feeQuotesResult.verifyingPaymasterNative.userOp
+        const userOpHash = feeQuotesResult.verifyingPaymasterNative.userOpHash
+        await smartAccount.sendUserOperation({ userOp, userOpHash });
+        const txHash = await smartAccount.sendTransaction(tx);
+        return txHash;
+      }
+
+      createSpace().then((result) => {
+        setVerify(2);
+      });
+    }
+
+  }, [verify]);
+
+  useEffect(() => {
+    if (verify === 2) {
+      openCreateRoom(true, spaceId);
+    }
+  }, [verify]);
+
+
   const mx = initMatrix.matrixClient;
   const room = mx.getRoom(spaceId);
   const canManage = room
@@ -38,29 +85,26 @@ export function HomeSpaceOptions({ spaceId, afterOptionSelect }) {
   return (
     <>
       <MenuHeader>Add rooms or spaces</MenuHeader>
-      <MenuItem
-        iconSrc={SpacePlusIC}
-        onClick={() => { afterOptionSelect(); openCreateRoom(true, spaceId); }}
-        disabled={!canManage}
-      >
-        Create new space
-      </MenuItem>
-      <MenuItem
-        iconSrc={HashPlusIC}
-        onClick={() => { afterOptionSelect(); openCreateRoom(false, spaceId); }}
-        disabled={!canManage}
-      >
-        Create new room
-      </MenuItem>
-      { !spaceId && (
+      {
+        !spaceId && <MenuItem
+          iconSrc={SpacePlusIC}
+          onClick={() => { afterOptionSelect(); setVerify(1); }}
+          disabled={!canManage}
+        >
+          Create new space
+        </MenuItem>
+      }
+
+      {/* {!spaceId && (
         <MenuItem
           iconSrc={HashGlobeIC}
           onClick={() => { afterOptionSelect(); openPublicRooms(); }}
         >
           Explore public rooms
         </MenuItem>
-      )}
-      { !spaceId && (
+      )} */}
+
+      {!spaceId && (
         <MenuItem
           iconSrc={PlusIC}
           onClick={() => { afterOptionSelect(); openJoinAlias(); }}
@@ -68,7 +112,16 @@ export function HomeSpaceOptions({ spaceId, afterOptionSelect }) {
           Join with address
         </MenuItem>
       )}
-      { spaceId && (
+      {spaceId &&
+        <MenuItem
+          iconSrc={HashPlusIC}
+          onClick={() => { afterOptionSelect(); openCreateRoom(false, spaceId); }}
+          disabled={!canManage}
+        >
+          Create new room
+        </MenuItem>
+      }
+      {/* {spaceId && (
         <MenuItem
           iconSrc={PlusIC}
           onClick={() => { afterOptionSelect(); openSpaceAddExisting(spaceId); }}
@@ -76,8 +129,8 @@ export function HomeSpaceOptions({ spaceId, afterOptionSelect }) {
         >
           Add existing
         </MenuItem>
-      )}
-      { spaceId && (
+      )} */}
+      {spaceId && (
         <MenuItem
           onClick={() => { afterOptionSelect(); openSpaceManage(spaceId); }}
           iconSrc={HashSearchIC}
@@ -142,8 +195,8 @@ function DrawerHeader({ selectedTab, spaceId }) {
         </TitleWrapper>
       )}
 
-      { isDMTab && <IconButton onClick={() => openInviteUser()} tooltip="Start DM" src={PlusIC} size="small" /> }
-      { !isDMTab && <IconButton onClick={openHomeSpaceOptions} tooltip="Add rooms/spaces" src={PlusIC} size="small" /> }
+      {isDMTab && <IconButton onClick={() => openInviteUser()} tooltip="Start DM" src={PlusIC} size="small" />}
+      {!isDMTab && <IconButton onClick={openHomeSpaceOptions} tooltip="Add rooms/spaces" src={PlusIC} size="small" />}
     </Header>
   );
 }

@@ -81,7 +81,7 @@ function Drawer() {
           </ScrollView>
         </div>
       </div>
-      { systemState !== null && (
+      {systemState !== null && (
         <div className="drawer__state">
           <Text>{systemState.status}</Text>
         </div>

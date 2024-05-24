@@ -9,7 +9,6 @@ import ViewSource from '../view-source/ViewSource';
 import CreateRoom from '../create-room/CreateRoom';
 import JoinAlias from '../join-alias/JoinAlias';
 import EmojiVerification from '../emoji-verification/EmojiVerification';
-
 import ReusableDialog from '../../molecules/dialog/ReusableDialog';
 
 function Dialogs() {

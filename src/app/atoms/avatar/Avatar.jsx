@@ -33,7 +33,7 @@ const Avatar = React.forwardRef(({
           )
           : (
             <span
-              style={{ backgroundColor: iconSrc === null ? bgColor : 'transparent' }}
+              style={{ backgroundColor: bgColor ?? 'transparent' }}
               className={`avatar__border${iconSrc !== null ? '--active' : ''}`}
             >
               {

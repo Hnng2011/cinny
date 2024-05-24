@@ -3,12 +3,11 @@ import react from '@vitejs/plugin-react';
 
 import { wasm } from '@rollup/plugin-wasm';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
-import { vanillaExtractPlugin } from "@vanilla-extract/vite-plugin";
-import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
-import { svgLoader } from './viteSvgLoader'
-import buildConfig from "./build.config"
-import fs from 'fs';
+import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import path from 'path';
+import fs from 'fs';
+import { svgLoader } from './viteSvgLoader';
+import buildConfig from './build.config';
 
 const copyFiles = {
   targets: [
@@ -37,13 +36,11 @@ const copyFiles = {
       dest: 'public/',
     },
   ],
-}
+};
 
 const particleWasmPlugin: Plugin | undefined = {
   name: 'particle-wasm',
-  apply: (_, env: ConfigEnv) => {
-    return env.mode === 'development';
-  },
+  apply: (_, env: ConfigEnv) => env.mode === 'development',
   buildStart: () => {
     const copiedPath = path.join(
       __dirname,
@@ -61,7 +58,7 @@ const particleWasmPlugin: Plugin | undefined = {
 export default defineConfig({
   appType: 'spa',
   define: {
-    'process.env': process.env
+    'process.env': process.env,
   },
   publicDir: false,
   base: buildConfig.base,
@@ -76,8 +73,8 @@ export default defineConfig({
       stream: 'stream-browserify',
       zlib: 'browserify-zlib',
       url: 'url',
-      assert: 'assert'
-    }
+      assert: 'assert',
+    },
   },
   plugins: [
     viteStaticCopy(copyFiles),
@@ -90,16 +87,15 @@ export default defineConfig({
   optimizeDeps: {
     esbuildOptions: {
       define: {
-        global: 'globalThis'
+        global: 'globalThis',
       },
-      plugins: [
-        NodeGlobalsPolyfillPlugin({
-          process: false,
-          buffer: true,
-        }),
-
-      ]
-    }
+      // plugins: [
+      //   NodeGlobalsPolyfillPlugin({
+      //     process: false,
+      //     buffer: true,
+      //   }),
+      // ]
+    },
   },
   build: {
     outDir: 'dist',
