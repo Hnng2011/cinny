@@ -1,6 +1,6 @@
 {
   "defaultHomeserver": 0,
-  "homeserverList": ["api.ubiw.space"],
+  "homeserverList": ["homeserver.ubiw.space"],
   "allowCustomHomeservers": true,
   "hashRouter": {
     "enabled": false,
