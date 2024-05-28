@@ -145,11 +145,11 @@ async function create(options, isDM = false) {
     if (isDM && typeof options.invite?.[0] === 'string') {
       await addRoomToMDirect(result.room_id, options.invite[0]);
     }
-    appDispatcher.dispatch({
-      type: cons.actions.room.CREATE,
-      roomId: result.room_id,
-      isDM,
-    });
+    // appDispatcher.dispatch({
+    //   type: cons.actions.room.CREATE,
+    //   roomId: result.room_id,
+    //   isDM,
+    // });
     return result;
   } catch (e) {
     const errcodes = ['M_UNKNOWN', 'M_BAD_JSON', 'M_ROOM_IN_USE', 'M_INVALID_ROOM_STATE', 'M_UNSUPPORTED_ROOM_VERSION'];

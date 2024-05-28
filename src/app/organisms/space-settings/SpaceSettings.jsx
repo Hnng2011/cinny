@@ -21,7 +21,7 @@ import Tabs from '../../atoms/tabs/Tabs';
 import { MenuHeader, MenuItem } from '../../atoms/context-menu/ContextMenu';
 import PopupWindow from '../../molecules/popup-window/PopupWindow';
 import RoomProfile from '../../molecules/room-profile/RoomProfile';
-import RoomVisibility from '../../molecules/room-visibility/RoomVisibility';
+// import RoomVisibility from '../../molecules/room-visibility/RoomVisibility';
 import RoomAliases from '../../molecules/room-aliases/RoomAliases';
 import RoomPermissions from '../../molecules/room-permissions/RoomPermissions';
 import RoomMembers from '../../molecules/room-members/RoomMembers';
@@ -31,14 +31,14 @@ import UserIC from '../../../../public/res/ic/outlined/user.svg';
 import CrossIC from '../../../../public/res/ic/outlined/cross.svg';
 import SettingsIC from '../../../../public/res/ic/outlined/settings.svg';
 import ShieldUserIC from '../../../../public/res/ic/outlined/shield-user.svg';
-import LeaveArrowIC from '../../../../public/res/ic/outlined/leave-arrow.svg';
+// import LeaveArrowIC from '../../../../public/res/ic/outlined/leave-arrow.svg';
 import PinIC from '../../../../public/res/ic/outlined/pin.svg';
 import PinFilledIC from '../../../../public/res/ic/filled/pin.svg';
 import CategoryIC from '../../../../public/res/ic/outlined/category.svg';
 import CategoryFilledIC from '../../../../public/res/ic/filled/category.svg';
 import EmojiIC from '../../../../public/res/ic/outlined/emoji.svg';
 
-import { confirmDialog } from '../../molecules/confirm-dialog/ConfirmDialog';
+// import { confirmDialog } from '../../molecules/confirm-dialog/ConfirmDialog';
 import { useForceUpdate } from '../../hooks/useForceUpdate';
 
 const tabText = {
@@ -69,7 +69,7 @@ const tabItems = [{
 function GeneralSettings({ roomId }) {
   const isPinned = initMatrix.accountData.spaceShortcut.has(roomId);
   const isCategorized = initMatrix.accountData.categorizedSpaces.has(roomId);
-  const roomName = initMatrix.matrixClient.getRoom(roomId)?.name;
+  // const roomName = initMatrix.matrixClient.getRoom(roomId)?.name;
   const [, forceUpdate] = useForceUpdate();
 
   return (
@@ -96,7 +96,7 @@ function GeneralSettings({ roomId }) {
         >
           {isPinned ? 'Unpin from sidebar' : 'Pin to sidebar'}
         </MenuItem>
-        <MenuItem
+        {/* <MenuItem
           variant="danger"
           onClick={async () => {
             const isConfirmed = await confirmDialog(
@@ -110,14 +110,14 @@ function GeneralSettings({ roomId }) {
           iconSrc={LeaveArrowIC}
         >
           Leave
-        </MenuItem>
+        </MenuItem> */}
       </div>
-      <div className="space-settings__card">
+      {/* <div className="space-settings__card">
         <MenuHeader>Space visibility (who can join)</MenuHeader>
         <RoomVisibility roomId={roomId} />
-      </div>
+      </div> */}
       <div className="space-settings__card">
-        <MenuHeader>Space addresses</MenuHeader>
+        {/* <MenuHeader>Space addresses</MenuHeader> */}
         <RoomAliases roomId={roomId} />
       </div>
     </>

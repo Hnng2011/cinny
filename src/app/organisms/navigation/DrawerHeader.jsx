@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable prefer-destructuring */
 import React from 'react';
@@ -10,7 +11,7 @@ import initMatrix from '../../../client/initMatrix';
 import cons from '../../../client/state/cons';
 import {
   openCreateRoom, openSpaceManage, openJoinAlias,
-  openInviteUser, openReusableContextMenu,
+  openInviteUser, openReusableContextMenu, openPublicRooms
 } from '../../../client/action/navigation';
 import { getEventCords } from '../../../util/common';
 
@@ -28,6 +29,7 @@ import HashPlusIC from '../../../../public/res/ic/outlined/hash-plus.svg';
 import HashSearchIC from '../../../../public/res/ic/outlined/hash-search.svg';
 import SpacePlusIC from '../../../../public/res/ic/outlined/space-plus.svg';
 import ChevronBottomIC from '../../../../public/res/ic/outlined/chevron-bottom.svg';
+import HashGlobeIC from '../../../../public/res/ic/outlined/hash-globe.svg'
 
 
 
@@ -52,14 +54,14 @@ export function HomeSpaceOptions({ spaceId, afterOptionSelect }) {
         </MenuItem>
       }
 
-      {/* {!spaceId && (
+      {!spaceId && (
         <MenuItem
           iconSrc={HashGlobeIC}
           onClick={() => { afterOptionSelect(); openPublicRooms(); }}
         >
           Explore public rooms
         </MenuItem>
-      )} */}
+      )}
 
       {!spaceId && (
         <MenuItem

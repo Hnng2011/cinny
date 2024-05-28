@@ -102,7 +102,7 @@ function RoomAliases({ roomId }) {
 
   const isMountedStore = useStore();
   const [isPublic, setIsPublic] = useState(false);
-  const [isLocalVisible, setIsLocalVisible] = useState(false);
+  const [isLocalVisible, setIsLocalVisible] = useState(true);
   const [aliases, setAliases] = useState(getAliases(roomId));
   const [selectedAlias, setSelectedAlias] = useState(null);
   const [deleteAlias, setDeleteAlias] = useState(null);
@@ -142,10 +142,10 @@ function RoomAliases({ roomId }) {
     };
   }, [roomId]);
 
-  const toggleDirectoryVisibility = () => {
-    mx.setRoomDirectoryVisibility(roomId, isPublic ? 'private' : 'public');
-    setIsPublic(!isPublic);
-  };
+  // const toggleDirectoryVisibility = () => {
+  //   mx.setRoomDirectoryVisibility(roomId, isPublic ? 'private' : 'public');
+  //   setIsPublic(!isPublic);
+  // };
 
   const handleAliasSubmit = async (e) => {
     e.preventDefault();
@@ -262,9 +262,9 @@ function RoomAliases({ roomId }) {
     return (
       <div className="room-aliases__item-btns">
         {canPublishAlias && !isMain && <Button onClick={() => handleSetMainAlias(alias)} variant="primary">Set as Main</Button>}
-        {!isPublished && canPublishAlias && <Button onClick={() => handlePublishAlias(alias)} variant="positive">Publish</Button>}
-        {isPublished && canPublishAlias && <Button onClick={() => handleUnPublishAlias(alias)} variant="caution">Un-Publish</Button>}
-        <Button onClick={() => handleDeleteAlias(alias)} variant="danger">Delete</Button>
+        {!isPublished && !isMain && canPublishAlias && <Button onClick={() => handlePublishAlias(alias)} variant="positive">Publish</Button>}
+        {isPublished && !isMain && canPublishAlias && <Button onClick={() => handleUnPublishAlias(alias)} variant="caution">Un-Publish</Button>}
+        {!isMain && <Button onClick={() => handleDeleteAlias(alias)} variant="danger">Delete</Button>}
       </div>
     );
   };
@@ -293,7 +293,7 @@ function RoomAliases({ roomId }) {
   if (validate.status === cons.status.SUCCESS) inputState = 'success';
   return (
     <div className="room-aliases">
-      <SettingTile
+      {/* <SettingTile
         title="Publish to room directory"
         content={<Text variant="b3">{`Publish this ${room.isSpaceRoom() ? 'space' : 'room'} to the ${hsString}'s public room directory?`}</Text>}
         options={(
@@ -303,7 +303,7 @@ function RoomAliases({ roomId }) {
             disabled={!canPublishAlias}
           />
         )}
-      />
+      /> */}
 
       <div className="room-aliases__content">
         <MenuHeader>Published addresses</MenuHeader>
@@ -314,7 +314,7 @@ function RoomAliases({ roomId }) {
           {`Published addresses can be used by anyone on any server to join your ${room.isSpaceRoom() ? 'space' : 'room'}. To publish an address, it needs to be set as a local address first.`}
         </Text>
       </div>
-      { isLocalVisible && (
+      {isLocalVisible && (
         <div className="room-aliases__content">
           <MenuHeader>Local addresses</MenuHeader>
           {(aliases.local.length === 0) && <Text className="room-aliases__message">No local addresses</Text>}
@@ -342,11 +342,11 @@ function RoomAliases({ roomId }) {
           </div>
         </div>
       )}
-      <div className="room-aliases__content">
+      {/* <div className="room-aliases__content">
         <Button onClick={() => setIsLocalVisible(!isLocalVisible)}>
           {`${isLocalVisible ? 'Hide' : 'Add / View'} local address`}
         </Button>
-      </div>
+      </div> */}
     </div>
   );
 }

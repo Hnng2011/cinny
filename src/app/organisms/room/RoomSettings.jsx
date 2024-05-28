@@ -112,14 +112,14 @@ function GeneralSettings({ roomId }) {
         <MenuHeader>Notification (Changing this will only affect you)</MenuHeader>
         <RoomNotification roomId={roomId} />
       </div>
-      <div className="room-settings__card">
+      {/* <div className="room-settings__card">
         <MenuHeader>Room visibility (who can join)</MenuHeader>
         <RoomVisibility roomId={roomId} />
       </div>
       <div className="room-settings__card">
         <MenuHeader>Room addresses</MenuHeader>
         <RoomAliases roomId={roomId} />
-      </div>
+      </div> */}
     </>
   );
 }
@@ -131,10 +131,10 @@ GeneralSettings.propTypes = {
 function SecuritySettings({ roomId }) {
   return (
     <>
-      <div className="room-settings__card">
+      {/* <div className="room-settings__card">
         <MenuHeader>Encryption</MenuHeader>
         <RoomEncryption roomId={roomId} />
-      </div>
+      </div> */}
       <div className="room-settings__card">
         <MenuHeader>Message history visibility</MenuHeader>
         <RoomHistoryVisibility roomId={roomId} />

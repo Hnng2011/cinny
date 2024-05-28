@@ -1,3 +1,5 @@
+/* eslint-disable no-plusplus */
+/* eslint-disable no-await-in-loop */
 /* eslint-disable no-constant-condition */
 /* eslint-disable consistent-return */
 /* eslint-disable no-console */
@@ -13,46 +15,59 @@ import { twemojify } from '../../../util/twemojify';
 import initMatrix from '../../../client/initMatrix';
 import cons from '../../../client/state/cons';
 import navigation from '../../../client/state/navigation';
-import { selectRoom, openReusableContextMenu } from '../../../client/action/navigation';
+import {
+  selectRoom,
+  // openReusableContextMenu
+} from '../../../client/action/navigation';
 import * as roomActions from '../../../client/action/room';
 import { isRoomAliasAvailable, getIdServer } from '../../../util/matrixUtil';
-import { getEventCords } from '../../../util/common';
+// import { getEventCords } from '../../../util/common';
 
 import Text from '../../atoms/text/Text';
 import Button from '../../atoms/button/Button';
-import Toggle from '../../atoms/button/Toggle';
+// import Toggle from '../../atoms/button/Toggle';
 import IconButton from '../../atoms/button/IconButton';
-import { MenuHeader, MenuItem } from '../../atoms/context-menu/ContextMenu';
+// import { MenuHeader, MenuItem } from '../../atoms/context-menu/ContextMenu';
 import Input from '../../atoms/input/Input';
 import Spinner from '../../atoms/spinner/Spinner';
-import SegmentControl from '../../atoms/segmented-controls/SegmentedControls';
+// import SegmentControl from '../../atoms/segmented-controls/SegmentedControls';
 import Dialog from '../../molecules/dialog/Dialog';
-import SettingTile from '../../molecules/setting-tile/SettingTile';
+// import SettingTile from '../../molecules/setting-tile/SettingTile';
 
 import HashPlusIC from '../../../../public/res/ic/outlined/hash-plus.svg';
 import SpacePlusIC from '../../../../public/res/ic/outlined/space-plus.svg';
-import HashIC from '../../../../public/res/ic/outlined/hash.svg';
-import HashLockIC from '../../../../public/res/ic/outlined/hash-lock.svg';
-import HashGlobeIC from '../../../../public/res/ic/outlined/hash-globe.svg';
-import SpaceIC from '../../../../public/res/ic/outlined/space.svg';
-import SpaceLockIC from '../../../../public/res/ic/outlined/space-lock.svg';
-import SpaceGlobeIC from '../../../../public/res/ic/outlined/space-globe.svg';
-import ChevronBottomIC from '../../../../public/res/ic/outlined/chevron-bottom.svg';
+// import HashIC from '../../../../public/res/ic/outlined/hash.svg';
+// import HashLockIC from '../../../../public/res/ic/outlined/hash-lock.svg';
+// import HashGlobeIC from '../../../../public/res/ic/outlined/hash-globe.svg';
+// import SpaceIC from '../../../../public/res/ic/outlined/space.svg';
+// import SpaceLockIC from '../../../../public/res/ic/outlined/space-lock.svg';
+// import SpaceGlobeIC from '../../../../public/res/ic/outlined/space-globe.svg';
+// import ChevronBottomIC from '../../../../public/res/ic/outlined/chevron-bottom.svg';
 import CrossIC from '../../../../public/res/ic/outlined/cross.svg';
 import { SmartAccountAtom } from '../../state/smartAccount';
+import appDispatcher from '../../../client/dispatcher';
 
+function generateRandomString(length) {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  const charactersLength = characters.length;
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+}
 
 function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
   const [smartAccount] = useAtom(SmartAccountAtom);
 
-  const [joinRule, setJoinRule] = useState(parentId ? 'restricted' : 'invite');
-  const [isEncrypted, setIsEncrypted] = useState(true);
+  const [joinRule] = useState(parentId ? 'restricted' : 'public');
+  const [isEncrypted] = useState(false);
   const [isCreatingRoom, setIsCreatingRoom] = useState(false);
   const [creatingError, setCreatingError] = useState(null);
 
   const [isValidAddress, setIsValidAddress] = useState(null);
   const [addressValue, setAddressValue] = useState(undefined);
-  const [roleIndex, setRoleIndex] = useState(0);
+  // const [roleIndex, setRoleIndex] = useState(0);
 
   const addressRef = useRef(null);
 
@@ -91,7 +106,16 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
     if (topic.trim() === '') topic = undefined;
     let roomAlias;
 
-    const powerLevel = roleIndex === 1 ? 101 : undefined;
+    if (joinRule === 'public') {
+      roomAlias = addressRef?.current?.value;
+      if (roomAlias.trim() === '') return false;
+    }
+    else if (!isSpace) {
+      roomAlias = name.toLowerCase().trim('').replace(/\s+/g, '') + generateRandomString(6);
+    }
+
+    // const powerLevel = roleIndex === 1 ? 101 : undefined;
+    const powerLevel = 101;
 
     const createspace = async () => {
       const contractAddress = '0xA428A805310A82BD8cf060725882128C4Bb602A1';
@@ -176,80 +200,86 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
       }
     }
 
-    const createroom = async () => {
-      const contractAddress = '0xA428A805310A82BD8cf060725882128C4Bb602A1';
-      const ABI = [{
-        "inputs": [
-          {
-            "internalType": "string",
-            "name": "_roomId",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256",
-            "name": "_subscriptionFee",
-            "type": "uint256"
-          }
-        ],
-        "name": "addRoomToSpace",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-      }]
-
-      const value = parseUnits(String(0.01), 'ether');
-      const callData = new Interface(ABI).encodeFunctionData('addRoomToSpace', [parentId, value]);
-
-      const tx = {
-        to: contractAddress,
-        data: callData,
-      }
-
-      try {
-        const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
-        const { userOp } = feeQuotesResult.verifyingPaymasterNative
-        const { userOpHash } = feeQuotesResult.verifyingPaymasterNative
-        const txHash = await smartAccount.sendUserOperation({ userOp, userOpHash });
-        console.log(txHash)
-        return true;
-      }
-      catch (e) {
-        const errlog = e.data.extraMessage.message || undefined;
-
-        if (errlog) {
-          const err = errlog.split(":").pop().trim().slice(1, -1);;
-          if (err === "Room ID already exists") {
-            return true
-          }
-          return false
-        }
-      }
-    }
-
-
 
     if (isSpace) {
       if (!await createspace()) {
         setIsCreatingRoom(false)
         return false
       }
-    } else if (!await createroom()) {
-      setIsCreatingRoom(false)
-      return false
     }
 
-
     try {
-      await roomActions.createRoom({
+      const result = await roomActions.createRoom({
         name,
         topic,
         joinRule,
         alias: roomAlias,
-        isEncrypted: (isSpace || joinRule === 'public') ? false : isEncrypted,
+        isEncrypted,
+        // (isSpace || joinRule === 'public') ? false : isEncrypted,
         powerLevel,
         isSpace,
         parentId,
       });
+
+
+      const createroom = async (roomid) => {
+        const contractAddress = '0xA428A805310A82BD8cf060725882128C4Bb602A1';
+        const ABI = [{
+          "inputs": [
+            {
+              "internalType": "string",
+              "name": "_roomId",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_subscriptionFee",
+              "type": "uint256"
+            }
+          ],
+          "name": "addRoomToSpace",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }]
+
+        if (!parseFloat(target.fee.value)) {
+          setCreatingError('Please enter Fee as a number')
+          return false
+        }
+
+        const value = parseUnits(target.fee.value, 'ether');
+        const callData = new Interface(ABI).encodeFunctionData('addRoomToSpace', [roomid, value]);
+
+        const tx = {
+          to: contractAddress,
+          data: callData,
+        }
+
+        try {
+          const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
+          const { userOp } = feeQuotesResult.verifyingPaymasterNative
+          const { userOpHash } = feeQuotesResult.verifyingPaymasterNative
+          await smartAccount.sendUserOperation({ userOp, userOpHash });
+          return true;
+        }
+        catch (e) {
+          const errlog = e.data.extraMessage.message || undefined;
+
+          if (errlog) {
+            const err = errlog.split(":").pop().trim().slice(1, -1);;
+            if (err === "Room ID already exists") {
+              return true
+            }
+            return false
+          }
+        }
+      }
+
+      if (await createroom(result.room_id)) {
+        setIsCreatingRoom(false)
+        onRequestClose()
+      }
     } catch (e) {
       if (e.message === 'M_UNKNOWN: Invalid characters in room alias') {
         setCreatingError('ERROR: Invalid characters in address');
@@ -282,52 +312,19 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
     }, 1000);
   };
 
-  const joinRules = ['invite', 'restricted'];
-  const joinRuleShortText = ['Private', 'Restricted'];
-  const joinRuleText = ['Private (invite only)', 'Restricted (space member can join)'];
-  const jrRoomIC = [HashLockIC, HashIC, HashGlobeIC];
-  const jrSpaceIC = [SpaceLockIC, SpaceIC, SpaceGlobeIC];
-  const handleJoinRule = (evt) => {
-    openReusableContextMenu(
-      'bottom',
-      getEventCords(evt, '.btn-surface'),
-      (closeMenu) => (
-        <>
-          <MenuHeader>Visibility (who can join)</MenuHeader>
-          {
-            joinRules.map((rule) => (
-              <MenuItem
-                key={rule}
-                variant={rule === joinRule ? 'positive' : 'surface'}
-                iconSrc={
-                  isSpace
-                    ? jrSpaceIC[joinRules.indexOf(rule)]
-                    : jrRoomIC[joinRules.indexOf(rule)]
-                }
-                onClick={() => { closeMenu(); setJoinRule(rule); }}
-                disabled={!parentId && rule === 'restricted'}
-              >
-                {joinRuleText[joinRules.indexOf(rule)]}
-              </MenuItem>
-            ))
-          }
-        </>
-      ),
-    );
-  };
 
   return (
     <div className="create-room">
       <form className="create-room__form" onSubmit={handleSubmit}>
-        <SettingTile
+        {/* <SettingTile
           title="Visibility"
           options={(
-            <Button onClick={handleJoinRule} iconSrc={ChevronBottomIC}>
-              {joinRuleShortText[joinRules.indexOf(joinRule)]}
+            <Button iconSrc={ChevronBottomIC}>
+              {joinRule.toUpperCase()}
             </Button>
           )}
           content={<Text variant="b3">{`Select who can join this ${isSpace ? 'space' : 'room'}.`}</Text>}
-        />
+        /> */}
         {joinRule === 'public' && (
           <div>
             <Text className="create-room__address__label" variant="b2">{isSpace ? 'Space address' : 'Room address'}</Text>
@@ -346,14 +343,14 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
             {isValidAddress === false && <Text className="create-room__address__tip" variant="b3"><span style={{ color: 'var(--bg-danger)' }}>{`#${addressValue}:${userHs} is already in use`}</span></Text>}
           </div>
         )}
-        {!isSpace && joinRule !== 'public' && (
+        {/* {!isSpace && joinRule !== 'public' && (
           <SettingTile
             title="Enable end-to-end encryption"
             options={<Toggle isActive={isEncrypted} onToggle={setIsEncrypted} />}
             content={<Text variant="b3">You can’t disable this later. Bridges & most bots won’t work yet.</Text>}
           />
-        )}
-        <SettingTile
+        )} */}
+        {/* <SettingTile
           title="Select your role"
           options={(
             <SegmentControl
@@ -365,10 +362,11 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
           content={(
             <Text variant="b3">Admin : 100 power level <br /> Founder: 101 power level</Text>
           )}
-        />
-        <Input name="topic" minHeight={174} resizable label="Topic (optional)" />
+        /> */}
+
         <div className="create-room__name-wrapper">
           <Input name="name" label={`${isSpace ? 'Space' : 'Room'} name`} required />
+          {!isSpace && <Input name="fee" label="Join room fees (ETH)" required />}
           <Button
             disabled={isValidAddress === false || isCreatingRoom}
             iconSrc={isSpace ? SpacePlusIC : HashPlusIC}
@@ -378,6 +376,7 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
             Create
           </Button>
         </div>
+        <Input name="topic" minHeight={174} resizable label="Topic (optional)" />
         {
           isCreatingRoom && (
             <div className="create-room__loading">
@@ -417,7 +416,6 @@ function useWindowToggle() {
   }, []);
 
   const onRequestClose = () => setCreate(null);
-
   return [create, onRequestClose];
 }
 
