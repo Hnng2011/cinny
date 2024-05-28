@@ -59,7 +59,7 @@ export function HomeSpaceOptions({ spaceId, afterOptionSelect }) {
           iconSrc={HashGlobeIC}
           onClick={() => { afterOptionSelect(); openPublicRooms(); }}
         >
-          Explore public rooms
+          Explore public
         </MenuItem>
       )}
 

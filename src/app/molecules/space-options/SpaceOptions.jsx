@@ -84,12 +84,12 @@ function SpaceOptions({ roomId, afterOptionSelect }) {
     <div style={{ maxWidth: 'calc(var(--navigation-drawer-width) - var(--sp-normal))' }}>
       <MenuHeader>{twemojify(`Options for ${initMatrix.matrixClient.getRoom(roomId)?.name}`)}</MenuHeader>
       <MenuItem iconSrc={TickMarkIC} onClick={handleMarkAsRead}>Mark as read</MenuItem>
-      <MenuItem
+      {/* <MenuItem
         onClick={handleCategorizeClick}
         iconSrc={isCategorized ? CategoryFilledIC : CategoryIC}
       >
         {isCategorized ? 'Uncategorize subspaces' : 'Categorize subspaces'}
-      </MenuItem>
+      </MenuItem> */}
       <MenuItem
         onClick={handlePinClick}
         iconSrc={isPinned ? PinFilledIC : PinIC}

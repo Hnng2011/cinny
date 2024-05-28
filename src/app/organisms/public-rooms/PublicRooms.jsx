@@ -218,15 +218,15 @@ function PublicRooms({ isOpen, searchTerm, onRequestClose }) {
   return (
     <PopupWindow
       isOpen={isOpen}
-      title="Public rooms"
+      title="Public Spaces and Rooms"
       contentOptions={<IconButton src={CrossIC} onClick={onRequestClose} tooltip="Close" />}
       onRequestClose={onRequestClose}
     >
       <div className="public-rooms">
         <form className="public-rooms__form" onSubmit={(e) => { e.preventDefault(); searchRooms(); }}>
           <div className="public-rooms__input-wrapper">
-            <Input value={searchTerm} forwardRef={roomNameRef} label="Room name or alias" />
-            <Input forwardRef={hsRef} value={userId.slice(userId.indexOf(':') + 1)} label="Homeserver" required />
+            <Input value={searchTerm} forwardRef={roomNameRef} label="Name or alias" />
+            <Input forwardRef={hsRef} value={userId.slice(userId.indexOf(':') + 1)} label="Homeserver" disabled />
           </div>
           <Button disabled={isSearching} iconSrc={HashSearchIC} variant="primary" type="submit">Search</Button>
         </form>
@@ -237,7 +237,7 @@ function PublicRooms({ isOpen, searchTerm, onRequestClose }) {
                 ? (
                   <div className="flex--center">
                     <Spinner size="small" />
-                    <Text variant="b2">{`Loading public rooms from ${searchQuery.homeserver}...`}</Text>
+                    <Text variant="b2">{`Loading ${searchQuery.homeserver === 'ubiw.space' ? 'public spaces' : 'public rooms'} from ${searchQuery.homeserver}...`}</Text>
                   </div>
                 )
                 : (
@@ -251,11 +251,11 @@ function PublicRooms({ isOpen, searchTerm, onRequestClose }) {
           {
             typeof searchQuery.name !== 'undefined' && !isSearching && (
               searchQuery.name === ''
-                ? <Text variant="b2">{`Public rooms on ${searchQuery.homeserver}.`}</Text>
+                ? <Text variant="b2">{`Public ${searchQuery.homeserver === 'ubiw.space' ? 'spaces' : 'rooms'} on  ${searchQuery.homeserver}.`}</Text>
                 : <Text variant="b2">{`Search result for "${searchQuery.name}" on ${searchQuery.homeserver}.`}</Text>
             )
           }
-          { searchQuery.error && (
+          {searchQuery.error && (
             <>
               <Text className="public-rooms__search-error" variant="b2">{searchQuery.error}</Text>
               {typeof searchQuery.alias === 'string' && (
@@ -264,17 +264,17 @@ function PublicRooms({ isOpen, searchTerm, onRequestClose }) {
             </>
           )}
         </div>
-        { publicRooms.length !== 0 && (
+        {publicRooms.length !== 0 && (
           <div className="public-rooms__content">
-            { renderRoomList(publicRooms) }
+            {renderRoomList(publicRooms)}
           </div>
         )}
-        { publicRooms.length !== 0 && publicRooms.length % SEARCH_LIMIT === 0 && (
+        {publicRooms.length !== 0 && publicRooms.length % SEARCH_LIMIT === 0 && (
           <div className="public-rooms__view-more">
-            { isViewMore !== true && (
+            {isViewMore !== true && (
               <Button onClick={() => searchRooms(true)}>View more</Button>
             )}
-            { isViewMore && <Spinner /> }
+            {isViewMore && <Spinner />}
           </div>
         )}
       </div>
