@@ -45,7 +45,6 @@ import SpacePlusIC from '../../../../public/res/ic/outlined/space-plus.svg';
 // import ChevronBottomIC from '../../../../public/res/ic/outlined/chevron-bottom.svg';
 import CrossIC from '../../../../public/res/ic/outlined/cross.svg';
 import { SmartAccountAtom } from '../../state/smartAccount';
-import appDispatcher from '../../../client/dispatcher';
 
 function generateRandomString(length) {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
