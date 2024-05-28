@@ -221,64 +221,68 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
       });
 
 
-      const createroom = async (roomid) => {
-        const contractAddress = '0xA428A805310A82BD8cf060725882128C4Bb602A1';
-        const ABI = [{
-          "inputs": [
-            {
-              "internalType": "string",
-              "name": "_roomId",
-              "type": "string"
-            },
-            {
-              "internalType": "uint256",
-              "name": "_subscriptionFee",
-              "type": "uint256"
-            }
-          ],
-          "name": "addRoomToSpace",
-          "outputs": [],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        }]
+      if (!isSpace) {
+        const createroom = async (roomid) => {
+          const contractAddress = '0xA428A805310A82BD8cf060725882128C4Bb602A1';
+          const ABI = [{
+            "inputs": [
+              {
+                "internalType": "string",
+                "name": "_roomId",
+                "type": "string"
+              },
+              {
+                "internalType": "uint256",
+                "name": "_subscriptionFee",
+                "type": "uint256"
+              }
+            ],
+            "name": "addRoomToSpace",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          }]
 
-        if (!parseFloat(target.fee.value)) {
-          setCreatingError('Please enter Fee as a number')
-          return false
-        }
-
-        const value = parseUnits(target.fee.value, 'ether');
-        const callData = new Interface(ABI).encodeFunctionData('addRoomToSpace', [roomid, value]);
-
-        const tx = {
-          to: contractAddress,
-          data: callData,
-        }
-
-        try {
-          const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
-          const { userOp } = feeQuotesResult.verifyingPaymasterNative
-          const { userOpHash } = feeQuotesResult.verifyingPaymasterNative
-          await smartAccount.sendUserOperation({ userOp, userOpHash });
-          return true;
-        }
-        catch (e) {
-          const errlog = e.data.extraMessage.message || undefined;
-
-          if (errlog) {
-            const err = errlog.split(":").pop().trim().slice(1, -1);;
-            if (err === "Room ID already exists") {
-              return true
-            }
+          if (!parseFloat(target.fee.value)) {
+            setCreatingError('Please enter Fee as a number')
             return false
           }
+
+          const value = parseUnits(target.fee.value, 'ether');
+          const callData = new Interface(ABI).encodeFunctionData('addRoomToSpace', [roomid, value]);
+
+          const tx = {
+            to: contractAddress,
+            data: callData,
+          }
+
+          try {
+            const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
+            const { userOp } = feeQuotesResult.verifyingPaymasterNative
+            const { userOpHash } = feeQuotesResult.verifyingPaymasterNative
+            await smartAccount.sendUserOperation({ userOp, userOpHash });
+            return true;
+          }
+          catch (e) {
+            const errlog = e.data.extraMessage.message || undefined;
+
+            if (errlog) {
+              const err = errlog.split(":").pop().trim().slice(1, -1);;
+              if (err === "Room ID already exists") {
+                return true
+              }
+              return false
+            }
+          }
         }
+
+        await createroom(result.room_id)
+
       }
 
-      if (await createroom(result.room_id)) {
-        setIsCreatingRoom(false)
-        onRequestClose()
-      }
+      setIsCreatingRoom(false)
+      onRequestClose()
+
     } catch (e) {
       if (e.message === 'M_UNKNOWN: Invalid characters in room alias') {
         setCreatingError('ERROR: Invalid characters in address');
