@@ -49,7 +49,7 @@
       @include dir.prop(
         border-radius,
         var(--bo-radius) 0 0 var(--bo-radius),
-        0 var(--bo-radius) var(--bo-radius) 0,
+        0 var(--bo-radius) var(--bo-radius) 0
       );
     }
     & .text:last-child {
@@ -57,7 +57,7 @@
       @include dir.prop(
         border-radius,
         0 var(--bo-radius) var(--bo-radius) 0,
-        var(--bo-radius) 0 0 var(--bo-radius),
+        var(--bo-radius) 0 0 var(--bo-radius)
       );
     }
   }
@@ -65,12 +65,20 @@
   &__name-wrapper {
     display: flex;
     align-items: flex-end;
+    justify-content: center;
 
     & .input-container {
       flex: 1;
       min-width: 0;
       @include dir.side(margin, 0, var(--sp-normal));
     }
+
+    & .btn-danger:nth-child(2) {
+      height: 46px;
+      width: 80px;
+      @include dir.side(margin, 0, var(--sp-normal));
+    }
+
     & .btn-primary {
       padding-top: 11px;
       padding-bottom: 11px;

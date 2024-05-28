@@ -1,7 +1,14 @@
+/* eslint-disable no-constant-condition */
+/* eslint-disable consistent-return */
+/* eslint-disable no-console */
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import './CreateRoom.scss';
 
+import { Interface, hexValue, parseUnits } from 'ethers/lib/utils';
+import { ethers } from 'ethers';
+import { useAtom } from 'jotai';
 import { twemojify } from '../../../util/twemojify';
 import initMatrix from '../../../client/initMatrix';
 import cons from '../../../client/state/cons';
@@ -32,8 +39,12 @@ import SpaceLockIC from '../../../../public/res/ic/outlined/space-lock.svg';
 import SpaceGlobeIC from '../../../../public/res/ic/outlined/space-globe.svg';
 import ChevronBottomIC from '../../../../public/res/ic/outlined/chevron-bottom.svg';
 import CrossIC from '../../../../public/res/ic/outlined/cross.svg';
+import { SmartAccountAtom } from '../../state/smartAccount';
+
 
 function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
+  const [smartAccount] = useAtom(SmartAccountAtom);
+
   const [joinRule, setJoinRule] = useState(parentId ? 'restricted' : 'invite');
   const [isEncrypted, setIsEncrypted] = useState(true);
   const [isCreatingRoom, setIsCreatingRoom] = useState(false);
@@ -67,11 +78,11 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
     };
   }, []);
 
+
   const handleSubmit = async (evt) => {
     evt.preventDefault();
     const { target } = evt;
 
-    if (isCreatingRoom) return;
     setIsCreatingRoom(true);
     setCreatingError(null);
 
@@ -79,12 +90,154 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
     let topic = target.topic.value;
     if (topic.trim() === '') topic = undefined;
     let roomAlias;
-    if (joinRule === 'public') {
-      roomAlias = addressRef?.current?.value;
-      if (roomAlias.trim() === '') roomAlias = undefined;
-    }
 
     const powerLevel = roleIndex === 1 ? 101 : undefined;
+
+    const createspace = async () => {
+      const contractAddress = '0xA428A805310A82BD8cf060725882128C4Bb602A1';
+
+      const check = async () => {
+        const address = await smartAccount.getAddress();;
+
+        const ABICheck = [{
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
+          ],
+          "name": "spaces",
+          "outputs": [
+            {
+              "internalType": "address",
+              "name": "spaceOwner",
+              "type": "address"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },]
+
+        try {
+          const provider = new ethers.providers.WebSocketProvider('wss://sepolia.gateway.tenderly.co');
+
+          const contract = new ethers.Contract(contractAddress, ABICheck, provider)
+
+          const result = await contract.callStatic.spaces(address)
+
+          return hexValue(result).toLowerCase() === address.toLowerCase();
+        }
+
+        catch (e) {
+          console.log(e)
+          return false
+        }
+      }
+
+      const create = async () => {
+        const ABICreate = [{
+          "inputs": [],
+          "name": "createSpace",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }];
+
+        const callData = new Interface(ABICreate).encodeFunctionData('createSpace', []);
+
+        const tx = {
+          to: contractAddress,
+          data: callData,
+        }
+
+        try {
+          const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
+          const { userOp } = feeQuotesResult.verifyingPaymasterNative
+          const { userOpHash } = feeQuotesResult.verifyingPaymasterNative
+          await smartAccount.sendUserOperation({ userOp, userOpHash });
+          return true;
+        }
+
+        catch (e) {
+          console.log(e)
+          return false;
+        }
+      }
+
+      if (!await check()) {
+        if (!await create()) {
+          setIsCreatingRoom(false)
+          return false;
+        }
+      }
+      else {
+        return true;
+      }
+    }
+
+    const createroom = async () => {
+      const contractAddress = '0xA428A805310A82BD8cf060725882128C4Bb602A1';
+      const ABI = [{
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "_roomId",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "_subscriptionFee",
+            "type": "uint256"
+          }
+        ],
+        "name": "addRoomToSpace",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }]
+
+      const value = parseUnits(String(0.01), 'ether');
+      const callData = new Interface(ABI).encodeFunctionData('addRoomToSpace', [parentId, value]);
+
+      const tx = {
+        to: contractAddress,
+        data: callData,
+      }
+
+      try {
+        const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
+        const { userOp } = feeQuotesResult.verifyingPaymasterNative
+        const { userOpHash } = feeQuotesResult.verifyingPaymasterNative
+        const txHash = await smartAccount.sendUserOperation({ userOp, userOpHash });
+        console.log(txHash)
+        return true;
+      }
+      catch (e) {
+        const errlog = e.data.extraMessage.message || undefined;
+
+        if (errlog) {
+          const err = errlog.split(":").pop().trim().slice(1, -1);;
+          if (err === "Room ID already exists") {
+            return true
+          }
+          return false
+        }
+      }
+    }
+
+
+
+    if (isSpace) {
+      if (!await createspace()) {
+        setIsCreatingRoom(false)
+        return false
+      }
+    } else if (!await createroom()) {
+      setIsCreatingRoom(false)
+      return false
+    }
+
 
     try {
       await roomActions.createRoom({
@@ -129,9 +282,9 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
     }, 1000);
   };
 
-  const joinRules = ['invite', 'restricted', 'public'];
-  const joinRuleShortText = ['Private', 'Restricted', 'Public'];
-  const joinRuleText = ['Private (invite only)', 'Restricted (space member can join)', 'Public (anyone can join)'];
+  const joinRules = ['invite', 'restricted'];
+  const joinRuleShortText = ['Private', 'Restricted'];
+  const joinRuleText = ['Private (invite only)', 'Restricted (space member can join)'];
   const jrRoomIC = [HashLockIC, HashIC, HashGlobeIC];
   const jrSpaceIC = [SpaceLockIC, SpaceIC, SpaceGlobeIC];
   const handleJoinRule = (evt) => {
@@ -154,7 +307,7 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
                 onClick={() => { closeMenu(); setJoinRule(rule); }}
                 disabled={!parentId && rule === 'restricted'}
               >
-                { joinRuleText[joinRules.indexOf(rule)] }
+                {joinRuleText[joinRules.indexOf(rule)]}
               </MenuItem>
             ))
           }
@@ -210,7 +363,7 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
             />
           )}
           content={(
-            <Text variant="b3">Selecting Admin sets 100 power level whereas Founder sets 101.</Text>
+            <Text variant="b3">Admin : 100 power level <br /> Founder: 101 power level</Text>
           )}
         />
         <Input name="topic" minHeight={174} resizable label="Topic (optional)" />
@@ -225,15 +378,17 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
             Create
           </Button>
         </div>
-        {isCreatingRoom && (
-          <div className="create-room__loading">
-            <Spinner size="small" />
-            <Text>{`Creating ${isSpace ? 'space' : 'room'}...`}</Text>
-          </div>
-        )}
+        {
+          isCreatingRoom && (
+            <div className="create-room__loading">
+              <Spinner size="small" />
+              <Text>{`Creating ${isSpace ? 'space' : 'room'}...`}</Text>
+            </div>
+          )
+        }
         {typeof creatingError === 'string' && <Text className="create-room__error" variant="b3">{creatingError}</Text>}
-      </form>
-    </div>
+      </form >
+    </div >
   );
 }
 CreateRoomContent.defaultProps = {

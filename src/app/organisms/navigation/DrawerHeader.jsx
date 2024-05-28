@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable prefer-destructuring */
+import React from 'react';
 import PropTypes from 'prop-types';
 import './DrawerHeader.scss';
 
@@ -7,8 +9,8 @@ import { twemojify } from '../../../util/twemojify';
 import initMatrix from '../../../client/initMatrix';
 import cons from '../../../client/state/cons';
 import {
-  openPublicRooms, openCreateRoom, openSpaceManage, openJoinAlias,
-  openSpaceAddExisting, openInviteUser, openReusableContextMenu,
+  openCreateRoom, openSpaceManage, openJoinAlias,
+  openInviteUser, openReusableContextMenu,
 } from '../../../client/action/navigation';
 import { getEventCords } from '../../../util/common';
 
@@ -27,54 +29,9 @@ import HashSearchIC from '../../../../public/res/ic/outlined/hash-search.svg';
 import SpacePlusIC from '../../../../public/res/ic/outlined/space-plus.svg';
 import ChevronBottomIC from '../../../../public/res/ic/outlined/chevron-bottom.svg';
 
-import { SmartAccountAtom } from '../../state/smartAccount';
-import { useAtom } from 'jotai';
-import { Interface } from 'ethers/lib/utils';
+
 
 export function HomeSpaceOptions({ spaceId, afterOptionSelect }) {
-  const [verify, setVerify] = useState(0);
-  const [smartAccount] = useAtom(SmartAccountAtom);
-
-  useEffect(() => {
-    if (verify === 1) {
-      const createSpace = async () => {
-        const contractAddress = '0xA428A805310A82BD8cf060725882128C4Bb602A1';
-        const ABI = [{
-          "inputs": [],
-          "name": "createSpace",
-          "outputs": [],
-          "stateMutability": "nonpayable",
-          "type": "function"
-        }];
-
-        const callData = new Interface(ABI).encodeFunctionData('createSpace', []);
-
-        const tx = {
-          to: contractAddress,
-          data: callData,
-        }
-
-        const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
-        const userOp = feeQuotesResult.verifyingPaymasterNative.userOp
-        const userOpHash = feeQuotesResult.verifyingPaymasterNative.userOpHash
-        await smartAccount.sendUserOperation({ userOp, userOpHash });
-        const txHash = await smartAccount.sendTransaction(tx);
-        return txHash;
-      }
-
-      createSpace().then((result) => {
-        setVerify(2);
-      });
-    }
-
-  }, [verify]);
-
-  useEffect(() => {
-    if (verify === 2) {
-      openCreateRoom(true, spaceId);
-    }
-  }, [verify]);
-
 
   const mx = initMatrix.matrixClient;
   const room = mx.getRoom(spaceId);
@@ -88,7 +45,7 @@ export function HomeSpaceOptions({ spaceId, afterOptionSelect }) {
       {
         !spaceId && <MenuItem
           iconSrc={SpacePlusIC}
-          onClick={() => { afterOptionSelect(); setVerify(1); }}
+          onClick={() => { afterOptionSelect(); openCreateRoom(true, spaceId) }}
           disabled={!canManage}
         >
           Create new space
