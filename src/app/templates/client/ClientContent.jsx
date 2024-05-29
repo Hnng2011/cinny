@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 import initMatrix from '../../../client/initMatrix';
 import cons from '../../../client/state/cons';
@@ -15,12 +15,14 @@ export function ClientContent() {
   });
 
   const mx = initMatrix.matrixClient;
+  const rt = useCallback((rId) => mx.getRoom(rId), [mx])
 
   useEffect(() => {
     const handleRoomSelected = (rId, pRoomId, eId) => {
       roomInfo.roomTimeline?.removeInternalListeners();
-      const r = mx.getRoom(rId);
-      if (r) {
+      const r = rt(rId);
+      const userId = r?.myUserId;
+      if (r && r?.currentState?.members?.[userId]?.membership === 'join') {
         setRoomInfo({
           room: r,
           eventId: eId ?? null,
@@ -37,7 +39,7 @@ export function ClientContent() {
     return () => {
       navigation.removeListener(cons.events.navigation.ROOM_SELECTED, handleRoomSelected);
     };
-  }, [roomInfo, mx]);
+  }, [roomInfo, mx, rt]);
 
   const { room, eventId } = roomInfo;
   if (!room) {

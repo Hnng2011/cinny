@@ -10,14 +10,14 @@ import { leave } from '../../../client/action/room';
 import {
   createSpaceShortcut,
   deleteSpaceShortcut,
-  categorizeSpace,
-  unCategorizeSpace,
+  // categorizeSpace,
+  // unCategorizeSpace,
 } from '../../../client/action/accountData';
 
 import { MenuHeader, MenuItem } from '../../atoms/context-menu/ContextMenu';
 
-import CategoryIC from '../../../../public/res/ic/outlined/category.svg';
-import CategoryFilledIC from '../../../../public/res/ic/filled/category.svg';
+// import CategoryIC from '../../../../public/res/ic/outlined/category.svg';
+// import CategoryFilledIC from '../../../../public/res/ic/filled/category.svg';
 import TickMarkIC from '../../../../public/res/ic/outlined/tick-mark.svg';
 import AddUserIC from '../../../../public/res/ic/outlined/add-user.svg';
 import SettingsIC from '../../../../public/res/ic/outlined/settings.svg';
@@ -34,7 +34,7 @@ function SpaceOptions({ roomId, afterOptionSelect }) {
   const room = mx.getRoom(roomId);
   const canInvite = room?.canInvite(mx.getUserId());
   const isPinned = initMatrix.accountData.spaceShortcut.has(roomId);
-  const isCategorized = initMatrix.accountData.categorizedSpaces.has(roomId);
+  // const isCategorized = initMatrix.accountData.categorizedSpaces.has(roomId);
 
   const handleMarkAsRead = () => {
     const spaceChildren = roomList.getCategorizedSpaces([roomId]);
@@ -54,11 +54,11 @@ function SpaceOptions({ roomId, afterOptionSelect }) {
     else createSpaceShortcut(roomId);
     afterOptionSelect();
   };
-  const handleCategorizeClick = () => {
-    if (isCategorized) unCategorizeSpace(roomId);
-    else categorizeSpace(roomId);
-    afterOptionSelect();
-  };
+  // const handleCategorizeClick = () => {
+  //   if (isCategorized) unCategorizeSpace(roomId);
+  //   else categorizeSpace(roomId);
+  //   afterOptionSelect();
+  // };
   const handleSettingsClick = () => {
     openSpaceSettings(roomId);
     afterOptionSelect();

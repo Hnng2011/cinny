@@ -1,6 +1,12 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-expressions */
 import React, { useState, useEffect, useRef } from 'react';
 import './Client.scss';
 
+import { useAccountInfo, useParticleConnect } from '@particle-network/connectkit';
+import { SmartAccount } from '@particle-network/aa';
+import { EthereumSepolia } from '@particle-network/chains';
+import { useAtom } from 'jotai';
 import { initHotkeys } from '../../../client/event/hotkeys';
 import { initRoomListListener } from '../../../client/event/roomList';
 
@@ -23,11 +29,7 @@ import { ClientContent } from './ClientContent';
 import { useSetting } from '../../state/hooks/settings';
 import { settingsAtom } from '../../state/settings';
 
-import { useAccountInfo, useParticleConnect } from '@particle-network/connectkit';
-import { SmartAccount } from '@particle-network/aa';
-import { EthereumSepolia } from '@particle-network/chains';
 import { SmartAccountAtom } from '../../state/smartAccount';
-import { useAtom } from 'jotai';
 
 function SystemEmojiFeature() {
   const [twitterEmoji] = useSetting(settingsAtom, 'twitterEmoji');

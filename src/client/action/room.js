@@ -1,7 +1,13 @@
+import {
+  Interface, hexValue,
+  parseUnits
+} from 'ethers/lib/utils';
+import { ethers } from 'ethers';
 import initMatrix from '../initMatrix';
 import appDispatcher from '../dispatcher';
 import cons from '../state/cons';
 import { getIdServer } from '../../util/matrixUtil';
+
 
 /**
  * https://github.com/matrix-org/matrix-react-sdk/blob/1e6c6e9d800890c732d60429449bc280de01a647/src/Rooms.js#L73
@@ -182,9 +188,134 @@ async function createDM(userIdOrIds, isEncrypted = true) {
   return result;
 }
 
+async function CreateSpaceByContract(smartAccount) {
+  const contractAddress = import.meta.env.VITE_APP_CONTRACT_ADDRESS;
+
+  const check = async () => {
+    const address = await smartAccount.getAddress();;
+    const ABICheck = [{
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "spaces",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "spaceOwner",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },]
+
+    try {
+      const provider = new ethers.providers.WebSocketProvider('wss://sepolia.gateway.tenderly.co');
+      const contract = new ethers.Contract(contractAddress, ABICheck, provider)
+      const result = await contract.callStatic.spaces(address)
+      return hexValue(result).toLowerCase() === address.toLowerCase();
+    }
+
+    catch (e) {
+      return false
+    }
+  }
+
+  const creating = async () => {
+    const ABICreate = [{
+      "inputs": [],
+      "name": "createSpace",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }];
+
+    const callData = new Interface(ABICreate).encodeFunctionData('createSpace', []);
+
+    const tx = {
+      to: contractAddress,
+      data: callData,
+    }
+
+    try {
+      const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
+      const { userOp } = feeQuotesResult.verifyingPaymasterNative
+      const { userOpHash } = feeQuotesResult.verifyingPaymasterNative
+      await smartAccount.sendUserOperation({ userOp, userOpHash });
+      return true;
+    }
+
+    catch (e) {
+      return false;
+    }
+  }
+
+  if (!await check()) {
+    if (!await creating()) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+async function CreateRoomByContract(roomid, fee, smartAccount) {
+  const contractAddress = import.meta.env.VITE_APP_CONTRACT_ADDRESS;
+  const ABI = [{
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "_roomId",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_subscriptionFee",
+        "type": "uint256"
+      }
+    ],
+    "name": "addRoomToSpace",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }]
+
+  const value = parseUnits(fee, 'ether');
+  const callData = new Interface(ABI).encodeFunctionData('addRoomToSpace', [roomid, value]);
+
+  const tx = {
+    to: contractAddress,
+    data: callData,
+  }
+
+  try {
+    const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
+    const { userOp } = feeQuotesResult.verifyingPaymasterNative
+    const { userOpHash } = feeQuotesResult.verifyingPaymasterNative
+    await smartAccount.sendUserOperation({ userOp, userOpHash });
+    return true;
+  }
+
+  catch (e) {
+    const errlog = e?.data?.extraMessage?.message || undefined;
+    if (errlog) {
+      const err = errlog.split(":").pop().trim().slice(1, -1);;
+      if (err === "Room ID already exists") {
+        return true
+      }
+    }
+
+    return false;
+  }
+}
+
 async function createRoom(opts) {
   // joinRule: 'public' | 'invite' | 'restricted'
-  const { name, topic, joinRule } = opts;
+  const { name, topic, joinRule, fee, smartAccount } = opts;
   const alias = opts.alias ?? undefined;
   const parentId = opts.parentId ?? undefined;
   const isSpace = opts.isSpace ?? false;
@@ -256,6 +387,26 @@ async function createRoom(opts) {
   }
 
   const result = await create(options);
+
+  let resultContract;
+
+  if (isSpace) {
+    resultContract = await CreateSpaceByContract(smartAccount)
+  }
+  else {
+    resultContract = await CreateRoomByContract(alias, fee, smartAccount);
+  }
+
+  if (!resultContract) {
+    await leave(result.room_id)
+    appDispatcher.dispatch({
+      type: cons.actions.navigation.SELECT_SPACE,
+      roomId: parentId,
+      asRoot: true,
+    });
+
+    return null;
+  }
 
   if (parentId) {
     await mx.sendStateEvent(parentId, 'm.space.child', {
