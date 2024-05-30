@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import {
   Interface, hexValue,
   parseUnits
@@ -105,6 +106,7 @@ async function join(roomIdOrAlias, isDM = false, via = undefined) {
   const mx = initMatrix.matrixClient;
   const roomIdParts = roomIdOrAlias.split(':');
   const viaServers = via || [roomIdParts[1]];
+
 
   try {
     const resultRoom = await mx.joinRoom(roomIdOrAlias, { viaServers });
@@ -264,35 +266,38 @@ async function CreateSpaceByContract(smartAccount) {
 }
 
 async function CreateRoomByContract(roomid, fee, smartAccount) {
-  const contractAddress = import.meta.env.VITE_APP_CONTRACT_ADDRESS;
-  const ABI = [{
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "_roomId",
-        "type": "string"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_subscriptionFee",
-        "type": "uint256"
-      }
-    ],
-    "name": "addRoomToSpace",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  }]
-
-  const value = parseUnits(fee, 'ether');
-  const callData = new Interface(ABI).encodeFunctionData('addRoomToSpace', [roomid, value]);
-
-  const tx = {
-    to: contractAddress,
-    data: callData,
-  }
-
   try {
+    const contractAddress = import.meta.env.VITE_APP_CONTRACT_ADDRESS;
+    const ABI = [{
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_roomId",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_subscriptionFee",
+          "type": "uint256"
+        }
+      ],
+      "name": "addRoomToSpace",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }]
+
+    const value = parseUnits(fee, 'ether');
+
+
+    const callData = new Interface(ABI).encodeFunctionData('addRoomToSpace', [roomid, value]);
+
+    const tx = {
+      to: contractAddress,
+      data: callData,
+    }
+
+
     const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
     const { userOp } = feeQuotesResult.verifyingPaymasterNative
     const { userOpHash } = feeQuotesResult.verifyingPaymasterNative
@@ -301,12 +306,9 @@ async function CreateRoomByContract(roomid, fee, smartAccount) {
   }
 
   catch (e) {
-    const errlog = e?.data?.extraMessage?.message || undefined;
-    if (errlog) {
-      const err = errlog.split(":").pop().trim().slice(1, -1);;
-      if (err === "Room ID already exists") {
-        return true
-      }
+    const errlog = e?.data?.extraMessage?.message || null;
+    if (errlog && errlog.split(":").pop().trim().slice(1, -1) === "Room ID already exists") {
+      return true
     }
 
     return false;
@@ -322,6 +324,7 @@ async function createRoom(opts) {
   const isEncrypted = opts.isEncrypted ?? false;
   const powerLevel = opts.powerLevel ?? undefined;
   const blockFederation = opts.blockFederation ?? false;
+  let resultContract;
 
   const mx = initMatrix.matrixClient;
   const visibility = joinRule === 'public' ? 'public' : 'private';
@@ -388,7 +391,7 @@ async function createRoom(opts) {
 
   const result = await create(options);
 
-  let resultContract;
+
 
   if (isSpace) {
     resultContract = await CreateSpaceByContract(smartAccount)
@@ -396,6 +399,8 @@ async function createRoom(opts) {
   else {
     resultContract = await CreateRoomByContract(alias, fee, smartAccount);
   }
+
+  console.log(resultContract)
 
   if (!resultContract) {
     await leave(result.room_id)
@@ -410,7 +415,7 @@ async function createRoom(opts) {
 
   if (parentId) {
     await mx.sendStateEvent(parentId, 'm.space.child', {
-      auto_join: false,
+      auto_join: true,
       suggested: false,
       via: [getIdServer(mx.getUserId())],
     }, result.room_id);

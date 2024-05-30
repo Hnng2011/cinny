@@ -10,7 +10,8 @@ import { twemojify } from '../../../util/twemojify';
 import initMatrix from '../../../client/initMatrix';
 import cons from '../../../client/state/cons';
 import {
-  openCreateRoom, openSpaceManage, openJoinAlias,
+  openCreateRoom, openSpaceManage,
+  // openJoinAlias,
   openInviteUser, openReusableContextMenu, openPublicRooms
 } from '../../../client/action/navigation';
 import { getEventCords } from '../../../util/common';
@@ -59,18 +60,17 @@ export function HomeSpaceOptions({ spaceId, afterOptionSelect }) {
           iconSrc={HashGlobeIC}
           onClick={() => { afterOptionSelect(); openPublicRooms(); }}
         >
-          Explore public
+          Explore Spaces
         </MenuItem>
       )}
-
-      {!spaceId && (
+      {/* {!spaceId && (
         <MenuItem
           iconSrc={PlusIC}
           onClick={() => { afterOptionSelect(); openJoinAlias(); }}
         >
           Join with address
         </MenuItem>
-      )}
+      )} */}
       {spaceId &&
         <MenuItem
           iconSrc={HashPlusIC}

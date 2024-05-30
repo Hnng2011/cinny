@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useAtom } from 'jotai';
+// import { useAtom } from 'jotai';
 import PropTypes from 'prop-types';
 import './SideBar.scss';
 
@@ -10,7 +10,9 @@ import initMatrix from '../../../client/initMatrix';
 import cons from '../../../client/state/cons';
 import colorMXID from '../../../util/colorMXID';
 import {
-  selectTab, openShortcutSpaces, openInviteList,
+  selectTab,
+  // openShortcutSpaces,
+  openInviteList,
   openSearch, openSettings, openReusableContextMenu,
 } from '../../../client/action/navigation';
 import { moveSpaceShortcut } from '../../../client/action/accountData';
@@ -24,7 +26,7 @@ import SidebarAvatar from '../../molecules/sidebar-avatar/SidebarAvatar';
 import SpaceOptions from '../../molecules/space-options/SpaceOptions';
 
 import HomeIC from '../../../../public/res/ic/outlined/home.svg';
-import UserIC from '../../../../public/res/ic/outlined/user.svg';
+// import UserIC from '../../../../public/res/ic/outlined/user.svg';
 // import AddPinIC from '../../../../public/res/ic/outlined/add-pin.svg';
 import SearchIC from '../../../../public/res/ic/outlined/search.svg';
 import InviteIC from '../../../../public/res/ic/outlined/invite.svg';

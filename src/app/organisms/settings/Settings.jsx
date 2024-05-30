@@ -95,7 +95,7 @@ function AppearanceSection() {
                 updateState({});
               }}
             />
-        )}
+          )}
         />
         <SettingTile
           title="Use Twitter Emoji"
@@ -114,33 +114,33 @@ function AppearanceSection() {
           title="Message Layout"
           content={
             <SegmentedControls
-            selected={messageLayout}
-            segments={[
-              { text: 'Modern' },
-              { text: 'Compact' },
-              { text: 'Bubble' },
-            ]}
-            onSelect={(index) => setMessageLayout(index)}
-          />
+              selected={messageLayout}
+              segments={[
+                { text: 'Modern' },
+                { text: 'Compact' },
+                { text: 'Bubble' },
+              ]}
+              onSelect={(index) => setMessageLayout(index)}
+            />
           }
         />
         <SettingTile
           title="Message Spacing"
           content={
             <SegmentedControls
-            selected={spacings.findIndex((s) => s === messageSpacing)}
-            segments={[
-              { text: 'No' },
-              { text: 'XXS' },
-              { text: 'XS' },
-              { text: 'S' },
-              { text: 'M' },
-              { text: 'L' },
-            ]}
-            onSelect={(index) => {
-              setMessageSpacing(spacings[index])
-            }}
-          />
+              selected={spacings.findIndex((s) => s === messageSpacing)}
+              segments={[
+                { text: 'No' },
+                { text: 'XXS' },
+                { text: 'XS' },
+                { text: 'S' },
+                { text: 'M' },
+                { text: 'L' },
+              ]}
+              onSelect={(index) => {
+                setMessageSpacing(spacings[index])
+              }}
+            />
           }
         />
         <SettingTile
@@ -148,7 +148,7 @@ function AppearanceSection() {
           options={(
             <Toggle
               isActive={enterForNewline}
-              onToggle={() => setEnterForNewline(!enterForNewline) }
+              onToggle={() => setEnterForNewline(!enterForNewline)}
             />
           )}
           content={<Text variant="b3">{`Use ${isMacOS() ? KeySymbol.Command : 'Ctrl'} + ENTER to send message and ENTER for newline.`}</Text>}
@@ -158,7 +158,7 @@ function AppearanceSection() {
           options={(
             <Toggle
               isActive={isMarkdown}
-              onToggle={() => setIsMarkdown(!isMarkdown) }
+              onToggle={() => setIsMarkdown(!isMarkdown)}
             />
           )}
           content={<Text variant="b3">Format messages with markdown syntax before sending.</Text>}
@@ -277,7 +277,7 @@ function NotificationsSection() {
               isActive={settings.isNotificationSounds}
               onToggle={() => { toggleNotificationSounds(); updateState({}); }}
             />
-            )}
+          )}
           content={<Text variant="b3">Play sound when new messages arrive.</Text>}
         />
       </div>
@@ -358,19 +358,19 @@ function AboutSection() {
         <div className="settings-about__credits">
           <ul>
             <li>
-              {/* eslint-disable-next-line react/jsx-one-expression-per-line */ }
+              {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
               <Text>The <a href="https://github.com/matrix-org/matrix-js-sdk" rel="noreferrer noopener" target="_blank">matrix-js-sdk</a> is © <a href="https://matrix.org/foundation" rel="noreferrer noopener" target="_blank">The Matrix.org Foundation C.I.C</a> used under the terms of <a href="http://www.apache.org/licenses/LICENSE-2.0" rel="noreferrer noopener" target="_blank">Apache 2.0</a>.</Text>
             </li>
             <li>
-              {/* eslint-disable-next-line react/jsx-one-expression-per-line */ }
+              {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
               <Text>The <a href="https://github.com/mozilla/twemoji-colr" target="_blank" rel="noreferrer noopener">twemoji-colr</a> font is © <a href="https://mozilla.org/" target="_blank" rel="noreferrer noopener">Mozilla Foundation</a> used under the terms of <a href="http://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="noreferrer noopener">Apache 2.0</a>.</Text>
             </li>
             <li>
-              {/* eslint-disable-next-line react/jsx-one-expression-per-line */ }
+              {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
               <Text>The <a href="https://twemoji.twitter.com" target="_blank" rel="noreferrer noopener">Twemoji</a> emoji art is © <a href="https://twemoji.twitter.com" target="_blank" rel="noreferrer noopener">Twitter, Inc and other contributors</a> used under the terms of <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer noopener">CC-BY 4.0</a>.</Text>
             </li>
             <li>
-              {/* eslint-disable-next-line react/jsx-one-expression-per-line */ }
+              {/* eslint-disable-next-line react/jsx-one-expression-per-line */}
               <Text>The <a href="https://material.io/design/sound/sound-resources.html" target="_blank" rel="noreferrer noopener">Material sound resources</a> are © <a href="https://google.com" target="_blank" rel="noreferrer noopener">Google</a> used under the terms of <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer noopener">CC-BY 4.0</a>.</Text>
             </li>
           </ul>
@@ -469,7 +469,7 @@ function Settings() {
             onSelect={handleTabChange}
           />
           <div className="settings-window__cards-wrapper">
-            { selectedTab.render() }
+            {selectedTab.render()}
           </div>
         </div>
       )}

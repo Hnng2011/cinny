@@ -34,6 +34,8 @@ import CrossIC from '../../../../public/res/ic/outlined/cross.svg';
 import { useForceUpdate } from '../../hooks/useForceUpdate';
 import { confirmDialog } from '../../molecules/confirm-dialog/ConfirmDialog';
 
+import TruncateText from '../../../util/truncateText';
+
 function ModerationTools({
   roomId, userId,
 }) {
@@ -246,14 +248,14 @@ function ProfileFooter({ roomId, userId, onRequestClose }) {
 
   return (
     <div className="profile-viewer__buttons">
-      <Button
+      {/* <Button
         variant="primary"
         onClick={openDM}
         disabled={isCreatingDM}
       >
         {isCreatingDM ? 'Creating room...' : 'Message'}
-      </Button>
-      { isBanned && canIKick && (
+      </Button> */}
+      {isBanned && canIKick && (
         <Button
           variant="positive"
           onClick={() => roomActions.unban(roomId, userId)}
@@ -261,7 +263,7 @@ function ProfileFooter({ roomId, userId, onRequestClose }) {
           Unban
         </Button>
       )}
-      { (isInvited ? canIKick : room.canInvite(mx.getUserId())) && isInvitable && (
+      {(isInvited ? canIKick : room.canInvite(mx.getUserId())) && isInvitable && (
         <Button
           onClick={toggleInvite}
           disabled={isInviting}
@@ -405,7 +407,7 @@ function ProfileViewer() {
         <div className="profile-viewer__user">
           <Avatar imageSrc={avatarUrl} text={username} bgColor={colorMXID(userId)} size="large" />
           <div className="profile-viewer__user__info">
-            <Text variant="s1" weight="medium">{twemojify(username)}</Text>
+            <Text variant="s1" weight="medium">{TruncateText(twemojify(username))}</Text>
             <Text variant="b2">{twemojify(userId)}</Text>
           </div>
           <div className="profile-viewer__user__role">
@@ -419,8 +421,8 @@ function ProfileViewer() {
           </div>
         </div>
         <ModerationTools roomId={roomId} userId={userId} />
-        <SessionInfo userId={userId} />
-        { userId !== mx.getUserId() && (
+        {/* <SessionInfo userId={userId} /> */}
+        {userId !== mx.getUserId() && (
           <ProfileFooter roomId={roomId} userId={userId} onRequestClose={closeDialog} />
         )}
       </div>

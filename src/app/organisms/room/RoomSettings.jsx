@@ -19,10 +19,10 @@ import { MenuHeader, MenuItem } from '../../atoms/context-menu/ContextMenu';
 import RoomProfile from '../../molecules/room-profile/RoomProfile';
 import RoomSearch from '../../molecules/room-search/RoomSearch';
 import RoomNotification from '../../molecules/room-notification/RoomNotification';
-import RoomVisibility from '../../molecules/room-visibility/RoomVisibility';
-import RoomAliases from '../../molecules/room-aliases/RoomAliases';
+// import RoomVisibility from '../../molecules/room-visibility/RoomVisibility';
+// import RoomAliases from '../../molecules/room-aliases/RoomAliases';
 import RoomHistoryVisibility from '../../molecules/room-history-visibility/RoomHistoryVisibility';
-import RoomEncryption from '../../molecules/room-encryption/RoomEncryption';
+// import RoomEncryption from '../../molecules/room-encryption/RoomEncryption';
 import RoomPermissions from '../../molecules/room-permissions/RoomPermissions';
 import RoomMembers from '../../molecules/room-members/RoomMembers';
 import RoomEmojis from '../../molecules/room-emojis/RoomEmojis';
@@ -82,7 +82,7 @@ function GeneralSettings({ roomId }) {
 
   return (
     <>
-      <div className="room-settings__card">
+      {/* <div className="room-settings__card">
         <MenuHeader>Options</MenuHeader>
         <MenuItem
           disabled={!canInvite}
@@ -107,7 +107,7 @@ function GeneralSettings({ roomId }) {
         >
           Leave
         </MenuItem>
-      </div>
+      </div> */}
       <div className="room-settings__card">
         <MenuHeader>Notification (Changing this will only affect you)</MenuHeader>
         <RoomNotification roomId={roomId} />

@@ -13,13 +13,9 @@ import Input from '../../atoms/input/Input';
 
 import PencilIC from '../../../../public/res/ic/outlined/pencil.svg';
 import { confirmDialog } from '../../molecules/confirm-dialog/ConfirmDialog';
+import TruncateText from '../../../util/truncateText';
 
 import './ProfileEditor.scss';
-
-const TruncateText = (text) => {
-  const truncatedText = (text?.length > 24) ? `...${text?.substring(text.length - 24)}` : text;
-  return truncatedText
-}
 
 function ProfileEditor({ userId }) {
   const [isEditing, setIsEditing] = useState(false);

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-expressions */
 /* eslint-disable no-plusplus */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-constant-condition */
@@ -115,7 +116,7 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
     const fee = target?.fee?.value || null;
 
     try {
-      await roomActions.createRoom({
+      const result = await roomActions.createRoom({
         name,
         topic,
         joinRule,
@@ -129,8 +130,10 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
         smartAccount
       });
 
-      onRequestClose()
+      result && onRequestClose()
+      !result && setCreatingError('Create Room Failed');
       setIsCreatingRoom(false)
+
     } catch (e) {
       if (e.message === 'M_UNKNOWN: Invalid characters in room alias') {
         setCreatingError('ERROR: Invalid characters in address');

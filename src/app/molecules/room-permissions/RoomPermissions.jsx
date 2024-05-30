@@ -55,7 +55,7 @@ const permissionsInfo = {
   invite: {
     name: 'Invite',
     description: 'Set minimum power level to invite members.',
-    default: 50,
+    default: 101,
   },
   kick: {
     name: 'Kick',
