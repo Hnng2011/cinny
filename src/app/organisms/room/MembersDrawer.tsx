@@ -175,6 +175,7 @@ type MembersDrawerProps = {
 };
 export function MembersDrawer({ room }: MembersDrawerProps) {
   const mx = useMatrixClient();
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const scrollTopAnchorRef = useRef<HTMLDivElement>(null);
@@ -436,9 +437,8 @@ export function MembersDrawer({ room }: MembersDrawerProps) {
                         }}
                         after={<Icon size="50" src={Icons.Cross} />}
                       >
-                        <Text size="B300">{`${result.items.length || 'No'} ${
-                          result.items.length === 1 ? 'Result' : 'Results'
-                        }`}</Text>
+                        <Text size="B300">{`${result.items.length || 'No'} ${result.items.length === 1 ? 'Result' : 'Results'
+                          }`}</Text>
                       </Chip>
                     )
                   }
@@ -494,7 +494,9 @@ export function MembersDrawer({ room }: MembersDrawerProps) {
                   }
 
                   const member = tagOrMember;
-                  const name = getName(member);
+
+                  const name = member.userId === mx.getUserId() ? 'Me' : getName(member);
+
                   const avatarUrl = member.getAvatarUrl(
                     mx.baseUrl,
                     100,

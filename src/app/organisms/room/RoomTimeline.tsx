@@ -336,9 +336,9 @@ const useTimelinePagination = (
         range:
           offsetRange > 0
             ? {
-                start: currentTimeline.range.start + offsetRange,
-                end: currentTimeline.range.end + offsetRange,
-              }
+              start: currentTimeline.range.start + offsetRange,
+              end: currentTimeline.range.end + offsetRange,
+            }
             : { ...currentTimeline.range },
       }));
     };
@@ -357,7 +357,7 @@ const useTimelinePagination = (
       if (
         !paginationToken &&
         getTimelinesEventsCount(lTimelines) !==
-          getTimelinesEventsCount(getLinkedTimelines(timelineToPaginate))
+        getTimelinesEventsCount(getLinkedTimelines(timelineToPaginate))
       ) {
         recalibratePagination(lTimelines, timelinesEventsCount, backwards);
         return;
@@ -1763,9 +1763,8 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor }: RoomTimeli
           {!canPaginateBack && rangeAtStart && getItems().length > 0 && (
             <div
               style={{
-                padding: `${config.space.S700} ${config.space.S400} ${config.space.S600} ${
-                  messageLayout === 1 ? config.space.S400 : toRem(64)
-                }`,
+                padding: `${config.space.S700} ${config.space.S400} ${config.space.S600} ${messageLayout === 1 ? config.space.S400 : toRem(64)
+                  }`,
               }}
             >
               <RoomIntro room={room} />

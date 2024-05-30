@@ -29,6 +29,7 @@ import React, {
   MouseEventHandler,
   ReactNode,
   useCallback,
+  useMemo,
   useState,
 } from 'react';
 import FocusTrap from 'focus-trap-react';
@@ -228,9 +229,9 @@ export const MessageSourceCodeItem = as<
   const getContent = (evt: MatrixEvent) =>
     evt.isEncrypted()
       ? {
-          [`<== DECRYPTED_EVENT ==>`]: evt.getEffectiveEvent(),
-          [`<== ORIGINAL_EVENT ==>`]: evt.event,
-        }
+        [`<== DECRYPTED_EVENT ==>`]: evt.getEffectiveEvent(),
+        [`<== ORIGINAL_EVENT ==>`]: evt.event,
+      }
       : evt.event;
 
   const getText = (): string => {
@@ -615,6 +616,9 @@ export const Message = as<'div', MessageProps>(
 
     const senderDisplayName =
       getMemberDisplayName(room, senderId) ?? getMxIdLocalPart(senderId) ?? senderId;
+
+    const Me = useMemo(() => senderDisplayName === mx.getUser(mx.getUserId() as string)?.displayName, [mx, senderDisplayName])
+
     const senderAvatarMxc = getMemberAvatarMxc(room, senderId);
 
     const headerJSX = !collapse && (
@@ -633,7 +637,7 @@ export const Message = as<'div', MessageProps>(
           onClick={onUsernameClick}
         >
           <Text as="span" size={messageLayout === 2 ? 'T300' : 'T400'} truncate>
-            <b>{senderDisplayName}</b>
+            <b>{Me ? "Me" : senderDisplayName}</b>
           </Text>
         </Username>
         <Box shrink="No" gap="100">
@@ -672,7 +676,7 @@ export const Message = as<'div', MessageProps>(
                 color: 'white',
               }}
             >
-              <Text size="H4">{senderDisplayName[0]}</Text>
+              <Text size="H4">{Me ? "Me"[0] : senderDisplayName[0]}</Text>
             </AvatarFallback>
           )}
         </Avatar>
@@ -891,26 +895,26 @@ export const Message = as<'div', MessageProps>(
                         </Box>
                         {((!mEvent.isRedacted() && canDelete) ||
                           mEvent.getSender() !== mx.getUserId()) && (
-                          <>
-                            <Line size="300" />
-                            <Box direction="Column" gap="100" className={css.MessageMenuGroup}>
-                              {!mEvent.isRedacted() && canDelete && (
-                                <MessageDeleteItem
-                                  room={room}
-                                  mEvent={mEvent}
-                                  onClose={closeMenu}
-                                />
-                              )}
-                              {mEvent.getSender() !== mx.getUserId() && (
-                                <MessageReportItem
-                                  room={room}
-                                  mEvent={mEvent}
-                                  onClose={closeMenu}
-                                />
-                              )}
-                            </Box>
-                          </>
-                        )}
+                            <>
+                              <Line size="300" />
+                              <Box direction="Column" gap="100" className={css.MessageMenuGroup}>
+                                {!mEvent.isRedacted() && canDelete && (
+                                  <MessageDeleteItem
+                                    room={room}
+                                    mEvent={mEvent}
+                                    onClose={closeMenu}
+                                  />
+                                )}
+                                {mEvent.getSender() !== mx.getUserId() && (
+                                  <MessageReportItem
+                                    room={room}
+                                    mEvent={mEvent}
+                                    onClose={closeMenu}
+                                  />
+                                )}
+                              </Box>
+                            </>
+                          )}
                       </Menu>
                     </FocusTrap>
                   }
@@ -1025,26 +1029,26 @@ export const Event = as<'div', EventProps>(
                         </Box>
                         {((!mEvent.isRedacted() && canDelete && !stateEvent) ||
                           (mEvent.getSender() !== mx.getUserId() && !stateEvent)) && (
-                          <>
-                            <Line size="300" />
-                            <Box direction="Column" gap="100" className={css.MessageMenuGroup}>
-                              {!mEvent.isRedacted() && canDelete && (
-                                <MessageDeleteItem
-                                  room={room}
-                                  mEvent={mEvent}
-                                  onClose={closeMenu}
-                                />
-                              )}
-                              {mEvent.getSender() !== mx.getUserId() && (
-                                <MessageReportItem
-                                  room={room}
-                                  mEvent={mEvent}
-                                  onClose={closeMenu}
-                                />
-                              )}
-                            </Box>
-                          </>
-                        )}
+                            <>
+                              <Line size="300" />
+                              <Box direction="Column" gap="100" className={css.MessageMenuGroup}>
+                                {!mEvent.isRedacted() && canDelete && (
+                                  <MessageDeleteItem
+                                    room={room}
+                                    mEvent={mEvent}
+                                    onClose={closeMenu}
+                                  />
+                                )}
+                                {mEvent.getSender() !== mx.getUserId() && (
+                                  <MessageReportItem
+                                    room={room}
+                                    mEvent={mEvent}
+                                    onClose={closeMenu}
+                                  />
+                                )}
+                              </Box>
+                            </>
+                          )}
                       </Menu>
                     </FocusTrap>
                   }
