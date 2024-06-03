@@ -47,19 +47,15 @@ import { SmartAccountAtom } from '../../state/smartAccount';
 import generateRandomString from '../../../util/randomString';
 
 function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
-
   const [smartAccount] = useAtom(SmartAccountAtom);
   const [joinRule] = useState(parentId ? 'restricted' : 'public');
   const [isEncrypted] = useState(false);
   const [isCreatingRoom, setIsCreatingRoom] = useState(false);
   const [creatingError, setCreatingError] = useState(null);
-
   const [isValidAddress, setIsValidAddress] = useState(null);
   const [addressValue, setAddressValue] = useState(undefined);
   // const [roleIndex, setRoleIndex] = useState(0);
-
   const addressRef = useRef(null);
-
   const mx = initMatrix.matrixClient;
   const userHs = getIdServer(mx.getUserId());
 
@@ -107,8 +103,6 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
     // const powerLevel = roleIndex === 1 ? 101 : undefined;
     const powerLevel = 101;
     const fee = target?.fee?.value || null;
-
-
 
     try {
       const result = await roomActions.createRoom({

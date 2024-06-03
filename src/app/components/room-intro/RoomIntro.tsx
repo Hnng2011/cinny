@@ -25,7 +25,7 @@ export const RoomIntro = as<'div', RoomIntroProps>(({ room, ...props }, ref) => 
   const ts = createEvent?.getTs();
   const creatorId = createEvent?.getSender();
   const creatorName =
-    creatorId && (getMemberDisplayName(room, creatorId) ?? getMxIdLocalPart(creatorId));
+    creatorId === mx.getUserId() ? 'Me' : creatorId && (getMemberDisplayName(room, creatorId) ?? getMxIdLocalPart(creatorId))
   const prevRoomId = createContent?.predecessor?.room_id;
   const avatarMxc = (avatarEvent?.getContent().url as string) || undefined;
   const avatarHttpUrl = avatarMxc ? mx.mxcUrlToHttp(avatarMxc) : undefined;

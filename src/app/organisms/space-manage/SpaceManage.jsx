@@ -1,8 +1,10 @@
+/* eslint-disable no-unused-expressions */
 /* eslint-disable react/prop-types */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import './SpaceManage.scss';
 
+import { useAtom } from 'jotai';
 import { twemojify } from '../../../util/twemojify';
 
 import initMatrix from '../../../client/initMatrix';
@@ -31,6 +33,7 @@ import InfoIC from '../../../../public/res/ic/outlined/info.svg';
 
 import { useForceUpdate } from '../../hooks/useForceUpdate';
 import { useStore } from '../../hooks/useStore';
+import { SmartAccountAtom } from '../../state/smartAccount';
 
 function SpaceManageBreadcrumb({ path, onSelect }) {
   return (
@@ -66,7 +69,6 @@ function SpaceManageItem({
 }) {
   const [isExpand, setIsExpand] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
-
   const { directs } = initMatrix.roomList;
   const mx = initMatrix.matrixClient;
   const parentRoom = mx.getRoom(parentId);
@@ -84,6 +86,21 @@ function SpaceManageItem({
     if (imageSrc === null) imageSrc = room.getAvatarUrl(mx.baseUrl, 24, 24, 'crop') || null;
   }
   const isDM = directs.has(roomId);
+  const [smartAccount] = useAtom(SmartAccountAtom)
+
+  useEffect(() => {
+    if (isJoining) {
+      const joinRoom = async () => {
+        const viaSet = roomHierarchy.viaMap.get(roomId);
+        const via = viaSet ? [...viaSet] : undefined;
+        const result = await join({ roomIdOrAlias: roomId, via, smartAccount, room: parentRoom });
+        !result && setIsJoining(false)
+      }
+
+      joinRoom();
+    }
+
+  }, [isJoining, parentRoom, roomHierarchy.viaMap, roomId, smartAccount])
 
   const handleOpen = () => {
     if (isSpace) selectTab(roomId);
@@ -91,9 +108,6 @@ function SpaceManageItem({
     requestClose();
   };
   const handleJoin = () => {
-    const viaSet = roomHierarchy.viaMap.get(roomId);
-    const via = viaSet ? [...viaSet] : undefined;
-    join(roomId, false, via);
     setIsJoining(true);
   };
 
@@ -201,7 +215,7 @@ function SpaceManageFooter({ parentId, selected }) {
     <div className="space-manage__footer">
       {process && <Spinner size="small" />}
       <Text weight="medium">{process || `${selected.length} item selected`}</Text>
-      { !process && (
+      {!process && (
         <>
           <Button onClick={handleRemove} variant="danger">Remove</Button>
           <Button
@@ -294,6 +308,7 @@ function SpaceManageContent({ roomId, requestClose }) {
   useChildUpdate(currentPath.roomId, roomsHierarchy);
 
   const currentHierarchy = roomsHierarchy.getHierarchy(currentPath.roomId);
+
 
   useEffect(() => {
     mountStore.setItem(true);
@@ -403,6 +418,7 @@ function useWindowToggle() {
 
   return [roomId, requestClose];
 }
+
 function SpaceManage() {
   const mx = initMatrix.matrixClient;
   const [roomId, requestClose] = useWindowToggle();

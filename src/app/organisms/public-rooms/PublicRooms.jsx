@@ -17,6 +17,7 @@ import RoomTile from '../../molecules/room-tile/RoomTile';
 
 import CrossIC from '../../../../public/res/ic/outlined/cross.svg';
 import HashSearchIC from '../../../../public/res/ic/outlined/hash-search.svg';
+import { isSpace } from '../../utils/room';
 
 const SEARCH_LIMIT = 20;
 
@@ -188,7 +189,7 @@ function PublicRooms({ isOpen, searchTerm, onRequestClose }) {
   function joinRoom(roomIdOrAlias) {
     joiningRooms.add(roomIdOrAlias);
     updateJoiningRooms(new Set(Array.from(joiningRooms)));
-    roomActions.join(roomIdOrAlias, false);
+    roomActions.join({ roomIdOrAlias, isSpace: true });
   }
 
   function renderRoomList(rooms) {

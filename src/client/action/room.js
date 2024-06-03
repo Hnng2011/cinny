@@ -1,17 +1,18 @@
+/* eslint-disable no-unused-expressions */
+/* eslint-disable default-param-last */
 /* eslint-disable no-restricted-globals */
 /* eslint-disable camelcase */
 /* eslint-disable no-console */
+import { ethers } from 'ethers';
 import {
   Interface,
-  parseUnits
+  parseEther
 } from 'ethers/lib/utils';
-
 import initMatrix from '../initMatrix';
 import appDispatcher from '../dispatcher';
 import cons from '../state/cons';
 import { getIdServer } from '../../util/matrixUtil';
 import generateRandomString from '../../util/randomString';
-
 
 /**
  * https://github.com/matrix-org/matrix-react-sdk/blob/1e6c6e9d800890c732d60429449bc280de01a647/src/Rooms.js#L73
@@ -105,13 +106,90 @@ function convertToRoom(roomId) {
  * @param {boolean} isDM
  * @param {string[]} via
  */
-async function join(roomIdOrAlias, isDM = false, via = undefined) {
+
+async function joinRoomByContract(roomId, room, smartAccount) {
+  const contractAddress = import.meta.env.VITE_APP_CONTRACT_ADDRESS;
+  const ABIFee = [{
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "spaceOwner",
+        "type": "address"
+      },
+      {
+        "internalType": "string",
+        "name": "roomId",
+        "type": "string"
+      }
+    ],
+    "name": "getRoomSubscriptionFee",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }]
+
+  const ABIPay = [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "spaceOwner",
+          "type": "address"
+        },
+        {
+          "internalType": "string",
+          "name": "_roomId",
+          "type": "string"
+        }
+      ],
+      "name": "addOrExtendSubscription",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    }
+  ]
+
+  const Creator = room.getCreator();
+  const creator = Creator.toString().substring(1, Creator.indexOf(':'));
+
+  try {
+    const provider = new ethers.providers.WebSocketProvider('wss://sepolia.gateway.tenderly.co');
+    const contract = new ethers.Contract(contractAddress, ABIFee, provider)
+    const fee = await contract.callStatic.getRoomSubscriptionFee(creator, roomId);
+
+    const data = new Interface(ABIPay).encodeFunctionData('addOrExtendSubscription', [creator, roomId])
+
+    const tx = {
+      to: contractAddress,
+      data,
+      value: fee.toHexString(),
+    }
+
+    const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
+    const { userOp } = feeQuotesResult.verifyingPaymasterNative
+    const { userOpHash } = feeQuotesResult.verifyingPaymasterNative
+    await smartAccount.sendUserOperation({ userOp, userOpHash })
+  }
+
+  catch (e) {
+    throw new Error(e)
+  }
+}
+
+async function join({ roomIdOrAlias, isDM = false, via = undefined, smartAccount, room, isSpace = false }) {
   const mx = initMatrix.matrixClient;
   const roomIdParts = roomIdOrAlias.split(':');
   const viaServers = via || [roomIdParts[1]];
 
 
   try {
+    !isSpace && await joinRoomByContract(roomIdOrAlias, room, smartAccount);
     const resultRoom = await mx.joinRoom(roomIdOrAlias, { viaServers });
 
     if (isDM) {
@@ -255,7 +333,7 @@ async function CreateRoomByContract(room_id, fee, smartAccount) {
       throw new Error("Fee must be a number");
     }
 
-    const value = parseUnits(fee, 'ether');
+    const value = parseEther(fee);
 
     const callData = new Interface(ABI).encodeFunctionData('addRoomToSpace', [room_id, value]);
 

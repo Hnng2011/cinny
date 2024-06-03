@@ -625,7 +625,7 @@ export const Message = as<'div', MessageProps>(
       <Box
         gap="300"
         direction={messageLayout === 1 ? 'RowReverse' : 'Row'}
-        justifyContent="SpaceBetween"
+        justifyContent={messageLayout === 1 ? 'End' : "SpaceBetween"}
         alignItems="Baseline"
         grow="Yes"
       >
@@ -676,7 +676,7 @@ export const Message = as<'div', MessageProps>(
                 color: 'white',
               }}
             >
-              <Text size="H4">{Me ? "Me"[0] : senderDisplayName[0]}</Text>
+              <Text size="H4">{senderDisplayName[0]}</Text>
             </AvatarFallback>
           )}
         </Avatar>

@@ -1,6 +1,6 @@
 /* eslint-disable no-return-await */
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 
 import { twemojify } from '../../../util/twemojify';
@@ -41,6 +41,7 @@ function SpaceOptions({ roomId, afterOptionSelect }) {
   // const isCategorized = initMatrix.accountData.categorizedSpaces.has(roomId);
   const createEvent = getStateEvent(room, StateEvent.RoomCreate);
   const creatorId = createEvent?.getSender();
+
 
   const handleMarkAsRead = () => {
     const spaceChildren = roomList.getCategorizedSpaces([roomId]);
@@ -85,9 +86,8 @@ function SpaceOptions({ roomId, afterOptionSelect }) {
     if (!isConfirmed) return;
 
     const roomInSpace = Array.from(roomList.roomIdToParents).filter(([, value]) => value.has(roomId)).map(([key]) => key);
-
-    roomInSpace.forEach(async (id) => { console.log(id); await leave(id) })
-    await leave(roomId);
+    roomInSpace.push(roomId);
+    roomInSpace.forEach(async (id) => { await leave(id) })
   };
 
   return (

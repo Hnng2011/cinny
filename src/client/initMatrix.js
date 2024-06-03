@@ -18,7 +18,6 @@ global.Olm = Olm;
 class InitMatrix extends EventEmitter {
   constructor() {
     super();
-
     navigation.initMatrix = this;
   }
 

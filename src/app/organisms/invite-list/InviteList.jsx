@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import './InviteList.scss';
 
+import { useAtom } from 'jotai';
 import initMatrix from '../../../client/initMatrix';
 import cons from '../../../client/state/cons';
 import * as roomActions from '../../../client/action/room';
@@ -15,14 +16,17 @@ import PopupWindow from '../../molecules/popup-window/PopupWindow';
 import RoomTile from '../../molecules/room-tile/RoomTile';
 
 import CrossIC from '../../../../public/res/ic/outlined/cross.svg';
+import { SmartAccountAtom } from '../../state/smartAccount';
 
 function InviteList({ isOpen, onRequestClose }) {
+  const [smartAccount] = useAtom(SmartAccountAtom)
   const [procInvite, changeProcInvite] = useState(new Set());
+
 
   function acceptInvite(roomId, isDM) {
     procInvite.add(roomId);
     changeProcInvite(new Set(Array.from(procInvite)));
-    roomActions.join(roomId, isDM);
+    roomActions.join({ roomIdOrAlias: roomId, isDM, smartAccount });
   }
   function rejectInvite(roomId, isDM) {
     procInvite.add(roomId);
@@ -90,7 +94,7 @@ function InviteList({ isOpen, onRequestClose }) {
       onRequestClose={onRequestClose}
     >
       <div className="invites-content">
-        { initMatrix.roomList.inviteDirects.size !== 0 && (
+        {initMatrix.roomList.inviteDirects.size !== 0 && (
           <div className="invites-content__subheading">
             <Text variant="b3" weight="bold">Direct Messages</Text>
           </div>
@@ -119,19 +123,19 @@ function InviteList({ isOpen, onRequestClose }) {
             );
           })
         }
-        { initMatrix.roomList.inviteSpaces.size !== 0 && (
+        {initMatrix.roomList.inviteSpaces.size !== 0 && (
           <div className="invites-content__subheading">
             <Text variant="b3" weight="bold">Spaces</Text>
           </div>
         )}
-        { Array.from(initMatrix.roomList.inviteSpaces).map(renderRoomTile) }
+        {Array.from(initMatrix.roomList.inviteSpaces).map(renderRoomTile)}
 
-        { initMatrix.roomList.inviteRooms.size !== 0 && (
+        {initMatrix.roomList.inviteRooms.size !== 0 && (
           <div className="invites-content__subheading">
             <Text variant="b3" weight="bold">Rooms</Text>
           </div>
         )}
-        { Array.from(initMatrix.roomList.inviteRooms).map(renderRoomTile) }
+        {Array.from(initMatrix.roomList.inviteRooms).map(renderRoomTile)}
       </div>
     </PopupWindow>
   );
