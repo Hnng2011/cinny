@@ -1,10 +1,14 @@
+/* eslint-disable no-unused-expressions */
 /* eslint-disable no-undef */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable prefer-destructuring */
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import './DrawerHeader.scss';
 
+import { hexValue } from 'ethers/lib/utils';
+import { ethers } from 'ethers';
+import { useAtom } from 'jotai';
 import { twemojify } from '../../../util/twemojify';
 
 import initMatrix from '../../../client/initMatrix';
@@ -31,38 +35,87 @@ import HashSearchIC from '../../../../public/res/ic/outlined/hash-search.svg';
 import SpacePlusIC from '../../../../public/res/ic/outlined/space-plus.svg';
 import ChevronBottomIC from '../../../../public/res/ic/outlined/chevron-bottom.svg';
 import HashGlobeIC from '../../../../public/res/ic/outlined/hash-globe.svg'
-
-
+import { SmartAccountAtom } from '../../state/smartAccount';
 
 export function HomeSpaceOptions({ spaceId, afterOptionSelect }) {
-
   const mx = initMatrix.matrixClient;
   const room = mx.getRoom(spaceId);
   const canManage = room
     ? room.currentState.maySendStateEvent('m.space.child', mx.getUserId())
     : true;
+  const [smartAccount] = useAtom(SmartAccountAtom);
+
+  const [canCreate, setCancreate] = useState(false);
+
+  useEffect(() => {
+    if (!spaceId && smartAccount) {
+      const check = async () => {
+        const checking = async () => {
+          const contractAddress = import.meta.env.VITE_APP_CONTRACT_ADDRESS;
+          const address = await smartAccount.getAddress()
+          const ABICheck = [{
+            "inputs": [
+              {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+              }
+            ],
+            "name": "spaces",
+            "outputs": [
+              {
+                "internalType": "address",
+                "name": "spaceOwner",
+                "type": "address"
+              }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+          },]
+
+          try {
+            const provider = new ethers.providers.WebSocketProvider('wss://sepolia.gateway.tenderly.co');
+            const contract = new ethers.Contract(contractAddress, ABICheck, provider)
+            const result = await contract.callStatic.spaces(address)
+            return hexValue(result).toLowerCase() !== address.toLowerCase();
+          }
+
+          catch (e) {
+            return false
+          }
+        }
+
+        setCancreate(await checking());
+      }
+
+      check()
+    }
+
+
+  }, [smartAccount])
 
   return (
     <>
-      <MenuHeader>Add rooms or spaces</MenuHeader>
+      <MenuHeader>{!spaceId ? 'Create space' : "Create rooms"}</MenuHeader>
       {
         !spaceId && <MenuItem
           iconSrc={SpacePlusIC}
-          onClick={() => { afterOptionSelect(); openCreateRoom(true, spaceId) }}
-          disabled={!canManage}
+          onClick={() => { canCreate ? (afterOptionSelect(), openCreateRoom(true, spaceId)) : undefined }}
+          disabled={!canManage || !canCreate}
         >
           Create new space
-        </MenuItem>
+        </MenuItem >
       }
-
-      {!spaceId && (
-        <MenuItem
-          iconSrc={HashGlobeIC}
-          onClick={() => { afterOptionSelect(); openPublicRooms(); }}
-        >
-          Explore Spaces
-        </MenuItem>
-      )}
+      {
+        !spaceId && (
+          <MenuItem
+            iconSrc={HashGlobeIC}
+            onClick={() => { afterOptionSelect(); openPublicRooms(); }}
+          >
+            Explore Spaces
+          </MenuItem>
+        )
+      }
       {/* {!spaceId && (
         <MenuItem
           iconSrc={PlusIC}
@@ -71,7 +124,8 @@ export function HomeSpaceOptions({ spaceId, afterOptionSelect }) {
           Join with address
         </MenuItem>
       )} */}
-      {spaceId &&
+      {
+        spaceId &&
         <MenuItem
           iconSrc={HashPlusIC}
           onClick={() => { afterOptionSelect(); openCreateRoom(false, spaceId); }}
@@ -89,14 +143,16 @@ export function HomeSpaceOptions({ spaceId, afterOptionSelect }) {
           Add existing
         </MenuItem>
       )} */}
-      {spaceId && (
-        <MenuItem
-          onClick={() => { afterOptionSelect(); openSpaceManage(spaceId); }}
-          iconSrc={HashSearchIC}
-        >
-          Manage rooms
-        </MenuItem>
-      )}
+      {
+        spaceId && (
+          <MenuItem
+            onClick={() => { afterOptionSelect(); openSpaceManage(spaceId); }}
+            iconSrc={HashSearchIC}
+          >
+            Manage rooms
+          </MenuItem>
+        )
+      }
     </>
   );
 }

@@ -1,3 +1,4 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import React, { useEffect } from 'react';
 import { Provider as JotaiProvider } from 'jotai';
 import {
@@ -9,6 +10,9 @@ import {
   redirect,
 } from 'react-router-dom';
 
+import { EthereumSepolia } from '@particle-network/chains';
+import { ModalProvider } from '@particle-network/connectkit';
+import { evmWallets } from '@particle-network/connectors';
 import { ClientConfigLoader } from '../components/ClientConfigLoader';
 import { ClientConfig, ClientConfigProvider } from '../hooks/useClientConfig';
 import { AuthLayout, Login, Register, ResetPassword, authLayoutLoader } from './auth';
@@ -18,12 +22,9 @@ import Client from '../templates/client/Client';
 import { getLoginPath } from './pathUtils';
 import { ConfigConfigError, ConfigConfigLoading } from './ConfigConfig';
 import { FeatureCheck } from './FeatureCheck';
-import { EthereumSepolia } from '@particle-network/chains';
-import { ModalProvider } from '@particle-network/connectkit';
 import '@particle-network/connectkit/dist/index.css';
-import { evmWallets } from '@particle-network/connectors';
 
-const ConnectKit = ({ children }: any) => {
+function ConnectKit({ children }: any) {
   return (
     <ModalProvider
       options={{
@@ -46,12 +47,12 @@ const ConnectKit = ({ children }: any) => {
         },
       }}
       theme='dark'
-      cacheProvider={true}
+      cacheProvider
     >
       {children}
     </ModalProvider>
   );
-};
+}
 
 
 

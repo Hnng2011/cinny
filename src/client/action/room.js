@@ -1,13 +1,16 @@
+/* eslint-disable no-restricted-globals */
+/* eslint-disable camelcase */
 /* eslint-disable no-console */
 import {
-  Interface, hexValue,
+  Interface,
   parseUnits
 } from 'ethers/lib/utils';
-import { ethers } from 'ethers';
+
 import initMatrix from '../initMatrix';
 import appDispatcher from '../dispatcher';
 import cons from '../state/cons';
 import { getIdServer } from '../../util/matrixUtil';
+import generateRandomString from '../../util/randomString';
 
 
 /**
@@ -193,40 +196,6 @@ async function createDM(userIdOrIds, isEncrypted = true) {
 async function CreateSpaceByContract(smartAccount) {
   const contractAddress = import.meta.env.VITE_APP_CONTRACT_ADDRESS;
 
-  const check = async () => {
-    const address = await smartAccount.getAddress();;
-    const ABICheck = [{
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "name": "spaces",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "spaceOwner",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },]
-
-    try {
-      const provider = new ethers.providers.WebSocketProvider('wss://sepolia.gateway.tenderly.co');
-      const contract = new ethers.Contract(contractAddress, ABICheck, provider)
-      const result = await contract.callStatic.spaces(address)
-      return hexValue(result).toLowerCase() === address.toLowerCase();
-    }
-
-    catch (e) {
-      return false
-    }
-  }
-
   const creating = async () => {
     const ABICreate = [{
       "inputs": [],
@@ -248,24 +217,19 @@ async function CreateSpaceByContract(smartAccount) {
       const { userOp } = feeQuotesResult.verifyingPaymasterNative
       const { userOpHash } = feeQuotesResult.verifyingPaymasterNative
       await smartAccount.sendUserOperation({ userOp, userOpHash });
-      return true;
     }
 
     catch (e) {
-      return false;
+      throw new Error(e?.data.extraMessage.message.match(/"(.*?)"/)[1] || e?.message || e)
     }
   }
 
-  if (!await check()) {
-    if (!await creating()) {
-      return false;
-    }
-  }
+  await creating();
 
   return true;
 }
 
-async function CreateRoomByContract(roomid, fee, smartAccount) {
+async function CreateRoomByContract(room_id, fee, smartAccount) {
   try {
     const contractAddress = import.meta.env.VITE_APP_CONTRACT_ADDRESS;
     const ABI = [{
@@ -287,32 +251,40 @@ async function CreateRoomByContract(roomid, fee, smartAccount) {
       "type": "function"
     }]
 
+    if (isNaN(fee)) {
+      throw new Error("Fee must be a number");
+    }
+
     const value = parseUnits(fee, 'ether');
 
-
-    const callData = new Interface(ABI).encodeFunctionData('addRoomToSpace', [roomid, value]);
+    const callData = new Interface(ABI).encodeFunctionData('addRoomToSpace', [room_id, value]);
 
     const tx = {
       to: contractAddress,
       data: callData,
     }
 
-
     const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
     const { userOp } = feeQuotesResult.verifyingPaymasterNative
     const { userOpHash } = feeQuotesResult.verifyingPaymasterNative
     await smartAccount.sendUserOperation({ userOp, userOpHash });
-    return true;
   }
 
   catch (e) {
+    console.log(e)
     const errlog = e?.data?.extraMessage?.message || null;
-    if (errlog && errlog.split(":").pop().trim().slice(1, -1) === "Room ID already exists") {
+    if (errlog?.match(/"(.*?)"/)?.[1] === "Room ID already exists") {
       return true
     }
 
-    return false;
+    if (errlog === "Simulate user operation failed: AA21 didn't pay prefund") {
+      throw new Error("Don't have enough fund in your account")
+    }
+
+    throw new Error(errlog?.match(/"(.*?)"/)?.[1] || errlog || e?.message || e)
   }
+
+  return true;
 }
 
 async function createRoom(opts) {
@@ -324,11 +296,12 @@ async function createRoom(opts) {
   const isEncrypted = opts.isEncrypted ?? false;
   const powerLevel = opts.powerLevel ?? undefined;
   const blockFederation = opts.blockFederation ?? false;
-  let resultContract;
-
   const mx = initMatrix.matrixClient;
   const visibility = joinRule === 'public' ? 'public' : 'private';
+  const room_id = `${generateRandomString(18)}`;
+
   const options = {
+    room_id,
     creation_content: undefined,
     name,
     topic,
@@ -389,29 +362,13 @@ async function createRoom(opts) {
     });
   }
 
-  const result = await create(options);
-
-
-
-  if (isSpace) {
-    resultContract = await CreateSpaceByContract(smartAccount)
-  }
-  else {
-    resultContract = await CreateRoomByContract(alias, fee, smartAccount);
-  }
-
-  console.log(resultContract)
+  const resultContract = isSpace && await CreateSpaceByContract(smartAccount) || !isSpace && await CreateRoomByContract(`!${room_id}:${getIdServer(mx.getUserId())}`, fee, smartAccount);
 
   if (!resultContract) {
-    await leave(result.room_id)
-    appDispatcher.dispatch({
-      type: cons.actions.navigation.SELECT_SPACE,
-      roomId: parentId,
-      asRoot: true,
-    });
-
     return null;
   }
+
+  const result = await create(options);
 
   if (parentId) {
     await mx.sendStateEvent(parentId, 'm.space.child', {

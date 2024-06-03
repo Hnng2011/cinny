@@ -44,18 +44,10 @@ import SpacePlusIC from '../../../../public/res/ic/outlined/space-plus.svg';
 // import ChevronBottomIC from '../../../../public/res/ic/outlined/chevron-bottom.svg';
 import CrossIC from '../../../../public/res/ic/outlined/cross.svg';
 import { SmartAccountAtom } from '../../state/smartAccount';
-
-function generateRandomString(length) {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  const charactersLength = characters.length;
-  for (let i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  return result;
-}
+import generateRandomString from '../../../util/randomString';
 
 function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
+
   const [smartAccount] = useAtom(SmartAccountAtom);
   const [joinRule] = useState(parentId ? 'restricted' : 'public');
   const [isEncrypted] = useState(false);
@@ -107,6 +99,7 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
       roomAlias = addressRef?.current?.value;
       if (roomAlias.trim() === '') return false;
     }
+
     else if (!isSpace) {
       roomAlias = name.toLowerCase().trim('').replace(/\s+/g, '') + generateRandomString(6);
     }
@@ -114,6 +107,8 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
     // const powerLevel = roleIndex === 1 ? 101 : undefined;
     const powerLevel = 101;
     const fee = target?.fee?.value || null;
+
+
 
     try {
       const result = await roomActions.createRoom({
@@ -133,7 +128,6 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
       result && onRequestClose()
       !result && setCreatingError('Create Room Failed');
       setIsCreatingRoom(false)
-
     } catch (e) {
       if (e.message === 'M_UNKNOWN: Invalid characters in room alias') {
         setCreatingError('ERROR: Invalid characters in address');

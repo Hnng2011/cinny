@@ -1,4 +1,6 @@
-import React from 'react';
+/* eslint-disable no-return-await */
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 import { twemojify } from '../../../util/twemojify';
@@ -27,6 +29,8 @@ import PinIC from '../../../../public/res/ic/outlined/pin.svg';
 import PinFilledIC from '../../../../public/res/ic/filled/pin.svg';
 
 import { confirmDialog } from '../confirm-dialog/ConfirmDialog';
+import { StateEvent } from '../../../types/matrix/room';
+import { getStateEvent } from '../../utils/room';
 
 function SpaceOptions({ roomId, afterOptionSelect }) {
   const mx = initMatrix.matrixClient;
@@ -35,6 +39,8 @@ function SpaceOptions({ roomId, afterOptionSelect }) {
   const canInvite = room?.canInvite(mx.getUserId());
   const isPinned = initMatrix.accountData.spaceShortcut.has(roomId);
   // const isCategorized = initMatrix.accountData.categorizedSpaces.has(roomId);
+  const createEvent = getStateEvent(room, StateEvent.RoomCreate);
+  const creatorId = createEvent?.getSender();
 
   const handleMarkAsRead = () => {
     const spaceChildren = roomList.getCategorizedSpaces([roomId]);
@@ -77,7 +83,11 @@ function SpaceOptions({ roomId, afterOptionSelect }) {
       'danger',
     );
     if (!isConfirmed) return;
-    leave(roomId);
+
+    const roomInSpace = Array.from(roomList.roomIdToParents).filter(([, value]) => value.has(roomId)).map(([key]) => key);
+
+    roomInSpace.forEach(async (id) => { console.log(id); await leave(id) })
+    await leave(roomId);
   };
 
   return (
@@ -105,13 +115,14 @@ function SpaceOptions({ roomId, afterOptionSelect }) {
       </MenuItem>
       <MenuItem onClick={handleManageRoom} iconSrc={HashSearchIC}>Manage rooms</MenuItem>
       <MenuItem onClick={handleSettingsClick} iconSrc={SettingsIC}>Settings</MenuItem>
-      <MenuItem
+      {!(creatorId === mx.getUserId()) && <MenuItem
         variant="danger"
         onClick={handleLeaveClick}
         iconSrc={LeaveArrowIC}
       >
         Leave
-      </MenuItem>
+      </MenuItem>}
+
     </div>
   );
 }

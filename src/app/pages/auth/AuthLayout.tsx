@@ -17,7 +17,6 @@ import * as css from './styles.css';
 import * as PatternsCss from '../../styles/Patterns.css';
 import { isAuthenticated } from '../../../client/state/auth';
 import {
-  clientAllowedServer,
   clientDefaultServer,
   useClientConfig,
 } from '../../hooks/useClientConfig';
@@ -80,7 +79,7 @@ export function AuthLayout() {
   const clientConfig = useClientConfig();
 
   const defaultServer = clientDefaultServer(clientConfig);
-  let server: string = defaultServer;
+  const server: string = defaultServer;
 
   const [discoveryState, discoverServer] = useAsyncCallback(
     useCallback(async (serverName: string) => {
