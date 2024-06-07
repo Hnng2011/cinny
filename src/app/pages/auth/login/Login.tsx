@@ -121,13 +121,6 @@ export function Login() {
 
   }, [signedMessage, msg]);
 
-  useEffect(() => {
-    if (err) {
-      connectKit.disconnect();
-    }
-  }, [err])
-
-
   return (
     <>
       {account && !err && <Spinner />}

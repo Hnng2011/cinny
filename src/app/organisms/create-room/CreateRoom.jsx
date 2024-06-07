@@ -137,7 +137,9 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
   const validateAddress = (e) => {
     const myAddress = e.target.value;
     setIsValidAddress(null);
-    setAddressValue(e.target.value);
+
+    const address = e.target.value ? (e.target.value).replaceAll(' ', '').toLowerCase().concat('_').concat(generateRandomString(6, true)) : null;
+    setAddressValue(address);
     setCreatingError(null);
 
     setTimeout(async () => {
@@ -167,24 +169,7 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
           )}
           content={<Text variant="b3">{`Select who can join this ${isSpace ? 'space' : 'room'}.`}</Text>}
         /> */}
-        {joinRule === 'public' && (
-          <div>
-            <Text className="create-room__address__label" variant="b2">{isSpace ? 'Space address' : 'Room address'}</Text>
-            <div className="create-room__address">
-              <Text variant="b1">#</Text>
-              <Input
-                value={addressValue}
-                onChange={validateAddress}
-                state={(isValidAddress === false) ? 'error' : 'normal'}
-                forwardRef={addressRef}
-                placeholder="my_address"
-                required
-              />
-              <Text variant="b1">{`:${userHs}`}</Text>
-            </div>
-            {isValidAddress === false && <Text className="create-room__address__tip" variant="b3"><span style={{ color: 'var(--bg-danger)' }}>{`#${addressValue}:${userHs} is already in use`}</span></Text>}
-          </div>
-        )}
+
         {/* {!isSpace && joinRule !== 'public' && (
           <SettingTile
             title="Enable end-to-end encryption"
@@ -207,7 +192,7 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
         /> */}
 
         <div className="create-room__name-wrapper">
-          <Input name="name" label={`${isSpace ? 'Space' : 'Room'} name`} required />
+          <Input name="name" label={`${isSpace ? 'Space' : 'Room'} name`} required onChange={validateAddress} />
           {!isSpace && <Input name="fee" label="Join room fees (ETH)" required />}
           <Button
             disabled={isValidAddress === false || isCreatingRoom}
@@ -218,7 +203,29 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
             Create
           </Button>
         </div>
+
         <Input name="topic" minHeight={174} resizable label="Topic (optional)" />
+
+        {joinRule === 'public' && (
+          <div>
+            <Text className="create-room__address__label" variant="b2">{isSpace ? 'Space address' : 'Room address'}</Text>
+            <div className="create-room__address">
+              <Text variant="b1">#</Text>
+              <Input
+                value={addressValue}
+                onChange={null}
+                state={(isValidAddress === false) ? 'error' : 'normal'}
+                forwardRef={addressRef}
+                placeholder="my_address"
+                disabled
+                required
+              />
+              <Text variant="b1">{`:${userHs}`}</Text>
+            </div>
+            {isValidAddress === false && <Text className="create-room__address__tip" variant="b3"><span style={{ color: 'var(--bg-danger)' }}>{`#${addressValue}:${userHs} is already in use`}</span></Text>}
+          </div>
+        )}
+
         {
           isCreatingRoom && (
             <div className="create-room__loading">
@@ -227,6 +234,7 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
             </div>
           )
         }
+
         {typeof creatingError === 'string' && <Text className="create-room__error" variant="b3">{creatingError}</Text>}
       </form >
     </div >

@@ -1,9 +1,14 @@
+/* eslint-disable prefer-const */
+/* eslint-disable no-promise-executor-return */
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-plusplus */
+/* eslint-disable no-else-return */
 /* eslint-disable no-unused-expressions */
 /* eslint-disable default-param-last */
 /* eslint-disable no-restricted-globals */
 /* eslint-disable camelcase */
 /* eslint-disable no-console */
-import { ethers } from 'ethers';
+import { ethers, utils } from 'ethers';
 import {
   Interface,
   parseEther
@@ -13,6 +18,44 @@ import appDispatcher from '../dispatcher';
 import cons from '../state/cons';
 import { getIdServer } from '../../util/matrixUtil';
 import generateRandomString from '../../util/randomString';
+import { util } from 'prismjs';
+
+const provider = new ethers.providers.WebSocketProvider('wss://eth-sepolia.g.alchemy.com/v2/eOLovQ082DFsqRNNckle5rVXwV7PeiyO')
+const contractAddress = import.meta.env.VITE_APP_CONTRACT_ADDRESS;
+const ABI = [
+  {
+    "inputs": [
+      { "internalType": "address", "name": "spaceOwner", "type": "address" },
+      { "internalType": "string", "name": "roomId", "type": "string" }
+    ],
+    "name": "getRoomSubscriptionFee",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "spaceOwner", "type": "address" },
+      { "internalType": "string", "name": "_roomId", "type": "string" }
+    ],
+    "name": "addOrExtendSubscription",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "spaceOwner", "type": "address" },
+      { "internalType": "string", "name": "roomId", "type": "string" },
+      { "internalType": "address", "name": "subscriber", "type": "address" }
+    ],
+    "name": "isSubscriptionActive",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
+const contract = new ethers.Contract(contractAddress, ABI, provider);
 
 /**
  * https://github.com/matrix-org/matrix-react-sdk/blob/1e6c6e9d800890c732d60429449bc280de01a647/src/Rooms.js#L73
@@ -100,110 +143,128 @@ function convertToRoom(roomId) {
   return addRoomToMDirect(roomId, undefined);
 }
 
+
+/**
+ * Checks the status of a transaction based on its hash.
+ * @param {string} txHash The hash of the transaction to check.
+ * @returns {Promise<boolean>} Returns true if the transaction was successful, false otherwise.
+ */
+
+async function checkTransactionStatus(txHash) {
+  return new Promise((resolve) => {
+    const filterCreate = {
+      address: contractAddress,
+      topics: [
+        ethers.utils.id("RoomCreated(address,string,uint256)")
+      ]
+    };
+
+    const filterJoin = {
+      address: contractAddress,
+      topics: [
+        ethers.utils.id("SubscriberAddedOrExtended(address,string,address,uint256)")
+      ]
+    };
+
+    let eventHandlerCreate;
+    let eventHandlerJoin;
+
+    eventHandlerCreate = (log) => {
+      if (txHash === log.transactionHash) {
+        provider.off(filterCreate, eventHandlerCreate);  // Remove event listener
+        provider.off(filterJoin, eventHandlerJoin);      // Remove the other event listener as well
+        resolve(true);
+      } else {
+        resolve(false);
+      }
+    };
+
+    eventHandlerJoin = (log) => {
+      if (txHash === log.transactionHash) {
+        provider.off(filterCreate, eventHandlerCreate);  // Remove the other event listener as well
+        provider.off(filterJoin, eventHandlerJoin);      // Remove event listener
+        resolve(true);
+      } else {
+        resolve(false);
+      }
+    };
+
+    provider.on(filterCreate, eventHandlerCreate);
+    provider.on(filterJoin, eventHandlerJoin);
+  });
+}
+
+async function joinRoomByContract(roomId, room, smartAccount) {
+
+  const creator = room.getCreator().substring(1, room.getCreator().indexOf(':'));
+  const address = await smartAccount.getAddress();
+
+  if (creator.toLowerCase() === address.toLowerCase()) {
+    return null; // User is the creator, no need to subscribe
+  }
+
+  try {
+    const isSubscribed = await contract.callStatic.isSubscriptionActive(creator, roomId, address);
+
+    if (isSubscribed) return true; // Already subscribed
+
+    const fee = await contract.callStatic.getRoomSubscriptionFee(creator, roomId);
+    const data = new ethers.utils.Interface(ABI).encodeFunctionData('addOrExtendSubscription', [creator, roomId]);
+
+    const tx = {
+      to: contractAddress,
+      data,
+      value: ethers.utils.parseUnits(fee.toString(), 'wei')
+    };
+
+    const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
+    const txHash = await smartAccount.sendUserOperation(feeQuotesResult.verifyingPaymasterNative);
+
+    const result = checkTransactionStatus(txHash)
+      .then(receipt => receipt)
+
+    return result
+  } catch (error) {
+    console.log(error)
+    throw new Error(`Error joining room please check your Balance`);
+  }
+}
+
 /**
  *
  * @param {string} roomId
  * @param {boolean} isDM
  * @param {string[]} via
  */
-
-async function joinRoomByContract(roomId, room, smartAccount) {
-  const contractAddress = import.meta.env.VITE_APP_CONTRACT_ADDRESS;
-  const ABIFee = [{
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "spaceOwner",
-        "type": "address"
-      },
-      {
-        "internalType": "string",
-        "name": "roomId",
-        "type": "string"
-      }
-    ],
-    "name": "getRoomSubscriptionFee",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  }]
-
-  const ABIPay = [
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "spaceOwner",
-          "type": "address"
-        },
-        {
-          "internalType": "string",
-          "name": "_roomId",
-          "type": "string"
-        }
-      ],
-      "name": "addOrExtendSubscription",
-      "outputs": [],
-      "stateMutability": "payable",
-      "type": "function"
-    }
-  ]
-
-  const Creator = room.getCreator();
-  const creator = Creator.toString().substring(1, Creator.indexOf(':'));
-
-  try {
-    const provider = new ethers.providers.WebSocketProvider('wss://sepolia.gateway.tenderly.co');
-    const contract = new ethers.Contract(contractAddress, ABIFee, provider)
-    const fee = await contract.callStatic.getRoomSubscriptionFee(creator, roomId);
-
-    const data = new Interface(ABIPay).encodeFunctionData('addOrExtendSubscription', [creator, roomId])
-
-    const tx = {
-      to: contractAddress,
-      data,
-      value: fee.toHexString(),
-    }
-
-    const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
-    const { userOp } = feeQuotesResult.verifyingPaymasterNative
-    const { userOpHash } = feeQuotesResult.verifyingPaymasterNative
-    await smartAccount.sendUserOperation({ userOp, userOpHash })
-  }
-
-  catch (e) {
-    throw new Error(e)
-  }
-}
-
-async function join({ roomIdOrAlias, isDM = false, via = undefined, smartAccount, room, isSpace = false }) {
+async function join({ roomIdOrAlias, smartAccount, room, isSpace = false, isDM = false, via = undefined }) {
   const mx = initMatrix.matrixClient;
-  const roomIdParts = roomIdOrAlias.split(':');
-  const viaServers = via || [roomIdParts[1]];
+  const viaServers = via || [roomIdOrAlias.split(':')[1]];
 
+  const parent = await mx.get
+  console.log(parent)
 
   try {
-    !isSpace && await joinRoomByContract(roomIdOrAlias, room, smartAccount);
+    const resultContract = isSpace || await joinRoomByContract(roomIdOrAlias, room, smartAccount);
+    if (!resultContract) return false;
+
     const resultRoom = await mx.joinRoom(roomIdOrAlias, { viaServers });
 
     if (isDM) {
       const targetUserId = guessDMRoomTargetId(mx.getRoom(resultRoom.roomId), mx.getUserId());
       await addRoomToMDirect(resultRoom.roomId, targetUserId);
     }
+
     appDispatcher.dispatch({
       type: cons.actions.room.JOIN,
       roomId: resultRoom.roomId,
-      isDM,
+      isDM
     });
+
     return resultRoom.roomId;
-  } catch (e) {
-    throw new Error(e);
+
+  } catch (error) {
+    alert(error)
+    return false;
   }
 }
 
@@ -292,9 +353,9 @@ async function CreateSpaceByContract(smartAccount) {
 
     try {
       const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
-      const { userOp } = feeQuotesResult.verifyingPaymasterNative
-      const { userOpHash } = feeQuotesResult.verifyingPaymasterNative
-      await smartAccount.sendUserOperation({ userOp, userOpHash });
+      const txHash = await smartAccount.sendUserOperation(feeQuotesResult.verifyingPaymasterNative);
+      const result = await checkTransactionStatus(txHash).then(recipe => recipe)
+      return result
     }
 
     catch (e) {
@@ -343,13 +404,12 @@ async function CreateRoomByContract(room_id, fee, smartAccount) {
     }
 
     const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
-    const { userOp } = feeQuotesResult.verifyingPaymasterNative
-    const { userOpHash } = feeQuotesResult.verifyingPaymasterNative
-    await smartAccount.sendUserOperation({ userOp, userOpHash });
+    const txHash = await smartAccount.sendUserOperation(feeQuotesResult.verifyingPaymasterNative);
+    const result = await checkTransactionStatus(txHash).then(recipe => recipe)
+    return result
   }
 
   catch (e) {
-    console.log(e)
     const errlog = e?.data?.extraMessage?.message || null;
     if (errlog?.match(/"(.*?)"/)?.[1] === "Room ID already exists") {
       return true
@@ -361,8 +421,6 @@ async function CreateRoomByContract(room_id, fee, smartAccount) {
 
     throw new Error(errlog?.match(/"(.*?)"/)?.[1] || errlog || e?.message || e)
   }
-
-  return true;
 }
 
 async function createRoom(opts) {
@@ -461,8 +519,8 @@ async function createRoom(opts) {
 
 async function invite(roomId, userId, reason) {
   const mx = initMatrix.matrixClient;
-
-  const result = await mx.invite(roomId, userId, undefined, reason);
+  const parentId = initMatrix.roomList.roomIdToParents.get(roomId).keys().next().value
+  const result = await mx.invite(parentId, userId, undefined, reason);
   return result;
 }
 

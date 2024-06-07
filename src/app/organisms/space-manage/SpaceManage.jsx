@@ -93,8 +93,8 @@ function SpaceManageItem({
       const joinRoom = async () => {
         const viaSet = roomHierarchy.viaMap.get(roomId);
         const via = viaSet ? [...viaSet] : undefined;
-        const result = await join({ roomIdOrAlias: roomId, via, smartAccount, room: parentRoom });
-        !result && setIsJoining(false)
+        await join({ roomIdOrAlias: roomId, via, smartAccount, room: parentRoom });
+        setIsJoining(false)
       }
 
       joinRoom();

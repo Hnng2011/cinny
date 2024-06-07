@@ -22,11 +22,13 @@ function InviteList({ isOpen, onRequestClose }) {
   const [smartAccount] = useAtom(SmartAccountAtom)
   const [procInvite, changeProcInvite] = useState(new Set());
 
+  const mx = initMatrix.matrixClient
 
-  function acceptInvite(roomId, isDM) {
+  function acceptInvite(roomId) {
     procInvite.add(roomId);
     changeProcInvite(new Set(Array.from(procInvite)));
-    roomActions.join({ roomIdOrAlias: roomId, isDM, smartAccount });
+    const room = mx.getRoom(roomId);
+    roomActions.join({ roomIdOrAlias: roomId, smartAccount, room, isInvied: true });
   }
   function rejectInvite(roomId, isDM) {
     procInvite.add(roomId);

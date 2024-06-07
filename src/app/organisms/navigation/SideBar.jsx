@@ -326,6 +326,7 @@ function SpaceShortcut() {
 
 function useTotalInvites() {
   const { roomList } = initMatrix;
+
   const totalInviteCount = () => roomList.inviteRooms.size
     + roomList.inviteSpaces.size
     + roomList.inviteDirects.size;

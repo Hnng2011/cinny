@@ -227,7 +227,7 @@ function InviteUser({
   return (
     <PopupWindow
       isOpen={isOpen}
-      title={(typeof roomId === 'string' ? `Invite to ${mx.getRoom(roomId).name}` : 'Direct message')}
+      title={(typeof roomId === 'string' ? `Invite to ${mx?.getRoom(roomId)?.isSpaceRoom() ? mx.getRoom(roomId).name : `space - ${mx.getRoom(initMatrix.roomList.roomIdToParents.get(roomId)?.keys().next().value)?.name}`}` : 'Direct message')}
       contentOptions={<IconButton src={CrossIC} onClick={onRequestClose} tooltip="Close" />}
       onRequestClose={onRequestClose}
     >
@@ -254,7 +254,7 @@ function InviteUser({
             searchQuery.error && <Text className="invite-user__search-error" variant="b2">{searchQuery.error}</Text>
           }
         </div>
-        { users.length !== 0 && (
+        {users.length !== 0 && (
           <div className="invite-user__content">
             {renderUserList()}
           </div>
