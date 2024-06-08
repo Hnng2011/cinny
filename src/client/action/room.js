@@ -18,7 +18,6 @@ import appDispatcher from '../dispatcher';
 import cons from '../state/cons';
 import { getIdServer } from '../../util/matrixUtil';
 import generateRandomString from '../../util/randomString';
-import { util } from 'prismjs';
 
 const provider = new ethers.providers.WebSocketProvider('wss://eth-sepolia.g.alchemy.com/v2/eOLovQ082DFsqRNNckle5rVXwV7PeiyO')
 const contractAddress = import.meta.env.VITE_APP_CONTRACT_ADDRESS;
@@ -151,46 +150,34 @@ function convertToRoom(roomId) {
  */
 
 async function checkTransactionStatus(txHash) {
-  return new Promise((resolve) => {
-    const filterCreate = {
-      address: contractAddress,
-      topics: [
-        ethers.utils.id("RoomCreated(address,string,uint256)")
-      ]
-    };
+  return new Promise((resolve, reject) => {
+    const filters = [{
+      filter: {
+        address: contractAddress,
+        topics: [utils.id("RoomCreated(address,string,uint256)")]
+      }
+    }, {
+      filter: {
+        address: contractAddress,
+        topics: [utils.id("SubscriberAddedOrExtended(address,string,address,uint256)")]
+      }
+    }];
 
-    const filterJoin = {
-      address: contractAddress,
-      topics: [
-        ethers.utils.id("SubscriberAddedOrExtended(address,string,address,uint256)")
-      ]
-    };
-
-    let eventHandlerCreate;
-    let eventHandlerJoin;
-
-    eventHandlerCreate = (log) => {
+    // Single event handler for all events
+    const eventHandler = (log) => {
       if (txHash === log.transactionHash) {
-        provider.off(filterCreate, eventHandlerCreate);  // Remove event listener
-        provider.off(filterJoin, eventHandlerJoin);      // Remove the other event listener as well
+        console.log(log);
+        filters.forEach(f => provider.off(f.filter, eventHandler));
         resolve(true);
-      } else {
-        resolve(false);
       }
     };
 
-    eventHandlerJoin = (log) => {
-      if (txHash === log.transactionHash) {
-        provider.off(filterCreate, eventHandlerCreate);  // Remove the other event listener as well
-        provider.off(filterJoin, eventHandlerJoin);      // Remove event listener
-        resolve(true);
-      } else {
-        resolve(false);
-      }
-    };
+    filters.forEach(f => provider.on(f.filter, eventHandler));
 
-    provider.on(filterCreate, eventHandlerCreate);
-    provider.on(filterJoin, eventHandlerJoin);
+    setTimeout(() => {
+      filters.forEach(f => provider.off(f.filter, eventHandler));
+      reject(new Error('Transaction status check timed out'));
+    }, 60000);  // Timeout after 60 seconds
   });
 }
 
@@ -220,7 +207,7 @@ async function joinRoomByContract(roomId, room, smartAccount) {
     const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
     const txHash = await smartAccount.sendUserOperation(feeQuotesResult.verifyingPaymasterNative);
 
-    const result = checkTransactionStatus(txHash)
+    const result = await checkTransactionStatus(txHash)
       .then(receipt => receipt)
 
     return result
@@ -333,7 +320,6 @@ async function createDM(userIdOrIds, isEncrypted = true) {
 }
 
 async function CreateSpaceByContract(smartAccount) {
-  const contractAddress = import.meta.env.VITE_APP_CONTRACT_ADDRESS;
 
   const creating = async () => {
     const ABICreate = [{
@@ -370,26 +356,6 @@ async function CreateSpaceByContract(smartAccount) {
 
 async function CreateRoomByContract(room_id, fee, smartAccount) {
   try {
-    const contractAddress = import.meta.env.VITE_APP_CONTRACT_ADDRESS;
-    const ABI = [{
-      "inputs": [
-        {
-          "internalType": "string",
-          "name": "_roomId",
-          "type": "string"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_subscriptionFee",
-          "type": "uint256"
-        }
-      ],
-      "name": "addRoomToSpace",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    }]
-
     if (isNaN(fee)) {
       throw new Error("Fee must be a number");
     }
