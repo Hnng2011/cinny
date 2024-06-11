@@ -52,7 +52,25 @@ const ABI = [
     "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
     "stateMutability": "view",
     "type": "function"
-  }
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "_roomId",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_subscriptionFee",
+        "type": "uint256"
+      }
+    ],
+    "name": "addRoomToSpace",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
 ];
 const contract = new ethers.Contract(contractAddress, ABI, provider);
 
@@ -161,6 +179,12 @@ async function checkTransactionStatus(txHash) {
         address: contractAddress,
         topics: [utils.id("SubscriberAddedOrExtended(address,string,address,uint256)")]
       }
+    },
+    {
+      filter: {
+        address: contractAddress,
+        topics: [utils.id("SpaceCreated(address)")]
+      }
     }];
 
     // Single event handler for all events
@@ -187,13 +211,13 @@ async function joinRoomByContract(roomId, room, smartAccount) {
   const address = await smartAccount.getAddress();
 
   if (creator.toLowerCase() === address.toLowerCase()) {
-    return null; // User is the creator, no need to subscribe
+    return null;
   }
 
   try {
     const isSubscribed = await contract.callStatic.isSubscriptionActive(creator, roomId, address);
 
-    if (isSubscribed) return true; // Already subscribed
+    if (isSubscribed) return true;
 
     const fee = await contract.callStatic.getRoomSubscriptionFee(creator, roomId);
     const data = new ethers.utils.Interface(ABI).encodeFunctionData('addOrExtendSubscription', [creator, roomId]);
@@ -227,12 +251,10 @@ async function join({ roomIdOrAlias, smartAccount, room, isSpace = false, isDM =
   const mx = initMatrix.matrixClient;
   const viaServers = via || [roomIdOrAlias.split(':')[1]];
 
-  const parent = await mx.get
-  console.log(parent)
-
   try {
-    const resultContract = isSpace || await joinRoomByContract(roomIdOrAlias, room, smartAccount);
-    if (!resultContract) return false;
+    const resultContract = !isSpace && await joinRoomByContract(roomIdOrAlias, room, smartAccount);
+
+    if (!isSpace && !resultContract) return false;
 
     const resultRoom = await mx.joinRoom(roomIdOrAlias, { viaServers });
 
@@ -361,6 +383,7 @@ async function CreateRoomByContract(room_id, fee, smartAccount) {
     }
 
     const value = parseEther(fee);
+
 
     const callData = new Interface(ABI).encodeFunctionData('addRoomToSpace', [room_id, value]);
 

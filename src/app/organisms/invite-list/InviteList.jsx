@@ -28,7 +28,7 @@ function InviteList({ isOpen, onRequestClose }) {
     procInvite.add(roomId);
     changeProcInvite(new Set(Array.from(procInvite)));
     const room = mx.getRoom(roomId);
-    roomActions.join({ roomIdOrAlias: roomId, smartAccount, room, isInvied: true });
+    roomActions.join({ roomIdOrAlias: roomId, smartAccount, room, isSpace: true });
   }
   function rejectInvite(roomId, isDM) {
     procInvite.add(roomId);
