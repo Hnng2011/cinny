@@ -14,7 +14,7 @@ import colorMXID from '../../../util/colorMXID';
 import { selectRoom, selectTab } from '../../../client/action/navigation';
 import RoomsHierarchy from '../../../client/state/RoomsHierarchy';
 import { joinRuleToIconSrc } from '../../../util/matrixUtil';
-import { join } from '../../../client/action/room';
+import { join, getFee } from '../../../client/action/room';
 import { Debounce } from '../../../util/common';
 
 import Text from '../../atoms/text/Text';
@@ -34,6 +34,7 @@ import InfoIC from '../../../../public/res/ic/outlined/info.svg';
 import { useForceUpdate } from '../../hooks/useForceUpdate';
 import { useStore } from '../../hooks/useStore';
 import { SmartAccountAtom } from '../../state/smartAccount';
+import { Box } from 'folds';
 
 function SpaceManageBreadcrumb({ path, onSelect }) {
   return (
@@ -69,10 +70,12 @@ function SpaceManageItem({
 }) {
   const [isExpand, setIsExpand] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
+  const [fee, setFee] = useState(undefined)
   const { directs } = initMatrix.roomList;
   const mx = initMatrix.matrixClient;
   const parentRoom = mx.getRoom(parentId);
   const isSpace = roomInfo.room_type === 'm.space';
+  const creator = parentRoom.getCreator().substring(1, parentRoom.getCreator().indexOf(':'));
   const roomId = roomInfo.room_id;
   const canManage = parentRoom?.currentState.maySendStateEvent('m.space.child', mx.getUserId()) || false;
   const isSuggested = parentRoom?.currentState.getStateEvents('m.space.child', roomId)?.getContent().suggested === true;
@@ -89,11 +92,20 @@ function SpaceManageItem({
   const [smartAccount] = useAtom(SmartAccountAtom)
 
   useEffect(() => {
+    const callFee = async () => {
+      const feeRes = await getFee(creator, roomId);
+      setFee(feeRes)
+    }
+
+    callFee()
+  }, [creator, roomId])
+
+  useEffect(() => {
     if (isJoining) {
       const joinRoom = async () => {
         const viaSet = roomHierarchy.viaMap.get(roomId);
         const via = viaSet ? [...viaSet] : undefined;
-        await join({ roomIdOrAlias: roomId, via, smartAccount, room: parentRoom });
+        await join({ roomIdOrAlias: roomId, via, smartAccount, creator, fee });
         setIsJoining(false)
       }
 
@@ -162,7 +174,12 @@ function SpaceManageItem({
         {
           isJoined
             ? <Button onClick={handleOpen}>Open</Button>
-            : <Button variant="primary" onClick={handleJoin} disabled={isJoining}>{isJoining ? 'Joining...' : 'Join'}</Button>
+            :
+            <Box direction='Row' alignItems='Center' gap='300'>
+              <Text>{fee} ETH</Text>
+              <Button variant="primary" onClick={handleJoin} disabled={isJoining || !fee}>{isJoining ? 'Joining...' : 'Join'}</Button>
+            </Box>
+
         }
       </div>
       {isExpand && roomInfo.topic && <Text variant="b2">{twemojify(roomInfo.topic, undefined, true)}</Text>}
@@ -308,7 +325,6 @@ function SpaceManageContent({ roomId, requestClose }) {
   useChildUpdate(currentPath.roomId, roomsHierarchy);
 
   const currentHierarchy = roomsHierarchy.getHierarchy(currentPath.roomId);
-
 
   useEffect(() => {
     mountStore.setItem(true);

@@ -11,6 +11,7 @@
 import { ethers, utils } from 'ethers';
 import {
   Interface,
+  formatEther,
   parseEther
 } from 'ethers/lib/utils';
 import initMatrix from '../initMatrix';
@@ -205,9 +206,12 @@ async function checkTransactionStatus(txHash) {
   });
 }
 
-async function joinRoomByContract(roomId, room, smartAccount) {
+export async function getFee(creator, roomId) {
+  const fee = await contract.callStatic.getRoomSubscriptionFee(creator, roomId);
+  return formatEther(fee);
+}
 
-  const creator = room.getCreator().substring(1, room.getCreator().indexOf(':'));
+async function joinRoomByContract(roomId, creator, smartAccount, fee) {
   const address = await smartAccount.getAddress();
 
   if (creator.toLowerCase() === address.toLowerCase()) {
@@ -219,13 +223,14 @@ async function joinRoomByContract(roomId, room, smartAccount) {
 
     if (isSubscribed) return true;
 
-    const fee = await contract.callStatic.getRoomSubscriptionFee(creator, roomId);
     const data = new ethers.utils.Interface(ABI).encodeFunctionData('addOrExtendSubscription', [creator, roomId]);
+
+    console.log(ethers.utils.parseEther(fee))
 
     const tx = {
       to: contractAddress,
       data,
-      value: ethers.utils.parseUnits(fee.toString(), 'wei')
+      value: ethers.utils.parseEther(fee)
     };
 
     const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
@@ -247,12 +252,12 @@ async function joinRoomByContract(roomId, room, smartAccount) {
  * @param {boolean} isDM
  * @param {string[]} via
  */
-async function join({ roomIdOrAlias, smartAccount, room, isSpace = false, isDM = false, via = undefined }) {
+async function join({ roomIdOrAlias, smartAccount, creator, isSpace = false, isDM = false, via = undefined, fee = 0 }) {
   const mx = initMatrix.matrixClient;
   const viaServers = via || [roomIdOrAlias.split(':')[1]];
 
   try {
-    const resultContract = !isSpace && await joinRoomByContract(roomIdOrAlias, room, smartAccount);
+    const resultContract = !isSpace && await joinRoomByContract(roomIdOrAlias, creator, smartAccount, fee);
 
     if (!isSpace && !resultContract) return false;
 
