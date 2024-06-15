@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import './InviteList.scss';
@@ -22,13 +23,10 @@ function InviteList({ isOpen, onRequestClose }) {
   const [smartAccount] = useAtom(SmartAccountAtom)
   const [procInvite, changeProcInvite] = useState(new Set());
 
-  const mx = initMatrix.matrixClient
-
   function acceptInvite(roomId) {
     procInvite.add(roomId);
     changeProcInvite(new Set(Array.from(procInvite)));
-    const room = mx.getRoom(roomId);
-    roomActions.join({ roomIdOrAlias: roomId, smartAccount, room, isSpace: true });
+    roomActions.join({ roomIdOrAlias: roomId, smartAccount, isSpace: true });
   }
   function rejectInvite(roomId, isDM) {
     procInvite.add(roomId);

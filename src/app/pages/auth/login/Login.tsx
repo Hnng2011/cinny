@@ -60,7 +60,6 @@ async function postNonce(msg: any, setSignedMessage: any, setToken: any) {
 
 
 export function Login() {
-  const connectKit = useConnectKit();
   const [_, setSmartAccount] = useAtom(SmartAccountAtom);
   const [err, setErr] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
@@ -132,7 +131,7 @@ export function Login() {
         </Box>
       }
       {!account && <ConnectButton />}
-      {token && <TokenLogin token={token} />}
+      {token && <TokenLogin token={token} setErr={setErr} />}
     </>
   );
 }

@@ -7,7 +7,7 @@ import { twemojify } from '../../../util/twemojify';
 import initMatrix from '../../../client/initMatrix';
 import cons from '../../../client/state/cons';
 import navigation from '../../../client/state/navigation';
-import { leave } from '../../../client/action/room';
+// import { leave } from '../../../client/action/room';
 import {
   createSpaceShortcut,
   deleteSpaceShortcut,

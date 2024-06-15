@@ -1,30 +1,28 @@
+/* eslint-disable no-console */
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-expressions */
 /* eslint-disable react/prop-types */
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import './SpaceManage.scss';
+import './SpaceWithdraw.scss';
 
-import { useAtom } from 'jotai';
 import { Box } from 'folds';
+import { useAtom } from 'jotai';
 import { twemojify } from '../../../util/twemojify';
-
 import initMatrix from '../../../client/initMatrix';
 import cons from '../../../client/state/cons';
 import navigation from '../../../client/state/navigation';
 import colorMXID from '../../../util/colorMXID';
-import { selectRoom, selectTab } from '../../../client/action/navigation';
 import RoomsHierarchy from '../../../client/state/RoomsHierarchy';
 import { joinRuleToIconSrc } from '../../../util/matrixUtil';
-import { join, getFee } from '../../../client/action/room';
+import { getFee, getPercentage, Withdraw } from '../../../client/action/room';
 import { Debounce } from '../../../util/common';
 
 import Text from '../../atoms/text/Text';
 import RawIcon from '../../atoms/system-icons/RawIcon';
 import Button from '../../atoms/button/Button';
 import IconButton from '../../atoms/button/IconButton';
-import Checkbox from '../../atoms/button/Checkbox';
 import Avatar from '../../atoms/avatar/Avatar';
 import Spinner from '../../atoms/spinner/Spinner';
 import ScrollView from '../../atoms/scroll/ScrollView';
@@ -38,7 +36,8 @@ import { useForceUpdate } from '../../hooks/useForceUpdate';
 import { useStore } from '../../hooks/useStore';
 import { SmartAccountAtom } from '../../state/smartAccount';
 
-function SpaceManageBreadcrumb({ path, onSelect }) {
+
+function SpaceWithdrawBreadcrumb({ path, onSelect }) {
   return (
     <div className="space-manage-breadcrumb__wrapper">
       <ScrollView horizontal vertical={false} invisible>
@@ -58,7 +57,7 @@ function SpaceManageBreadcrumb({ path, onSelect }) {
     </div>
   );
 }
-SpaceManageBreadcrumb.propTypes = {
+SpaceWithdrawBreadcrumb.propTypes = {
   path: PropTypes.arrayOf(PropTypes.exact({
     roomId: PropTypes.string,
     name: PropTypes.string,
@@ -66,75 +65,40 @@ SpaceManageBreadcrumb.propTypes = {
   onSelect: PropTypes.func.isRequired,
 };
 
-function SpaceManageItem({
-  parentId, roomInfo, onSpaceClick, requestClose,
-  isSelected, onSelect, roomHierarchy,
+function SpaceWithdrawItem({
+  roomInfo, onSpaceClick, creator
 }) {
   const [isExpand, setIsExpand] = useState(false);
-  const [isJoining, setIsJoining] = useState(false);
-  const [fee, setFee] = useState(undefined)
-  const { directs } = initMatrix.roomList;
   const mx = initMatrix.matrixClient;
-  const parentRoom = mx.getRoom(parentId);
   const isSpace = roomInfo.room_type === 'm.space';
-  const creator = parentRoom.getCreator().substring(1, parentRoom.getCreator().indexOf(':'));
+
   const roomId = roomInfo.room_id;
-  const canManage = parentRoom?.currentState.maySendStateEvent('m.space.child', mx.getUserId()) || false;
-  const isSuggested = parentRoom?.currentState.getStateEvents('m.space.child', roomId)?.getContent().suggested === true;
+  const [fee, setRoomFee] = useState(0)
+
+  useEffect(() => {
+    const setfee = async () => {
+      const res = await getFee(creator, roomId)
+      setRoomFee(res)
+    }
+    setfee()
+  }, [])
 
   const room = mx.getRoom(roomId);
-  const isJoined = !!(room?.getMyMembership() === 'join' || null);
   const name = room?.name || roomInfo.name || roomInfo.canonical_alias || roomId;
   let imageSrc = mx.mxcUrlToHttp(roomInfo.avatar_url, 24, 24, 'crop') || null;
   if (!imageSrc && room) {
     imageSrc = room.getAvatarFallbackMember()?.getAvatarUrl(mx.baseUrl, 24, 24, 'crop') || null;
     if (imageSrc === null) imageSrc = room.getAvatarUrl(mx.baseUrl, 24, 24, 'crop') || null;
   }
-  const isDM = directs.has(roomId);
-  const [smartAccount] = useAtom(SmartAccountAtom)
-
-  useEffect(() => {
-    const callFee = async () => {
-      const feeRes = await getFee(creator, roomId);
-      setFee(feeRes)
-    }
-
-    callFee()
-  }, [creator, roomId])
-
-  useEffect(() => {
-    if (isJoining) {
-      const joinRoom = async () => {
-        const viaSet = roomHierarchy.viaMap.get(roomId);
-        const via = viaSet ? [...viaSet] : undefined;
-        await join({ roomIdOrAlias: roomId, via, smartAccount, creator, fee });
-        setIsJoining(false)
-      }
-
-      joinRoom();
-    }
-
-  }, [isJoining])
-
-  const handleOpen = () => {
-    if (isSpace) selectTab(roomId);
-    else selectRoom(roomId);
-    requestClose();
-  };
-  const handleJoin = () => {
-    setIsJoining(true);
-  };
 
   const roomAvatarJSX = (
     <Avatar
       text={name}
       bgColor={colorMXID(roomId)}
-      imageSrc={isDM ? imageSrc : null}
+      imageSrc={null}
       iconColor="var(--ic-surface-low)"
       iconSrc={
-        isDM
-          ? null
-          : joinRuleToIconSrc((roomInfo.join_rules || roomInfo.join_rule), isSpace)
+        joinRuleToIconSrc((roomInfo.join_rules || roomInfo.join_rule), isSpace)
       }
       size="extra-small"
     />
@@ -162,7 +126,6 @@ function SpaceManageItem({
       className={`space-manage-item${isSpace ? '--space' : ''}`}
     >
       <div>
-        {canManage && <Checkbox isActive={isSelected} onToggle={() => onSelect(roomId)} variant="positive" />}
         <button
           className="space-manage-item__btn"
           onClick={isSpace ? () => onSpaceClick(roomId, name) : null}
@@ -170,87 +133,21 @@ function SpaceManageItem({
         >
           {roomAvatarJSX}
           {roomNameJSX}
-          {isSuggested && <Text variant="b2">Suggested</Text>}
         </button>
         {roomInfo.topic && expandBtnJsx}
-        {
-          isJoined
-            ? <Button onClick={handleOpen}>Open</Button>
-            :
-            <Box direction='Row' alignItems='Center' gap='300'>
-              <Text>{fee} ETH</Text>
-              <Button variant="primary" onClick={handleJoin} disabled={isJoining || !fee}>{isJoining ? 'Joining...' : 'Join'}</Button>
-            </Box>
-
-        }
+        <Box direction='Row' alignItems='Center' gap='300'>
+          <Text>{fee} ETH</Text>
+        </Box>
       </div>
       {isExpand && roomInfo.topic && <Text variant="b2">{twemojify(roomInfo.topic, undefined, true)}</Text>}
     </div>
   );
 }
-SpaceManageItem.propTypes = {
-  parentId: PropTypes.string.isRequired,
-  roomHierarchy: PropTypes.shape({}).isRequired,
+
+SpaceWithdrawItem.propTypes = {
   roomInfo: PropTypes.shape({}).isRequired,
   onSpaceClick: PropTypes.func.isRequired,
-  requestClose: PropTypes.func.isRequired,
-  isSelected: PropTypes.bool.isRequired,
-  onSelect: PropTypes.func.isRequired,
-};
-
-function SpaceManageFooter({ parentId, selected }) {
-  const [process, setProcess] = useState(null);
-  const mx = initMatrix.matrixClient;
-  const room = mx.getRoom(parentId);
-  const { currentState } = room;
-
-  const allSuggested = selected.every((roomId) => {
-    const sEvent = currentState.getStateEvents('m.space.child', roomId);
-    return !!sEvent?.getContent()?.suggested;
-  });
-
-  const handleRemove = () => {
-    setProcess(`Removing ${selected.length} items`);
-    selected.forEach((roomId) => {
-      mx.sendStateEvent(parentId, 'm.space.child', {}, roomId);
-    });
-  };
-
-  const handleToggleSuggested = (isMark) => {
-    if (isMark) setProcess(`Marking as suggested ${selected.length} items`);
-    else setProcess(`Marking as not suggested ${selected.length} items`);
-    selected.forEach((roomId) => {
-      const sEvent = room.currentState.getStateEvents('m.space.child', roomId);
-      if (!sEvent) return;
-      const content = { ...sEvent.getContent() };
-      if (isMark && content.suggested) return;
-      if (!isMark && !content.suggested) return;
-      content.suggested = isMark;
-      mx.sendStateEvent(parentId, 'm.space.child', content, roomId);
-    });
-  };
-
-  return (
-    <div className="space-manage__footer">
-      {process && <Spinner size="small" />}
-      <Text weight="medium">{process || `${selected.length} item selected`}</Text>
-      {!process && (
-        <>
-          <Button onClick={handleRemove} variant="danger">Remove</Button>
-          <Button
-            onClick={() => handleToggleSuggested(!allSuggested)}
-            variant={allSuggested ? 'surface' : 'primary'}
-          >
-            {allSuggested ? 'Mark as not suggested' : 'Mark as suggested'}
-          </Button>
-        </>
-      )}
-    </div>
-  );
-}
-SpaceManageFooter.propTypes = {
-  parentId: PropTypes.string.isRequired,
-  selected: PropTypes.arrayOf(PropTypes.string).isRequired,
+  creator: PropTypes.string.isRequired,
 };
 
 function useSpacePath(roomId) {
@@ -314,47 +211,35 @@ function useChildUpdate(roomId, roomsHierarchy) {
   }, [roomId, roomsHierarchy]);
 }
 
-function SpaceManageContent({ roomId, requestClose }) {
+function SpaceWithdrawContent({ roomId }) {
   const mx = initMatrix.matrixClient;
   useUpdateOnJoin(roomId);
   const [, forceUpdate] = useForceUpdate();
-  const [roomsHierarchy] = useState(new RoomsHierarchy(mx, 30));
+  const [percentage, setPercentage] = useState(0)
+  const [roomsHierarchy] = useState(new RoomsHierarchy(mx, 10));
   const [spacePath, addPathItem] = useSpacePath(roomId);
   const [isLoading, setIsLoading] = useState(true);
-  const [selected, setSelected] = useState([]);
+  const [withDrawing, setWithDrawing] = useState(false)
+  const [resultWitdraw, setResultWitdraw] = useState(undefined)
   const mountStore = useStore();
   const currentPath = spacePath[spacePath.length - 1];
   useChildUpdate(currentPath.roomId, roomsHierarchy);
-
   const currentHierarchy = roomsHierarchy.getHierarchy(currentPath.roomId);
+  const creator = mx.getRoom(roomId).getCreator().substring(1, mx.getRoom(roomId).getCreator().indexOf(':'));
+
+  const [smartAccount,] = useAtom(SmartAccountAtom)
 
   useEffect(() => {
     mountStore.setItem(true);
+    Promise.resolve(getPercentage()).then(res => setPercentage(res))
     return () => {
       mountStore.setItem(false);
     };
-  }, [roomId]);
+  }, [roomId, currentHierarchy]);
 
-  useEffect(() => {
-    setSelected([]);
-  }, [spacePath]);
-
-  const handleSelected = (selectedRoomId) => {
-    const newSelected = [...selected];
-    const selectedIndex = newSelected.indexOf(selectedRoomId);
-
-    if (selectedIndex > -1) {
-      newSelected.splice(selectedIndex, 1);
-      setSelected(newSelected);
-      return;
-    }
-    newSelected.push(selectedRoomId);
-    setSelected(newSelected);
-  };
 
   const loadRoomHierarchy = async () => {
     if (!roomsHierarchy.canLoadMore(currentPath.roomId)) return;
-    if (!roomsHierarchy.getHierarchy(currentPath.roomId)) setSelected([]);
     setIsLoading(true);
     try {
       await roomsHierarchy.load(currentPath.roomId);
@@ -368,67 +253,88 @@ function SpaceManageContent({ roomId, requestClose }) {
     }
   };
 
+  const withDraw = async () => {
+    setWithDrawing(true)
+    const result = await Withdraw(smartAccount)
+    setResultWitdraw(result)
+    setWithDrawing(false)
+  }
+
   if (!currentHierarchy) loadRoomHierarchy();
+
+  function isValidTxHash(txHash) {
+    // Kiểm tra độ dài của chuỗi và định dạng bắt đầu là '0x'
+    const re = /^0x[a-fA-F0-9]{64}$/;
+    return re.test(txHash);
+  }
+
   return (
     <div className="space-manage__content">
       {spacePath.length > 1 && (
-        <SpaceManageBreadcrumb path={spacePath} onSelect={addPathItem} />
+        <SpaceWithdrawBreadcrumb path={spacePath} onSelect={addPathItem} />
       )}
-      <Text variant="b3" weight="bold">Rooms and spaces</Text>
+      <Text variant="b3" weight="bold">Withdraw Percentage : {percentage}%</Text>
+      <Text variant="b3" weight="bold">Rooms</Text>
       <div className="space-manage__content-items">
         {!isLoading && currentHierarchy?.rooms?.length === 1 && (
           <Text>
-            Either the space contains private rooms or you need to join space to view it's rooms.
+            You need to create room first
           </Text>
         )}
-        {currentHierarchy && (currentHierarchy.rooms?.map((roomInfo) => (
+        {currentHierarchy?.rooms?.map((roomInfo) => (
           roomInfo.room_id === currentPath.roomId
             ? null
             : (
-              <SpaceManageItem
+              <SpaceWithdrawItem
                 key={roomInfo.room_id}
-                isSelected={selected.includes(roomInfo.room_id)}
-                roomHierarchy={currentHierarchy}
-                parentId={currentPath.roomId}
                 roomInfo={roomInfo}
                 onSpaceClick={addPathItem}
-                requestClose={requestClose}
-                onSelect={handleSelected}
+                creator={creator}
               />
             )
-        )))}
+        ))}
         {!currentHierarchy && <Text>loading...</Text>}
       </div>
       {currentHierarchy?.canLoadMore && !isLoading && (
         <Button onClick={loadRoomHierarchy}>Load more</Button>
       )}
-      {isLoading && (
-        <div className="space-manage__content-loading">
-          <Spinner size="small" />
-          <Text>Loading rooms...</Text>
-        </div>
-      )}
-      {selected.length > 0 && (
-        <SpaceManageFooter parentId={currentPath.roomId} selected={selected} />
-      )}
-    </div>
+
+      <Box className='withdraw' direction='Row' gap='300' alignItems='Center' justifyContent='End'>
+        <Button disabled={withDrawing} variant='primary' onClick={withDraw}>Withdraw</Button>
+      </Box>
+      {
+        resultWitdraw && (
+          <Box className='withdraw' direction='Row' gap='300' alignItems='Center' justifyContent='Center'>
+            {!isValidTxHash(resultWitdraw) && <Text className='space-manage__content-error' >{resultWitdraw}</Text>}
+            {isValidTxHash(resultWitdraw) && <a target='_blank' href={`https://sepolia.etherscan.io/tx/${resultWitdraw}`} rel="noreferrer"> {resultWitdraw}</a>}
+          </Box>
+        )
+      }
+      {
+        isLoading && (
+          <div className="space-manage__content-loading">
+            <Spinner size="small" />
+            <Text>Loading rooms...</Text>
+          </div>
+        )
+      }
+    </div >
   );
 }
-SpaceManageContent.propTypes = {
+SpaceWithdrawContent.propTypes = {
   roomId: PropTypes.string.isRequired,
-  requestClose: PropTypes.func.isRequired,
 };
 
 function useWindowToggle() {
   const [roomId, setRoomId] = useState(null);
 
   useEffect(() => {
-    const openSpaceManage = (rId) => {
+    const openSpaceWithdraw = (rId) => {
       setRoomId(rId);
     };
-    navigation.on(cons.events.navigation.SPACE_MANAGE_OPENED, openSpaceManage);
+    navigation.on(cons.events.navigation.SPACE_WITHDRAW_MANAGE, openSpaceWithdraw);
     return () => {
-      navigation.removeListener(cons.events.navigation.SPACE_MANAGE_OPENED, openSpaceManage);
+      navigation.removeListener(cons.events.navigation.SPACE_WITHDRAW_MANAGE, openSpaceWithdraw);
     };
   }, []);
 
@@ -437,7 +343,7 @@ function useWindowToggle() {
   return [roomId, requestClose];
 }
 
-function SpaceManage() {
+function SpaceWithdraw() {
   const mx = initMatrix.matrixClient;
   const [roomId, requestClose] = useWindowToggle();
   const room = mx.getRoom(roomId);
@@ -449,7 +355,7 @@ function SpaceManage() {
       title={(
         <Text variant="s1" weight="medium" primary>
           {roomId && twemojify(room.name)}
-          <span style={{ color: 'var(--tc-surface-low)' }}> — manage rooms</span>
+          <span style={{ color: 'var(--tc-surface-low)' }}> — withdraw</span>
         </Text>
       )}
       contentOptions={<IconButton src={CrossIC} onClick={requestClose} tooltip="Close" />}
@@ -457,11 +363,11 @@ function SpaceManage() {
     >
       {
         roomId
-          ? <SpaceManageContent roomId={roomId} requestClose={requestClose} />
+          ? <SpaceWithdrawContent roomId={roomId} requestClose={requestClose} />
           : <div />
       }
     </PopupWindow>
   );
 }
 
-export default SpaceManage;
+export default SpaceWithdraw;

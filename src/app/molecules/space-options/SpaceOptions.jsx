@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import { twemojify } from '../../../util/twemojify';
 
 import initMatrix from '../../../client/initMatrix';
-import { openSpaceSettings, openSpaceManage, openInviteUser } from '../../../client/action/navigation';
+import { openSpaceSettings, openSpaceManage, openInviteUser, openWithdrawManage } from '../../../client/action/navigation';
 import { markAsRead } from '../../../client/action/notifications';
 import { leave } from '../../../client/action/room';
 import {
@@ -25,6 +25,7 @@ import AddUserIC from '../../../../public/res/ic/outlined/add-user.svg';
 import SettingsIC from '../../../../public/res/ic/outlined/settings.svg';
 import HashSearchIC from '../../../../public/res/ic/outlined/hash-search.svg';
 import LeaveArrowIC from '../../../../public/res/ic/outlined/leave-arrow.svg';
+import WithdrawIc from '../../../../public/res/ic/outlined/withdraw.svg';
 import PinIC from '../../../../public/res/ic/outlined/pin.svg';
 import PinFilledIC from '../../../../public/res/ic/filled/pin.svg';
 
@@ -75,6 +76,11 @@ function SpaceOptions({ roomId, afterOptionSelect }) {
     afterOptionSelect();
   };
 
+  const handleWithdrawSpace = () => {
+    openWithdrawManage(roomId);
+    afterOptionSelect();
+  };
+
   const handleLeaveClick = async () => {
     afterOptionSelect();
     const isConfirmed = await confirmDialog(
@@ -114,6 +120,7 @@ function SpaceOptions({ roomId, afterOptionSelect }) {
         Invite
       </MenuItem>
       <MenuItem onClick={handleManageRoom} iconSrc={HashSearchIC}>Manage rooms</MenuItem>
+      {(creatorId === mx.getUserId()) && <MenuItem onClick={handleWithdrawSpace} iconSrc={WithdrawIc}>Withdraw fee</MenuItem>}
       <MenuItem onClick={handleSettingsClick} iconSrc={SettingsIC}>Settings</MenuItem>
       {!(creatorId === mx.getUserId()) && <MenuItem
         variant="danger"
@@ -121,7 +128,8 @@ function SpaceOptions({ roomId, afterOptionSelect }) {
         iconSrc={LeaveArrowIC}
       >
         Leave
-      </MenuItem>}
+      </MenuItem>
+      }
 
     </div>
   );

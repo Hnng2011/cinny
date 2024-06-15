@@ -12,6 +12,7 @@ import { ethers, utils } from 'ethers';
 import {
   Interface,
   formatEther,
+  formatUnits,
   parseEther
 } from 'ethers/lib/utils';
 import initMatrix from '../initMatrix';
@@ -23,55 +24,13 @@ import generateRandomString from '../../util/randomString';
 const provider = new ethers.providers.WebSocketProvider('wss://eth-sepolia.g.alchemy.com/v2/eOLovQ082DFsqRNNckle5rVXwV7PeiyO')
 const contractAddress = import.meta.env.VITE_APP_CONTRACT_ADDRESS;
 const ABI = [
-  {
-    "inputs": [
-      { "internalType": "address", "name": "spaceOwner", "type": "address" },
-      { "internalType": "string", "name": "roomId", "type": "string" }
-    ],
-    "name": "getRoomSubscriptionFee",
-    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "spaceOwner", "type": "address" },
-      { "internalType": "string", "name": "_roomId", "type": "string" }
-    ],
-    "name": "addOrExtendSubscription",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "spaceOwner", "type": "address" },
-      { "internalType": "string", "name": "roomId", "type": "string" },
-      { "internalType": "address", "name": "subscriber", "type": "address" }
-    ],
-    "name": "isSubscriptionActive",
-    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "_roomId",
-        "type": "string"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_subscriptionFee",
-        "type": "uint256"
-      }
-    ],
-    "name": "addRoomToSpace",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
+  { "inputs": [], "name": "createSpace", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+  { "inputs": [{ "internalType": "address", "name": "spaceOwner", "type": "address" }, { "internalType": "string", "name": "roomId", "type": "string" }], "name": "getRoomSubscriptionFee", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
+  { "inputs": [{ "internalType": "address", "name": "spaceOwner", "type": "address" }, { "internalType": "string", "name": "_roomId", "type": "string" }], "name": "addOrExtendSubscription", "outputs": [], "stateMutability": "payable", "type": "function" },
+  { "inputs": [{ "internalType": "address", "name": "spaceOwner", "type": "address" }, { "internalType": "string", "name": "roomId", "type": "string" }, { "internalType": "address", "name": "subscriber", "type": "address" }], "name": "isSubscriptionActive", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "view", "type": "function" },
+  { "inputs": [{ "internalType": "string", "name": "_roomId", "type": "string" }, { "internalType": "uint256", "name": "_subscriptionFee", "type": "uint256" }], "name": "addRoomToSpace", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+  { "inputs": [], "name": "claimablePercentage", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
+  { "inputs": [], "name": "claimFeeFromSpace", "outputs": [], "stateMutability": "nonpayable", "type": "function" }
 ];
 const contract = new ethers.Contract(contractAddress, ABI, provider);
 
@@ -206,9 +165,40 @@ async function checkTransactionStatus(txHash) {
   });
 }
 
+
+
 export async function getFee(creator, roomId) {
   const fee = await contract.callStatic.getRoomSubscriptionFee(creator, roomId);
   return formatEther(fee);
+}
+
+export function getPercentage() {
+  const percentage = async () => {
+    const res = await contract.callStatic.claimablePercentage();
+    return formatUnits(res, 0)
+  }
+
+  const res = percentage()
+  return res;
+}
+
+export async function Withdraw(smartAccount) {
+  const callData = new ethers.utils.Interface(ABI).encodeFunctionData('claimFeeFromSpace', []);
+
+  const tx = {
+    to: contractAddress,
+    data: callData,
+  };
+
+  try {
+    const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
+    const txHash = await smartAccount.sendTransaction(feeQuotesResult.verifyingPaymasterNative);
+    return txHash;
+  }
+
+  catch (e) {
+    return e?.data.extraMessage.message.match(/"(.*?)"/)[1] || e.message
+  }
 }
 
 async function joinRoomByContract(roomId, creator, smartAccount, fee) {
@@ -225,8 +215,6 @@ async function joinRoomByContract(roomId, creator, smartAccount, fee) {
 
     const data = new ethers.utils.Interface(ABI).encodeFunctionData('addOrExtendSubscription', [creator, roomId]);
 
-    console.log(ethers.utils.parseEther(fee))
-
     const tx = {
       to: contractAddress,
       data,
@@ -241,8 +229,7 @@ async function joinRoomByContract(roomId, creator, smartAccount, fee) {
 
     return result
   } catch (error) {
-    console.log(error)
-    throw new Error(`Error joining room please check your Balance`);
+    throw new Error(error);
   }
 }
 
@@ -277,7 +264,6 @@ async function join({ roomIdOrAlias, smartAccount, creator, isSpace = false, isD
     return resultRoom.roomId;
 
   } catch (error) {
-    alert(error)
     return false;
   }
 }
@@ -347,38 +333,23 @@ async function createDM(userIdOrIds, isEncrypted = true) {
 }
 
 async function CreateSpaceByContract(smartAccount) {
+  const callData = new Interface(ABI).encodeFunctionData('createSpace', []);
 
-  const creating = async () => {
-    const ABICreate = [{
-      "inputs": [],
-      "name": "createSpace",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    }];
-
-    const callData = new Interface(ABICreate).encodeFunctionData('createSpace', []);
-
-    const tx = {
-      to: contractAddress,
-      data: callData,
-    }
-
-    try {
-      const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
-      const txHash = await smartAccount.sendUserOperation(feeQuotesResult.verifyingPaymasterNative);
-      const result = await checkTransactionStatus(txHash).then(recipe => recipe)
-      return result
-    }
-
-    catch (e) {
-      throw new Error(e?.data.extraMessage.message.match(/"(.*?)"/)[1] || e?.message || e)
-    }
+  const tx = {
+    to: contractAddress,
+    data: callData,
   }
 
-  await creating();
+  try {
+    const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
+    const txHash = await smartAccount.sendUserOperation(feeQuotesResult.verifyingPaymasterNative);
+    const result = await checkTransactionStatus(txHash).then(recipe => recipe)
+    return result
+  }
 
-  return true;
+  catch (e) {
+    throw new Error(e?.data.extraMessage.message.match(/"(.*?)"/)[1] || e?.message || e)
+  }
 }
 
 async function CreateRoomByContract(room_id, fee, smartAccount) {

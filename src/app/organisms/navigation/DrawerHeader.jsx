@@ -2,13 +2,10 @@
 /* eslint-disable no-undef */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable prefer-destructuring */
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import './DrawerHeader.scss';
 
-import { hexValue } from 'ethers/lib/utils';
-import { ethers } from 'ethers';
-import { useAtom } from 'jotai';
 import { twemojify } from '../../../util/twemojify';
 
 import initMatrix from '../../../client/initMatrix';

@@ -45,6 +45,13 @@ export function openSpaceManage(roomId) {
   });
 }
 
+export function openWithdrawManage(roomId) {
+  appDispatcher.dispatch({
+    type: cons.actions.navigation.OPEN_WITHDRAW_MANAGE,
+    roomId,
+  });
+}
+
 export function openSpaceAddExisting(roomId) {
   appDispatcher.dispatch({
     type: cons.actions.navigation.OPEN_SPACE_ADDEXISTING,

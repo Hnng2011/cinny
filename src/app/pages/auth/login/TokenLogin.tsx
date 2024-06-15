@@ -42,8 +42,9 @@ function LoginTokenError({ message }: { message: string }) {
 
 type TokenLoginProps = {
   token: string;
+  setErr: React.Dispatch<React.SetStateAction<string | null>>;
 };
-export function TokenLogin({ token }: TokenLoginProps) {
+export function TokenLogin({ token, setErr }: TokenLoginProps) {
   const discovery = useAutoDiscoveryInfo();
   const baseUrl = discovery['m.homeserver'].base_url;
 
@@ -61,6 +62,27 @@ export function TokenLogin({ token }: TokenLoginProps) {
   }, [baseUrl, token, startLogin]);
 
   useLoginComplete(loginState.status === AsyncStatus.Success ? loginState.data : undefined);
+
+  useEffect(() => {
+    if (loginState.status === AsyncStatus.Error) {
+      if (loginState.error.errcode === LoginError.Forbidden) {
+        setErr("Invalid login token")
+      }
+      if (loginState.error.errcode === LoginError.UserDeactivated) {
+        setErr("This account has been deactivated.")
+      }
+      if (loginState.error.errcode === LoginError.InvalidRequest) {
+        setErr("Failed to login. Part of your request data is invalid.")
+      }
+      if (loginState.error.errcode === LoginError.RateLimited) {
+        setErr("Failed to login. Your login request has been rate-limited by server, Please try after some time.")
+
+      }
+      if (loginState.error.errcode === LoginError.Unknown) {
+        setErr("Failed to login. Unknown reason.")
+      }
+    }
+  }, [loginState, setErr])
 
   return (
     <>
