@@ -23,6 +23,7 @@ import generateRandomString from '../../util/randomString';
 
 const provider = new ethers.providers.WebSocketProvider('wss://eth-sepolia.g.alchemy.com/v2/eOLovQ082DFsqRNNckle5rVXwV7PeiyO')
 const contractAddress = import.meta.env.VITE_APP_CONTRACT_ADDRESS;
+const contractAddressVoting = import.meta.env.VITE_APP_CONTRACT_ADDRESS_VOTING;
 const ABI = [
   { "inputs": [], "name": "createSpace", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
   { "inputs": [{ "internalType": "address", "name": "spaceOwner", "type": "address" }, { "internalType": "string", "name": "roomId", "type": "string" }], "name": "getRoomSubscriptionFee", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
@@ -32,7 +33,224 @@ const ABI = [
   { "inputs": [], "name": "claimablePercentage", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
   { "inputs": [], "name": "claimFeeFromSpace", "outputs": [], "stateMutability": "nonpayable", "type": "function" }
 ];
+
+const ABIVoting = [
+  { "inputs": [{ "internalType": "address", "name": "spaceOwner", "type": "address" }, { "internalType": "string", "name": "roomId", "type": "string" }], "name": "getAverageStarRating", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
+  { "inputs": [{ "internalType": "address", "name": "spaceOwner", "type": "address" }, { "internalType": "string", "name": "roomId", "type": "string" }, { "internalType": "address", "name": "subscriber", "type": "address" }], "name": "hasVoted", "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }], "stateMutability": "view", "type": "function" },
+  { "inputs": [{ "internalType": "address", "name": "spaceOwner", "type": "address" }, { "internalType": "string", "name": "roomId", "type": "string" }, { "internalType": "uint8", "name": "stars", "type": "uint8" }], "name": "voteForRoom", "outputs": [], "stateMutability": "nonpayable", "type": "function" }
+]
+
 const contract = new ethers.Contract(contractAddress, ABI, provider);
+const contractVoting = new ethers.Contract(contractAddressVoting, ABIVoting, provider);
+
+
+async function checkTransactionStatus(txHash) {
+  return new Promise((resolve, reject) => {
+    const filters = [{
+      filter: {
+        address: contractAddress,
+        topics: [utils.id("RoomCreated(address,string,uint256)")]
+      }
+    }, {
+      filter: {
+        address: contractAddress,
+        topics: [utils.id("SubscriberAddedOrExtended(address,string,address,uint256)")]
+      }
+    },
+    {
+      filter: {
+        address: contractAddress,
+        topics: [utils.id("SpaceCreated(address)")]
+      }
+    },
+    {
+      filter: {
+        address: contractAddressVoting,
+        topics: [utils.id("Voted(address,string,address,uint8)")]
+      }
+    }
+    ];
+
+    // Single event handler for all events
+    const eventHandler = (log) => {
+      if (txHash === log.transactionHash) {
+        console.log(log);
+        filters.forEach(f => provider.off(f.filter, eventHandler));
+        resolve(true);
+      }
+    };
+
+    filters.forEach(f => provider.on(f.filter, eventHandler));
+
+    setTimeout(() => {
+      filters.forEach(f => provider.off(f.filter, eventHandler));
+      reject(new Error('Transaction status check timed out'));
+    }, 60000);  // Timeout after 60 seconds
+  });
+}
+
+export async function getFee(creator, roomId) {
+  const fee = await contract.callStatic.getRoomSubscriptionFee(creator, roomId);
+  return formatEther(fee);
+}
+
+function formatStarValue(starValue) {
+  const num = parseFloat(starValue);
+  if (num % 1 === 0) {
+    return num.toString();
+  } else {
+    return num.toFixed(1);
+  }
+
+}
+
+export async function hasVoted(creator, roomId, subscriber) {
+  const res = await contractVoting.callStatic.hasVoted(creator, roomId, subscriber)
+  return res
+}
+
+export async function getVotingStar(creator, roomId) {
+  const star = await contractVoting.callStatic.getAverageStarRating(creator, roomId);
+  return formatStarValue(parseEther(formatEther(star)))
+}
+
+export async function votingForRoom(creator, roomId, stars, smartAccount) {
+  const callData = new ethers.utils.Interface(ABIVoting).encodeFunctionData('voteForRoom', [creator, roomId, stars]);
+
+  const tx = {
+    to: contractAddressVoting,
+    data: callData,
+  };
+
+
+  try {
+    const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
+    const txhash = await smartAccount.sendTransaction(feeQuotesResult.verifyingPaymasterNative);
+    const result = checkTransactionStatus(txhash).then(receipt => receipt)
+    return result;
+  }
+
+  catch (e) {
+    return false
+  }
+}
+
+export function getPercentage() {
+  const percentage = async () => {
+    const res = await contract.callStatic.claimablePercentage();
+    return formatUnits(res, 0)
+  }
+
+  const res = percentage()
+  return res;
+}
+
+export async function Withdraw(smartAccount) {
+  const callData = new ethers.utils.Interface(ABI).encodeFunctionData('claimFeeFromSpace', []);
+
+  const tx = {
+    to: contractAddress,
+    data: callData,
+  };
+
+  try {
+    const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
+    const txHash = await smartAccount.sendTransaction(feeQuotesResult.verifyingPaymasterNative);
+    return txHash;
+  }
+
+  catch (e) {
+    return e?.data.extraMessage.message.match(/"(.*?)"/)[1] || e.message
+  }
+}
+
+async function joinRoomByContract(roomId, creator, smartAccount, fee) {
+  const address = await smartAccount.getAddress();
+
+  if (creator.toLowerCase() === address.toLowerCase()) {
+    return null;
+  }
+
+  try {
+    const isSubscribed = await contract.callStatic.isSubscriptionActive(creator, roomId, address);
+
+    if (isSubscribed) return true;
+
+    const data = new ethers.utils.Interface(ABI).encodeFunctionData('addOrExtendSubscription', [creator, roomId]);
+
+    const tx = {
+      to: contractAddress,
+      data,
+      value: ethers.utils.parseEther(fee)
+    };
+
+    const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
+    const txHash = await smartAccount.sendUserOperation(feeQuotesResult.verifyingPaymasterNative);
+
+    const result = await checkTransactionStatus(txHash)
+      .then(receipt => receipt)
+
+    return result
+  } catch (error) {
+    throw new Error(error);
+  }
+}
+
+async function CreateSpaceByContract(smartAccount) {
+  const callData = new Interface(ABI).encodeFunctionData('createSpace', []);
+
+  const tx = {
+    to: contractAddress,
+    data: callData,
+  }
+
+  try {
+    const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
+    const txHash = await smartAccount.sendUserOperation(feeQuotesResult.verifyingPaymasterNative);
+    const result = await checkTransactionStatus(txHash).then(recipe => recipe)
+    return result
+  }
+
+  catch (e) {
+    throw new Error(e?.data.extraMessage.message.match(/"(.*?)"/)[1] || e?.message || e)
+  }
+}
+
+async function CreateRoomByContract(room_id, fee, smartAccount) {
+  try {
+    if (isNaN(fee)) {
+      throw new Error("Fee must be a number");
+    }
+
+    const value = parseEther(fee);
+
+
+    const callData = new Interface(ABI).encodeFunctionData('addRoomToSpace', [room_id, value]);
+
+    const tx = {
+      to: contractAddress,
+      data: callData,
+    }
+
+    const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
+    const txHash = await smartAccount.sendUserOperation(feeQuotesResult.verifyingPaymasterNative);
+    const result = await checkTransactionStatus(txHash).then(recipe => recipe)
+    return result
+  }
+
+  catch (e) {
+    const errlog = e?.data?.extraMessage?.message || null;
+    if (errlog?.match(/"(.*?)"/)?.[1] === "Room ID already exists") {
+      return true
+    }
+
+    if (errlog === "Simulate user operation failed: AA21 didn't pay prefund") {
+      throw new Error("Don't have enough fund in your account")
+    }
+
+    throw new Error(errlog?.match(/"(.*?)"/)?.[1] || errlog || e?.message || e)
+  }
+}
 
 /**
  * https://github.com/matrix-org/matrix-react-sdk/blob/1e6c6e9d800890c732d60429449bc280de01a647/src/Rooms.js#L73
@@ -120,118 +338,12 @@ function convertToRoom(roomId) {
   return addRoomToMDirect(roomId, undefined);
 }
 
-
 /**
  * Checks the status of a transaction based on its hash.
  * @param {string} txHash The hash of the transaction to check.
  * @returns {Promise<boolean>} Returns true if the transaction was successful, false otherwise.
  */
 
-async function checkTransactionStatus(txHash) {
-  return new Promise((resolve, reject) => {
-    const filters = [{
-      filter: {
-        address: contractAddress,
-        topics: [utils.id("RoomCreated(address,string,uint256)")]
-      }
-    }, {
-      filter: {
-        address: contractAddress,
-        topics: [utils.id("SubscriberAddedOrExtended(address,string,address,uint256)")]
-      }
-    },
-    {
-      filter: {
-        address: contractAddress,
-        topics: [utils.id("SpaceCreated(address)")]
-      }
-    }];
-
-    // Single event handler for all events
-    const eventHandler = (log) => {
-      if (txHash === log.transactionHash) {
-        console.log(log);
-        filters.forEach(f => provider.off(f.filter, eventHandler));
-        resolve(true);
-      }
-    };
-
-    filters.forEach(f => provider.on(f.filter, eventHandler));
-
-    setTimeout(() => {
-      filters.forEach(f => provider.off(f.filter, eventHandler));
-      reject(new Error('Transaction status check timed out'));
-    }, 60000);  // Timeout after 60 seconds
-  });
-}
-
-
-
-export async function getFee(creator, roomId) {
-  const fee = await contract.callStatic.getRoomSubscriptionFee(creator, roomId);
-  return formatEther(fee);
-}
-
-export function getPercentage() {
-  const percentage = async () => {
-    const res = await contract.callStatic.claimablePercentage();
-    return formatUnits(res, 0)
-  }
-
-  const res = percentage()
-  return res;
-}
-
-export async function Withdraw(smartAccount) {
-  const callData = new ethers.utils.Interface(ABI).encodeFunctionData('claimFeeFromSpace', []);
-
-  const tx = {
-    to: contractAddress,
-    data: callData,
-  };
-
-  try {
-    const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
-    const txHash = await smartAccount.sendTransaction(feeQuotesResult.verifyingPaymasterNative);
-    return txHash;
-  }
-
-  catch (e) {
-    return e?.data.extraMessage.message.match(/"(.*?)"/)[1] || e.message
-  }
-}
-
-async function joinRoomByContract(roomId, creator, smartAccount, fee) {
-  const address = await smartAccount.getAddress();
-
-  if (creator.toLowerCase() === address.toLowerCase()) {
-    return null;
-  }
-
-  try {
-    const isSubscribed = await contract.callStatic.isSubscriptionActive(creator, roomId, address);
-
-    if (isSubscribed) return true;
-
-    const data = new ethers.utils.Interface(ABI).encodeFunctionData('addOrExtendSubscription', [creator, roomId]);
-
-    const tx = {
-      to: contractAddress,
-      data,
-      value: ethers.utils.parseEther(fee)
-    };
-
-    const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
-    const txHash = await smartAccount.sendUserOperation(feeQuotesResult.verifyingPaymasterNative);
-
-    const result = await checkTransactionStatus(txHash)
-      .then(receipt => receipt)
-
-    return result
-  } catch (error) {
-    throw new Error(error);
-  }
-}
 
 /**
  *
@@ -330,62 +442,6 @@ async function createDM(userIdOrIds, isEncrypted = true) {
 
   const result = await create(options, true);
   return result;
-}
-
-async function CreateSpaceByContract(smartAccount) {
-  const callData = new Interface(ABI).encodeFunctionData('createSpace', []);
-
-  const tx = {
-    to: contractAddress,
-    data: callData,
-  }
-
-  try {
-    const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
-    const txHash = await smartAccount.sendUserOperation(feeQuotesResult.verifyingPaymasterNative);
-    const result = await checkTransactionStatus(txHash).then(recipe => recipe)
-    return result
-  }
-
-  catch (e) {
-    throw new Error(e?.data.extraMessage.message.match(/"(.*?)"/)[1] || e?.message || e)
-  }
-}
-
-async function CreateRoomByContract(room_id, fee, smartAccount) {
-  try {
-    if (isNaN(fee)) {
-      throw new Error("Fee must be a number");
-    }
-
-    const value = parseEther(fee);
-
-
-    const callData = new Interface(ABI).encodeFunctionData('addRoomToSpace', [room_id, value]);
-
-    const tx = {
-      to: contractAddress,
-      data: callData,
-    }
-
-    const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
-    const txHash = await smartAccount.sendUserOperation(feeQuotesResult.verifyingPaymasterNative);
-    const result = await checkTransactionStatus(txHash).then(recipe => recipe)
-    return result
-  }
-
-  catch (e) {
-    const errlog = e?.data?.extraMessage?.message || null;
-    if (errlog?.match(/"(.*?)"/)?.[1] === "Room ID already exists") {
-      return true
-    }
-
-    if (errlog === "Simulate user operation failed: AA21 didn't pay prefund") {
-      throw new Error("Don't have enough fund in your account")
-    }
-
-    throw new Error(errlog?.match(/"(.*?)"/)?.[1] || errlog || e?.message || e)
-  }
 }
 
 async function createRoom(opts) {

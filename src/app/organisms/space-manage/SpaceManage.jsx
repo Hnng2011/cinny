@@ -8,6 +8,7 @@ import './SpaceManage.scss';
 
 import { useAtom } from 'jotai';
 import { Box } from 'folds';
+import ReactStars from "react-rating-stars-component";
 import { twemojify } from '../../../util/twemojify';
 
 import initMatrix from '../../../client/initMatrix';
@@ -17,7 +18,7 @@ import colorMXID from '../../../util/colorMXID';
 import { selectRoom, selectTab } from '../../../client/action/navigation';
 import RoomsHierarchy from '../../../client/state/RoomsHierarchy';
 import { joinRuleToIconSrc } from '../../../util/matrixUtil';
-import { join, getFee } from '../../../client/action/room';
+import { join, getFee, getVotingStar } from '../../../client/action/room';
 import { Debounce } from '../../../util/common';
 
 import Text from '../../atoms/text/Text';
@@ -37,6 +38,7 @@ import InfoIC from '../../../../public/res/ic/outlined/info.svg';
 import { useForceUpdate } from '../../hooks/useForceUpdate';
 import { useStore } from '../../hooks/useStore';
 import { SmartAccountAtom } from '../../state/smartAccount';
+
 
 function SpaceManageBreadcrumb({ path, onSelect }) {
   return (
@@ -73,6 +75,7 @@ function SpaceManageItem({
   const [isExpand, setIsExpand] = useState(false);
   const [isJoining, setIsJoining] = useState(false);
   const [fee, setFee] = useState(undefined)
+  const [votingStar, setVotingStar] = useState(undefined)
   const { directs } = initMatrix.roomList;
   const mx = initMatrix.matrixClient;
   const parentRoom = mx.getRoom(parentId);
@@ -90,17 +93,27 @@ function SpaceManageItem({
     imageSrc = room.getAvatarFallbackMember()?.getAvatarUrl(mx.baseUrl, 24, 24, 'crop') || null;
     if (imageSrc === null) imageSrc = room.getAvatarUrl(mx.baseUrl, 24, 24, 'crop') || null;
   }
+
   const isDM = directs.has(roomId);
   const [smartAccount] = useAtom(SmartAccountAtom)
 
   useEffect(() => {
-    const callFee = async () => {
-      const feeRes = await getFee(creator, roomId);
-      setFee(feeRes)
-    }
+    const callFeeAndStar = async () => {
+      try {
+        const [feeRes, starRes] = await Promise.all([
+          getFee(creator, roomId),
+          getVotingStar(creator, roomId)
+        ]);
 
-    callFee()
-  }, [creator, roomId])
+        setFee(feeRes);
+        setVotingStar(starRes);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    callFeeAndStar();
+  }, [creator, roomId]);
 
   useEffect(() => {
     if (isJoining) {
@@ -140,10 +153,20 @@ function SpaceManageItem({
     />
   );
   const roomNameJSX = (
-    <Text>
-      {twemojify(name)}
-      <Text variant="b3" span>{` • ${roomInfo.num_joined_members} members`}</Text>
-    </Text>
+    <Box direction='Row' alignItems='Center' gap='200'>
+      <Text>
+        {twemojify(name)}
+        <Text variant="b3" span>{` • ${roomInfo.num_joined_members} members`}</Text>
+      </Text>
+
+      {votingStar !== '0' && votingStar &&
+        <Box gap='100'>
+          <Text className='space-manage-item__star'>{votingStar / 10}</Text>
+          <ReactStars char='❤' activeColor="#e31b23" count={1} size={24} value={1} edit={false} />
+        </Box>
+      }
+    </Box>
+
   );
 
   const expandBtnJsx = (

@@ -1,4 +1,5 @@
-import React from 'react';
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 
 import { twemojify } from '../../../util/twemojify';
@@ -14,6 +15,7 @@ import RoomNotification from '../room-notification/RoomNotification';
 import TickMarkIC from '../../../../public/res/ic/outlined/tick-mark.svg';
 import AddUserIC from '../../../../public/res/ic/outlined/add-user.svg';
 import LeaveArrowIC from '../../../../public/res/ic/outlined/leave-arrow.svg';
+import HeartSVG from '../../../../public/res/ic/filled/heart.svg'
 
 import { confirmDialog } from '../confirm-dialog/ConfirmDialog';
 
@@ -21,6 +23,9 @@ function RoomOptions({ roomId, afterOptionSelect }) {
   const mx = initMatrix.matrixClient;
   const room = mx.getRoom(roomId);
   const canInvite = room?.canInvite(mx.getUserId());
+  const [canVote, setCanVote] = useState(false)
+  const creator = room.getCreator().substring(1, room.getCreator().indexOf(':'));
+  const subscriber = mx.getUserId().substring(1, mx.getUserId().indexOf(':'));
 
   const handleMarkAsRead = () => {
     markAsRead(roomId);
@@ -31,6 +36,18 @@ function RoomOptions({ roomId, afterOptionSelect }) {
     openInviteUser(roomId);
     afterOptionSelect();
   };
+
+  const handleVotingClick = async () => {
+    afterOptionSelect();
+    await confirmDialog(
+      'Voting room',
+      `Voting for "${room.name}" room`,
+      'Vote',
+      'primary',
+      [true, canVote, creator, roomId]
+    );
+  }
+
   const handleLeaveClick = async () => {
     afterOptionSelect();
     const isConfirmed = await confirmDialog(
@@ -43,6 +60,14 @@ function RoomOptions({ roomId, afterOptionSelect }) {
     roomActions.leave(roomId);
   };
 
+  useEffect(() => {
+    const canvote = async () => {
+      const res = await roomActions.hasVoted(creator, roomId, subscriber)
+      setCanVote(!res)
+    }
+    canvote()
+  }, [])
+
   return (
     <div style={{ maxWidth: '256px' }}>
       <MenuHeader>{twemojify(`Options for ${initMatrix.matrixClient.getRoom(roomId)?.name}`)}</MenuHeader>
@@ -54,6 +79,7 @@ function RoomOptions({ roomId, afterOptionSelect }) {
       >
         Invite
       </MenuItem>
+      <MenuItem iconSrc={HeartSVG} onClick={handleVotingClick}>Voting</MenuItem>
       <MenuItem iconSrc={LeaveArrowIC} variant="danger" onClick={handleLeaveClick}>Leave</MenuItem>
       <MenuHeader>Notification</MenuHeader>
       <RoomNotification roomId={roomId} />
