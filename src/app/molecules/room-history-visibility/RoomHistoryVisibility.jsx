@@ -15,23 +15,25 @@ const visibility = {
   JOINED: 'joined',
 };
 
-const items = [{
-  iconSrc: null,
-  text: 'Anyone (including guests)',
-  type: visibility.WORLD_READABLE,
-}, {
-  iconSrc: null,
-  text: 'Members (all messages)',
-  type: visibility.SHARED,
-}, {
-  iconSrc: null,
-  text: 'Members (messages after invite)',
-  type: visibility.INVITED,
-}, {
-  iconSrc: null,
-  text: 'Members (messages after join)',
-  type: visibility.JOINED,
-}];
+const items = [
+  // {
+  //   iconSrc: null,
+  //   text: 'Anyone (including guests)',
+  //   type: visibility.WORLD_READABLE,
+  // },
+  {
+    iconSrc: null,
+    text: 'Members (all messages)',
+    type: visibility.SHARED,
+  }, {
+    iconSrc: null,
+    text: 'Members (messages after invite)',
+    type: visibility.INVITED,
+  }, {
+    iconSrc: null,
+    text: 'Members (messages after join)',
+    type: visibility.JOINED,
+  }];
 
 function setHistoryVisibility(roomId, type) {
   const mx = initMatrix.matrixClient;

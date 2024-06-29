@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { ClientConfig, clientAllowedServer } from '../../../hooks/useClientConfig';
 import { autoDiscovery, specVersions } from '../../../cs-api';
 import { updateLocalStore } from '../../../../client/action/auth';
-import { ROOT_PATH } from '../../paths';
+import { APP_PATH } from '../../paths';
 import { ErrorCode } from '../../../cs-errorcode';
 
 export enum GetBaseUrlError {
@@ -69,8 +69,10 @@ export const login = async (
   }
 
   const mx = createClient({ baseUrl: url });
-  const [err, res] = await to<LoginResponse, MatrixError>(mx.login('org.matrix.login.jwt', {token : data.token}));
-  
+  const [err, res] = await to<LoginResponse, MatrixError>(
+    mx.login('org.matrix.login.jwt', { token: data.token })
+  );
+
   if (err) {
     if (err.httpStatus === 400) {
       throw new MatrixError({
@@ -112,7 +114,7 @@ export const useLoginComplete = (data?: CustomLoginResponse) => {
       const { response: loginRes, baseUrl: loginBaseUrl } = data;
       updateLocalStore(loginRes.access_token, loginRes.device_id, loginRes.user_id, loginBaseUrl);
       // TODO: add after login redirect url
-      navigate(ROOT_PATH, { replace: true });
+      navigate(APP_PATH, { replace: true });
     }
   }, [data, navigate]);
 };

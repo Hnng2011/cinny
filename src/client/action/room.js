@@ -212,7 +212,7 @@ async function CreateSpaceByContract(smartAccount) {
   }
 
   catch (e) {
-    throw new Error(e?.data.extraMessage.message.match(/"(.*?)"/)[1] || e?.message || e)
+    throw new Error(e?.data.extraMessage.message || e?.message || e)
   }
 }
 
@@ -520,6 +520,7 @@ async function createRoom(opts) {
   }
 
   const resultContract = isSpace && await CreateSpaceByContract(smartAccount) || !isSpace && await CreateRoomByContract(`!${room_id}:${getIdServer(mx.getUserId())}`, fee, smartAccount);
+
 
   if (!resultContract) {
     return null;

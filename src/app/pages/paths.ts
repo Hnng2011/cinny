@@ -1,4 +1,5 @@
 export const ROOT_PATH = '/';
+export const APP_PATH = '/app';
 
 export type LoginPathSearchParams = {
   username?: string;

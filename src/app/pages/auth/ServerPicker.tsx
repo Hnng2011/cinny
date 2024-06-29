@@ -31,7 +31,7 @@ export function ServerPicker({
   server: string;
   serverList: string[];
   allowCustomServer?: boolean;
-  onServerChange: (server: string) => void;
+  onServerChange: (server: string) => void | undefined;
 }) {
   const [serverMenu, setServerMenu] = useState(false);
   const serverInputRef = useRef<HTMLInputElement>(null);

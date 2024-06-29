@@ -223,7 +223,9 @@ export const MessageSourceCodeItem = as<
     mEvent: MatrixEvent;
     onClose?: () => void;
   }
->(({ room, mEvent, onClose, ...props }, ref) => {
+>(({ room, mEvent, onClose,
+  ...props
+}, ref) => {
   const [open, setOpen] = useState(false);
 
   const getContent = (evt: MatrixEvent) =>
@@ -281,7 +283,7 @@ export const MessageSourceCodeItem = as<
           </FocusTrap>
         </OverlayCenter>
       </Overlay>
-      <MenuItem
+      {/* <MenuItem
         size="300"
         after={<Icon size="100" src={Icons.BlockCode} />}
         radii="300"
@@ -293,7 +295,7 @@ export const MessageSourceCodeItem = as<
         <Text className={css.MessageMenuItemText} as="span" size="T300" truncate>
           View Source
         </Text>
-      </MenuItem>
+      </MenuItem> */}
     </>
   );
 });

@@ -75,7 +75,7 @@
   /* system icons | --ic-[background type]-[priority]: value */
   --ic-surface-high: #272727;
   --ic-surface-normal: #626262;
-  --ic-surface-low: #7c7c7c;
+  --ic-surface-low: #f6f6f6;
   --ic-primary-high: #ffffff;
   --ic-primary-normal: #ffffff;
   --ic-positive-high: rgba(69, 184, 59);
@@ -480,4 +480,24 @@ audio:not([controls]) {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+@keyframes bluring {
+  0% {
+    background: radial-gradient(circle, var(--bg-caution) 0%, var(--bg-caution) 100%);
+    border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
+    filter: hue-rotate(0) blur(15px);
+  }
+
+  50% {
+    background: radial-gradient(circle, var(--bg-caution) 0%, var(--bg-caution) 100%);
+    border-radius: 76% 24% 68% 32% / 50% 55% 45% 50%;
+    filter: hue-rotate(45deg) blur(15px);
+  }
+
+  100% {
+    background: radial-gradient(circle, var(--bg-caution) 0%, var(--bg-caution) 100%);
+    border-radius: 32% 68% 79% 21% / 28% 68% 32% 72%;
+    filter: hue-rotate(90deg) blur(15px);
+  }
 }

@@ -1,21 +1,58 @@
+/* eslint-disable react/no-unstable-nested-components */
 /* eslint-disable no-console */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
 import { ConnectButton, useAccountInfo, useConnectKit } from '@particle-network/connectkit';
 import { Buffer } from 'buffer';
-import { Box, Text, color } from 'folds';
 import { useAtom } from 'jotai';
+import {
+  Box,
+  Icon,
+  Icons,
+  Overlay,
+  OverlayBackdrop,
+  OverlayCenter,
+  Spinner,
+  Text,
+  color,
+  config,
+} from 'folds';
 import { SmartAccount } from '@particle-network/aa';
 import { EthereumSepolia } from '@particle-network/chains';
+import { MatrixError } from 'matrix-js-sdk';
 import { SmartAccountAtom } from '../../../state/smartAccount';
-import Spinner from '../../../atoms/spinner/Spinner';
-import { TokenLogin } from './TokenLogin';
+import { useAutoDiscoveryInfo } from '../../../hooks/useAutoDiscoveryInfo';
+import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
+import { CustomLoginResponse, LoginError, login, useLoginComplete } from './loginUtil';
 
+function LoginTokenError({ message }: { message: string }) {
+  return (
+    <Box
+      style={{
+        backgroundColor: color.Critical.Container,
+        color: color.Critical.OnContainer,
+        padding: config.space.S300,
+        borderRadius: config.radii.R400,
+      }}
+      justifyContent="Start"
+      alignItems="Start"
+      gap="300"
+    >
+      <Icon size="300" filled src={Icons.Warning} />
+      <Box direction="Column" gap="100">
+        <Text size="L400">Login Failed</Text>
+        <Text size="T300">
+          <b>{message}</b>
+        </Text>
+      </Box>
+    </Box>
+  );
+}
 
 const getNonce = async (address: any) => {
   const add = address.toString().toLowerCase();
@@ -58,18 +95,16 @@ async function postNonce(msg: any, setSignedMessage: any, setToken: any) {
   postData();
 };
 
-
 export function Login() {
   const [_, setSmartAccount] = useAtom(SmartAccountAtom);
   const [err, setErr] = useState<string | null>(null);
-  const [msg, setMsg] = useState<string | null>(null);
-  const [signedMessage, setSignedMessage] = useState<string | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useState<string | undefined>(undefined);
+  const connectkit = useConnectKit()
   const { account, particleProvider }: { particleProvider: any, account: string | undefined } = useAccountInfo();
 
   useEffect(() => {
     async function LoadToken() {
-      const smartAccount = new SmartAccount(particleProvider, {
+      const smartAccount = new SmartAccount(particleProvider as any, {
         projectId: String(import.meta.env.VITE_APP_PROJECT_ID),
         clientKey: String(import.meta.env.VITE_APP_CLIENT_KEY),
         appId: String(import.meta.env.VITE_APP_APP_ID),
@@ -89,49 +124,100 @@ export function Login() {
           params: [`0x${Buffer.from(msg).toString('hex')}`, account],
         });
 
-        setMsg(msg);
-        setSignedMessage(signature);
-
+        await postNonce(msg, signature, setToken)
       } catch (error: any) {
         setErr(error?.message.toString());
-        console.log('error', error?.message.toString());
+        connectkit.disconnect()
       }
     }
 
     if (account && particleProvider) {
-      if (err) {
-        setErr(null);
-      }
-
       LoadToken();
     }
 
   }, [account, particleProvider]);
 
 
-  useEffect(() => {
-    const getToken = async () => {
-      await postNonce(msg, signedMessage, setToken)
-    }
+  function TokenLogin() {
+    const discovery = useAutoDiscoveryInfo();
+    const baseUrl = discovery['m.homeserver'].base_url;
 
-    if (signedMessage && msg) {
-      getToken();
-    }
+    const [loginState, startLogin] = useAsyncCallback<
+      CustomLoginResponse,
+      MatrixError,
+      Parameters<typeof login>
+    >(useCallback(login, []));
 
-  }, [signedMessage, msg]);
+    useEffect(() => {
+      startLogin(baseUrl, {
+        type: 'org.matrix.login.token',
+        token,
+      });
+    }, [baseUrl, token, startLogin]);
+
+    useLoginComplete(loginState.status === AsyncStatus.Success ? loginState.data : undefined);
+
+    useEffect(() => {
+      if (loginState.status === AsyncStatus.Error) {
+        if (loginState.error.errcode === LoginError.Forbidden) {
+          setErr("Invalid login token")
+        }
+        if (loginState.error.errcode === LoginError.UserDeactivated) {
+          setErr("This account has been deactivated.")
+        }
+        if (loginState.error.errcode === LoginError.InvalidRequest) {
+          setErr("Failed to login. Part of your request data is invalid.")
+        }
+        if (loginState.error.errcode === LoginError.RateLimited) {
+          setErr("Failed to login. Your login request has been rate-limited by server, Please try after some time.")
+
+        }
+        if (loginState.error.errcode === LoginError.Unknown) {
+          setErr("Failed to login. Unknown reason.")
+        }
+
+        connectkit.disconnect()
+      }
+    }, [loginState, setErr])
+
+    return (
+      <>
+        {/* {loginState.status === AsyncStatus.Error && (
+          <>
+            {loginState.error.errcode === LoginError.Forbidden && (
+              <LoginTokenError message="Invalid login token." />
+            )}
+            {loginState.error.errcode === LoginError.UserDeactivated && (
+              <LoginTokenError message="This account has been deactivated." />
+            )}
+            {loginState.error.errcode === LoginError.InvalidRequest && (
+              <LoginTokenError message="Failed to login. Part of your request data is invalid." />
+            )}
+            {loginState.error.errcode === LoginError.RateLimited && (
+              <LoginTokenError message="Failed to login. Your login request has been rate-limited by server, Please try after some time." />
+            )}
+            {loginState.error.errcode === LoginError.Unknown && (
+              <LoginTokenError message="Failed to login. Unknown reason." />
+            )}
+          </>
+        )} */}
+        <Overlay open={loginState.status !== AsyncStatus.Error} backdrop={<OverlayBackdrop />}>
+          <OverlayCenter>
+            <Spinner size="600" variant="Secondary" />
+          </OverlayCenter>
+        </Overlay>
+      </>
+    );
+  }
 
   return (
     <>
       {account && !err && <Spinner />}
       {err &&
-        <Box justifyContent="Center" alignItems="Center" gap="200">
-          <Text align="Center" style={{ color: color.Critical.Main }} size="T300">
-            {err}
-          </Text>
-        </Box>
+        <LoginTokenError message={err} />
       }
       {!account && <ConnectButton />}
-      {token && <TokenLogin token={token} setErr={setErr} />}
+      {token && <TokenLogin />}
     </>
   );
 }

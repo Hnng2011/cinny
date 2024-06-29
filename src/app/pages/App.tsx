@@ -1,11 +1,10 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Provider as JotaiProvider } from 'jotai';
 import {
   Route,
   RouterProvider,
   createBrowserRouter,
-  createHashRouter,
   createRoutesFromElements,
   redirect,
 } from 'react-router-dom';
@@ -14,15 +13,16 @@ import { EthereumSepolia } from '@particle-network/chains';
 import { ModalProvider } from '@particle-network/connectkit';
 import { evmWallets } from '@particle-network/connectors';
 import { ClientConfigLoader } from '../components/ClientConfigLoader';
-import { ClientConfig, ClientConfigProvider } from '../hooks/useClientConfig';
-import { AuthLayout, Login, Register, ResetPassword, authLayoutLoader } from './auth';
-import { LOGIN_PATH, REGISTER_PATH, RESET_PASSWORD_PATH, ROOT_PATH } from './paths';
+import { ClientConfigProvider } from '../hooks/useClientConfig';
+import { AuthLayout, Login, authLayoutLoader } from './auth';
+import { APP_PATH, LOGIN_PATH, ROOT_PATH } from './paths';
 import { isAuthenticated } from '../../client/state/auth';
 import Client from '../templates/client/Client';
 import { getLoginPath } from './pathUtils';
 import { ConfigConfigError, ConfigConfigLoading } from './ConfigConfig';
 import { FeatureCheck } from './FeatureCheck';
 import '@particle-network/connectkit/dist/index.css';
+import Welcome from './welcome/welcome';
 
 function ConnectKit({ children }: any) {
   return (
@@ -56,41 +56,35 @@ function ConnectKit({ children }: any) {
 
 
 
-const createRouter = (clientConfig: ClientConfig) => {
-  const { hashRouter } = clientConfig;
+const createRouter = () => {
   const routes = createRoutesFromElements(
-    <Route>
-      <Route
-        path={ROOT_PATH}
-        loader={() => {
-          if (isAuthenticated()) return redirect('/home');
-          return redirect(getLoginPath());
-        }}
-      />
-      <Route loader={authLayoutLoader} element={<AuthLayout />}>
-        <Route path={LOGIN_PATH} element={<Login />} />
-        <Route path={REGISTER_PATH} element={<Register />} />
-        <Route path={RESET_PASSWORD_PATH} element={<ResetPassword />} />
-      </Route>
+    [
+      <Route>
+        <Route
+          path={APP_PATH}
+          loader={() => {
+            if (isAuthenticated()) return redirect('/home');
+            return redirect(getLoginPath());
+          }}
+        />
+        <Route loader={authLayoutLoader} element={<AuthLayout />}>
+          <Route path={LOGIN_PATH} element={<Login />} />
+        </Route>
 
-      <Route
-        loader={() => {
-          if (!isAuthenticated()) return redirect(getLoginPath());
-          return null;
-        }}
-      >
-        <Route path="/home" element={<Client />} />
-        <Route path="/direct" element={<p>direct</p>} />
-        <Route path="/:spaceIdOrAlias" element={<p>:spaceIdOrAlias</p>} />
-        <Route path="/explore" element={<p>explore</p>} />
-      </Route>
+        <Route
+          loader={() => {
+            if (!isAuthenticated()) return redirect(getLoginPath());
+            return null;
+          }}
+        >
+          <Route path="/home" element={<Client />} />
+        </Route>
+      </Route>,
+      <Route path={ROOT_PATH} element={<Welcome />} />,
       <Route path="/*" element={<p>Page not found</p>} />
-    </Route>
+    ]
   );
 
-  if (hashRouter?.enabled) {
-    return createHashRouter(routes, { basename: hashRouter.basename });
-  }
   return createBrowserRouter(routes, {
     basename: import.meta.env.BASE_URL,
   });
@@ -110,7 +104,7 @@ function App() {
           {(clientConfig) => (
             <ClientConfigProvider value={clientConfig}>
               <JotaiProvider>
-                <RouterProvider router={createRouter(clientConfig)} />
+                <RouterProvider router={createRouter()} />
               </JotaiProvider>
             </ClientConfigProvider>
           )}

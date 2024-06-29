@@ -1,3 +1,5 @@
+/* eslint-disable no-use-before-define */
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react/prop-types */
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
@@ -243,7 +245,7 @@ function Login({ loginFlow, baseUrl }) {
             values, errors, handleChange, handleSubmit, isSubmitting,
           }) => (
             <>
-              {isSubmitting && <LoadingScreen message="Login in progress..." />}
+              {/* {isSubmitting && <LoadingScreen message="Login in progress..." />} */}
               <form className="auth-form" onSubmit={handleSubmit}>
                 {typeIndex === 0 && <Input values={values.username} name="username" onChange={handleChange} label="Username" type="username" required />}
                 {errors.username && <Text className="auth-form__error" variant="b3">{errors.username}</Text>}
@@ -281,7 +283,7 @@ Login.propTypes = {
   baseUrl: PropTypes.string.isRequired,
 };
 
-let sid;
+// let sid;
 let clientSecret;
 function Register({ registerInfo, loginFlow, baseUrl }) {
   const [process, setProcess] = useState({});
@@ -347,7 +349,7 @@ function Register({ registerInfo, loginFlow, baseUrl }) {
             actions.setSubmitting(false);
             return;
           }
-          sid = result.sid;
+          // sid = result.sid;
         }
         setProcess({ type: 'processing', message: 'Registration in progress....' });
         actions.setSubmitting(false);
@@ -400,44 +402,44 @@ function Register({ registerInfo, loginFlow, baseUrl }) {
     asyncProcess();
   }, [process]);
 
-  const handleRecaptcha = async (value) => {
-    if (typeof value !== 'string') return;
-    const [username, password] = getInputs();
-    const d = await auth.completeRegisterStage(baseUrl, username, password, {
-      type: 'm.login.recaptcha',
-      response: value,
-      session,
-    });
-    if (d.done) refreshWindow();
-    else setProcess({ type: 'processing', message: 'Registration in progress...' });
-  };
-  const handleTerms = async () => {
-    const [username, password] = getInputs();
-    const d = await auth.completeRegisterStage(baseUrl, username, password, {
-      type: 'm.login.terms',
-      session,
-    });
-    if (d.done) refreshWindow();
-    else setProcess({ type: 'processing', message: 'Registration in progress...' });
-  };
-  const handleEmailVerify = async () => {
-    const [username, password] = getInputs();
-    const d = await auth.completeRegisterStage(baseUrl, username, password, {
-      type: 'm.login.email.identity',
-      threepidCreds: { sid, client_secret: clientSecret },
-      threepid_creds: { sid, client_secret: clientSecret },
-      session,
-    });
-    if (d.done) refreshWindow();
-    else setProcess({ type: 'processing', message: 'Registration in progress...' });
-  };
+  // const handleRecaptcha = async (value) => {
+  //   if (typeof value !== 'string') return;
+  //   const [username, password] = getInputs();
+  //   const d = await auth.completeRegisterStage(baseUrl, username, password, {
+  //     type: 'm.login.recaptcha',
+  //     response: value,
+  //     session,
+  //   });
+  //   if (d.done) refreshWindow();
+  //   else setProcess({ type: 'processing', message: 'Registration in progress...' });
+  // };
+  // const handleTerms = async () => {
+  //   const [username, password] = getInputs();
+  //   const d = await auth.completeRegisterStage(baseUrl, username, password, {
+  //     type: 'm.login.terms',
+  //     session,
+  //   });
+  //   if (d.done) refreshWindow();
+  //   else setProcess({ type: 'processing', message: 'Registration in progress...' });
+  // };
+  // const handleEmailVerify = async () => {
+  //   const [username, password] = getInputs();
+  //   const d = await auth.completeRegisterStage(baseUrl, username, password, {
+  //     type: 'm.login.email.identity',
+  //     threepidCreds: { sid, client_secret: clientSecret },
+  //     threepid_creds: { sid, client_secret: clientSecret },
+  //     session,
+  //   });
+  //   if (d.done) refreshWindow();
+  //   else setProcess({ type: 'processing', message: 'Registration in progress...' });
+  // };
 
   return (
     <>
-      {process.type === 'processing' && <LoadingScreen message={process.message} />}
+      {/* {process.type === 'processing' && <LoadingScreen message={process.message} />}
       {process.type === 'm.login.recaptcha' && <Recaptcha message="Please check the box below to proceed." sitekey={process.sitekey} onChange={handleRecaptcha} />}
       {process.type === 'm.login.terms' && <Terms url={process.url} onSubmit={handleTerms} />}
-      {process.type === 'm.login.email.identity' && <EmailVerify email={process.email} onContinue={handleEmailVerify} />}
+      {process.type === 'm.login.email.identity' && <EmailVerify email={process.email} onContinue={handleEmailVerify} />} */}
       <div className="auth-form__heading">
         {!isDisabled && <Text variant="h2" weight="medium">Register</Text>}
         {isDisabled && <Text className="auth-form__error">{registerInfo.error}</Text>}
@@ -452,7 +454,7 @@ function Register({ registerInfo, loginFlow, baseUrl }) {
             values, errors, handleChange, handleSubmit, isSubmitting,
           }) => (
             <>
-              {process.type === undefined && isSubmitting && <LoadingScreen message="Registration in progress..." />}
+              {/* {process.type === undefined && isSubmitting && <LoadingScreen message="Registration in progress..." />} */}
               <form className="auth-form" ref={formRef} onSubmit={handleSubmit}>
                 <Input values={values.username} name="username" onChange={handleChange} label="Username" type="username" required />
                 {errors.username && <Text className="auth-form__error" variant="b3">{errors.username}</Text>}
@@ -507,7 +509,7 @@ function AuthCard() {
   return (
     <>
       <Homeserver onChange={handleHsChange} />
-      { hsConfig !== null && (
+      {hsConfig !== null && (
         type === 'login'
           ? <Login loginFlow={hsConfig.login.flows} baseUrl={hsConfig.baseUrl} />
           : (
@@ -518,7 +520,7 @@ function AuthCard() {
             />
           )
       )}
-      { hsConfig !== null && (
+      {hsConfig !== null && (
         <Text variant="b2" className="auth-card__switch flex--center">
           {`${(type === 'login' ? 'Don\'t have' : 'Already have')} an account?`}
           <button
@@ -526,7 +528,7 @@ function AuthCard() {
             style={{ color: 'var(--tc-link)', cursor: 'pointer', margin: '0 var(--sp-ultra-tight)' }}
             onClick={() => setType((type === 'login') ? 'register' : 'login')}
           >
-            { type === 'login' ? ' Register' : ' Login' }
+            {type === 'login' ? ' Register' : ' Login'}
           </button>
         </Text>
       )}
@@ -558,7 +560,7 @@ function Auth() {
     <ScrollView invisible>
       <div className="auth__base">
         <div className="auth__wrapper">
-          {loginToken && <LoadingScreen message="Redirecting..." />}
+          {/* {loginToken && <LoadingScreen message="Redirecting..." />} */}
           {!loginToken && (
             <div className="auth-card">
               <Header>

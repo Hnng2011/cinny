@@ -152,6 +152,7 @@ function SpaceManageItem({
       size="extra-small"
     />
   );
+
   const roomNameJSX = (
     <Box direction='Row' alignItems='Center' gap='200'>
       <Text>
@@ -162,7 +163,7 @@ function SpaceManageItem({
       {votingStar !== '0' && votingStar &&
         <Box gap='100'>
           <Text className='space-manage-item__star'>{votingStar / 10}</Text>
-          <ReactStars char='❤' activeColor="#e31b23" count={1} size={24} value={1} edit={false} />
+          <ReactStars char='❤' activeColor="#e31b23" count={1} size={18} value={1} edit={false} />
         </Box>
       }
     </Box>
