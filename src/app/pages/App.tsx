@@ -7,6 +7,7 @@ import {
   createBrowserRouter,
   createRoutesFromElements,
   redirect,
+  useLocation,
 } from 'react-router-dom';
 
 import { EthereumSepolia } from '@particle-network/chains';
@@ -25,6 +26,7 @@ import '@particle-network/connectkit/dist/index.css';
 import Welcome from './welcome/welcome';
 
 function ConnectKit({ children }: any) {
+  const location = useLocation();
   return (
     <ModalProvider
       options={{
@@ -40,6 +42,7 @@ function ConnectKit({ children }: any) {
           version: '1.0.0',
         },
         wallet: {
+          visible: location.pathname === '/home',
           topMenuType: 'close',
           customStyle: {
             supportChains: [EthereumSepolia],
@@ -68,7 +71,7 @@ const createRouter = () => {
           }}
         />
         <Route loader={authLayoutLoader} element={<AuthLayout />}>
-          <Route path={LOGIN_PATH} element={<Login />} />
+          <Route path={LOGIN_PATH} element={<ConnectKit><Login /></ConnectKit>} />
         </Route>
 
         <Route
@@ -77,9 +80,9 @@ const createRouter = () => {
             return null;
           }}
         >
-          <Route path="/home" element={<Client />} />
+          <Route path="/home" element={<ConnectKit><Client /></ConnectKit>} />
         </Route>
-      </Route>,
+      </Route >,
       <Route path={ROOT_PATH} element={<Welcome />} />,
       <Route path="/*" element={<p>Page not found</p>} />
     ]
@@ -93,24 +96,23 @@ const createRouter = () => {
 // TODO: app crash boundary
 function App() {
   return (
-    <ConnectKit>
-      <FeatureCheck>
-        <ClientConfigLoader
-          fallback={() => <ConfigConfigLoading />}
-          error={(err, retry, ignore) => (
-            <ConfigConfigError error={err} retry={retry} ignore={ignore} />
-          )}
-        >
-          {(clientConfig) => (
-            <ClientConfigProvider value={clientConfig}>
-              <JotaiProvider>
-                <RouterProvider router={createRouter()} />
-              </JotaiProvider>
-            </ClientConfigProvider>
-          )}
-        </ClientConfigLoader>
-      </FeatureCheck>
-    </ConnectKit>
+
+    <FeatureCheck>
+      <ClientConfigLoader
+        fallback={() => <ConfigConfigLoading />}
+        error={(err, retry, ignore) => (
+          <ConfigConfigError error={err} retry={retry} ignore={ignore} />
+        )}
+      >
+        {(clientConfig) => (
+          <ClientConfigProvider value={clientConfig}>
+            <JotaiProvider>
+              <RouterProvider router={createRouter()} />
+            </JotaiProvider>
+          </ClientConfigProvider>
+        )}
+      </ClientConfigLoader>
+    </FeatureCheck>
   );
 }
 
