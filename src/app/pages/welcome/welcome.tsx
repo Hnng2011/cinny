@@ -1,6 +1,6 @@
 import { Box, Button, Text } from 'folds'
 import React, { useState } from 'react'
-import { useNavigate, } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import * as css from './styles.css';
 import { APP_PATH } from '../paths';
 import Toggle from '../../atoms/button/Toggle';
@@ -25,9 +25,11 @@ function Welcome() {
     const themeIndex = settings.getThemeIndex()
     const navigate = useNavigate()
 
+
     function LaunchApp() {
         navigate(APP_PATH, { replace: true })
     }
+
 
     return (
         <Box className={css.Welcome}>
@@ -58,12 +60,14 @@ function Welcome() {
                                 </Text>
                                 <RawIcon color="var(--bg-surface)" size="small" src={ArrowIC} />
                             </Button>
-                            <Button variant="Secondary" size="500" onClick={() => LaunchApp()}>
-                                <Text size='H6'>
-                                    Source code
-                                </Text>
-                                <RawIcon color="var(--bg-surface)" size="small" src={GitHub} />
-                            </Button>
+                            <Link to="https://github.com/ubiwdotspace" target="_blank">
+                                <Button variant="Secondary" size="500" onClick={() => (null)}>
+                                    <Text size='H6'>
+                                        Github
+                                    </Text>
+                                    <RawIcon color="var(--bg-surface)" size="small" src={GitHub} />
+                                </Button>
+                            </Link>
                         </Box>
 
                     </Box>
@@ -89,10 +93,10 @@ function Welcome() {
                         <Box direction='Column' className={css.FlexItems} gap="200">
                             <RawIcon src={NoFinancialIC} />
                             <Text size='H5'>
-                                No Traditional Financial Unit
+                                ZK Email
                             </Text>
                             <Text>
-                                All transactions are decentralized, bypassing traditional financial unit.
+                                Verify your Twitter without access privacy information, just email.
                             </Text>
                         </Box>
                         <Box direction='Column' className={css.FlexItems} gap="200">
@@ -146,7 +150,26 @@ function Welcome() {
                         </Box>
 
                     </Box>
+                    <Box direction='Column' className='FAQHeader'>
+                        <Text align='Center' size='H2' className={css.MainHeader2}>Frequently Asked Questions</Text>
+                        <Text align='Center' size='H4' className={css.SubHeader2}>something you need to know</Text>
+                    </Box>
+                    <Box direction='Column' className={css.FAQContent} alignItems='Start'>
+                        <Text align='Center' size='H4' className={css.Question}>What is Ubiw.space ?</Text>
+                        <Text align='Left' size='H6' className={css.Answer}>Ubiw.space is a platform that <Link to="https://github.com/ubiwdotspace" target="_blank"><span style={{ color: 'var(--bg-primary)' }}>made by Ubiwdotspace team</span></Link>. Everyone can create a space and in that, the owner can create any rooms for any content they want or think for earning money.</Text>
+                        <Box className={css.Divider} alignItems='Start' />
+                        <Text align='Center' size='H4' className={css.Question}>What is ZKEmail and why we use it ?</Text>
+                        <Text align='Left' size='H6' className={css.Answer}>ZK Email is a library that allows for anonymous verification of email signatures while masking specific data.<br /><br />We use ZK Email to verify your Twitter account for keeping your security and privacy. Freely to share content on our platform.</Text>
+                        <Box className={css.Divider} alignItems='Start' />
+                        <Text align='Center' size='H4' className={css.Question}>Is Ubiw.space free ?</Text>
+                        <Text align='Left' size='H6' className={css.Answer}>Yes. Ubiw.space is a free to use platform. Thanks to Account Abstraction you don't have to pay fee to the network. Just pay when join a Creator room</Text>
+
+                        <Button className={css.AllFaqs}> <Box direction='Row' gap='200' alignItems='Center'><Text size='H5'>Check all FAQs </Text><RawIcon color="var(--bg-surface)" size='small' src={ArrowIC} /></Box></Button>
+
+
+                    </Box>
                 </Box>
+
             </Box>
         </Box >
     )

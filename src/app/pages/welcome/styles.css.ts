@@ -41,7 +41,7 @@ export const Background = style({
 });
 
 export const Container = style({
-  minHeight: '100%',
+  height: '100%',
   width: '100%',
   maxWidth: toRem(1440),
   backgroundColor: color.Background.Container,
@@ -58,6 +58,7 @@ export const Navigation = style({
 });
 
 export const Content = style({
+  height: '100%',
   width: '100%',
   color: color.Background.OnContainer,
   zIndex: '11',
@@ -89,6 +90,30 @@ export const SubHeader = style({
   },
 });
 
+export const SubHeader2 = style({
+  color: color.Critical.MainLine,
+  '@media': {
+    'screen and (max-width: 1200px)': {
+      fontSize: toRem(30),
+    },
+    'screen and (max-width: 768px)': {
+      fontSize: toRem(20),
+    },
+  },
+});
+
+export const MainHeader2 = style({
+  marginTop: config.space.S500,
+  '@media': {
+    'screen and (max-width: 1200px)': {
+      fontSize: toRem(30),
+    },
+    'screen and (max-width: 768px)': {
+      fontSize: toRem(20),
+    },
+  },
+});
+
 export const MainHeader = style({
   fontSize: toRem(80),
   fontWeight: config.fontWeight.W900,
@@ -103,23 +128,28 @@ export const MainHeader = style({
 });
 
 export const Grid = style({
+  margin: `${config.space.S700} 0 ${config.space.S700} 0`,
+  height: '50%',
   display: 'grid',
   gridTemplateColumns: 'repeat(4 , 1fr)',
   '@media': {
     'screen and (max-width: 1200px)': {
       gridTemplateColumns: 'repeat(3 , 1fr)',
+      height: '60%',
     },
     'screen and (max-width: 960px)': {
       gridTemplateColumns: 'repeat(2 , 1fr)',
+      height: '70%',
     },
     'screen and (max-width: 768px)': {
       gridTemplateColumns: 'repeat(1 , 1fr)',
+      margin: '0',
+      height: '85%',
     },
   },
 });
 
 export const FlexItems = style({
-  minHeight: toRem(166),
   display: 'flex',
   height: '100%',
   width: '100%',
@@ -128,4 +158,41 @@ export const FlexItems = style({
   boxShadow: config.shadow.E400,
   borderRadius: toRem(5),
   backgroundColor: color.SurfaceVariant.Container,
+});
+
+export const Divider = style({
+  width: '100%',
+  margin: 'auto',
+  marginTop: config.space.S700,
+  height: toRem(2),
+  backgroundColor: color.Background.ContainerHover,
+});
+
+export const FAQContent = style({
+  width: '50%',
+  margin: 'auto',
+  marginTop: config.space.S700,
+});
+
+export const Question = style({
+  marginTop: config.space.S700,
+  '@media': {
+    'screen and (max-width: 1200px)': {
+      fontSize: toRem(30),
+    },
+    'screen and (max-width: 768px)': {
+      fontSize: toRem(20),
+    },
+  },
+});
+
+export const Answer = style({
+  color: color.Other.FocusRing,
+  marginTop: config.space.S300,
+  fontWeight: config.fontWeight.W400,
+});
+
+export const AllFaqs = style({
+  margin: 'auto',
+  marginTop: config.space.S700,
 });
