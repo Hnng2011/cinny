@@ -159,6 +159,11 @@ export const FlexItems = style({
   boxShadow: config.shadow.E400,
   borderRadius: toRem(5),
   backgroundColor: color.SurfaceVariant.Container,
+  '@media': {
+    'screen and (max-width: 768px)': {
+      minHeight: toRem(166),
+    },
+  },
 });
 
 export const Divider = style({
