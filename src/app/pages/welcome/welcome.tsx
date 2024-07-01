@@ -131,7 +131,6 @@ function Welcome() {
                         </Box>
                         <Box direction='Column' className={css.FlexItems} gap="200">
                             <RawIcon src={WalletIC} />
-
                             <Text size='H5'>
                                 Integrated web3 wallet
                             </Text>
@@ -155,18 +154,15 @@ function Welcome() {
                         <Text align='Center' size='H4' className={css.SubHeader2}>something you need to know</Text>
                     </Box>
                     <Box direction='Column' className={css.FAQContent} alignItems='Start'>
-                        <Text align='Center' size='H4' className={css.Question}>What is Ubiw.space ?</Text>
+                        <Text align='Left' size='H4' className={css.Question}>What is Ubiw.space ?</Text>
                         <Text align='Left' size='H6' className={css.Answer}>Ubiw.space is a platform that <Link to="https://github.com/ubiwdotspace" target="_blank"><span style={{ color: 'var(--bg-primary)' }}>made by Ubiwdotspace team</span></Link>. Everyone can create a space and in that, the owner can create any rooms for any content they want or think for earning money.</Text>
                         <Box className={css.Divider} alignItems='Start' />
-                        <Text align='Center' size='H4' className={css.Question}>What is ZKEmail and why we use it ?</Text>
+                        <Text align='Left' size='H4' className={css.Question}>What is ZKEmail and why we use it ?</Text>
                         <Text align='Left' size='H6' className={css.Answer}>ZK Email is a library that allows for anonymous verification of email signatures while masking specific data.<br /><br />We use ZK Email to verify your Twitter account for keeping your security and privacy. Freely to share content on our platform.</Text>
                         <Box className={css.Divider} alignItems='Start' />
-                        <Text align='Center' size='H4' className={css.Question}>Is Ubiw.space free ?</Text>
+                        <Text align='Left' size='H4' className={css.Question}>Is Ubiw.space free ?</Text>
                         <Text align='Left' size='H6' className={css.Answer}>Yes. Ubiw.space is a free to use platform. Thanks to Account Abstraction you don't have to pay fee to the network. Just pay when join a Creator room</Text>
-
                         <Button className={css.AllFaqs}> <Box direction='Row' gap='200' alignItems='Center'><Text size='H5'>Check all FAQs </Text><RawIcon color="var(--bg-surface)" size='small' src={ArrowIC} /></Box></Button>
-
-
                     </Box>
                 </Box>
 

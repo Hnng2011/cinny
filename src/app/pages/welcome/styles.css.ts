@@ -152,6 +152,7 @@ export const Grid = style({
 export const FlexItems = style({
   display: 'flex',
   height: '100%',
+  minHeight: toRem(144),
   width: '100%',
   padding: config.space.S400,
   borderWidth: config.borderWidth.B300,
