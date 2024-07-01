@@ -248,13 +248,13 @@ function ProfileFooter({ roomId, userId, onRequestClose }) {
 
   return (
     <div className="profile-viewer__buttons">
-      {/* <Button
+      <Button
         variant="primary"
         onClick={openDM}
         disabled={isCreatingDM}
       >
         {isCreatingDM ? 'Creating room...' : 'Message'}
-      </Button> */}
+      </Button>
       {isBanned && canIKick && (
         <Button
           variant="positive"

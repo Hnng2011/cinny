@@ -26,7 +26,7 @@ import SidebarAvatar from '../../molecules/sidebar-avatar/SidebarAvatar';
 import SpaceOptions from '../../molecules/space-options/SpaceOptions';
 
 import HomeIC from '../../../../public/res/ic/outlined/home.svg';
-// import UserIC from '../../../../public/res/ic/outlined/user.svg';
+import UserIC from '../../../../public/res/ic/outlined/user.svg';
 // import AddPinIC from '../../../../public/res/ic/outlined/add-pin.svg';
 import SearchIC from '../../../../public/res/ic/outlined/search.svg';
 import InviteIC from '../../../../public/res/ic/outlined/invite.svg';
@@ -162,7 +162,7 @@ function FeaturedTab() {
           />
         ) : null}
       />
-      {/* <SidebarAvatar
+      <SidebarAvatar
         tooltip="People"
         active={selectedTab === cons.tabs.DIRECTS}
         onClick={() => selectTab(cons.tabs.DIRECTS)}
@@ -173,7 +173,7 @@ function FeaturedTab() {
             content={abbreviateNumber(dmsNoti.total) || null}
           />
         ) : null}
-      /> */}
+      />
     </>
   );
 }

@@ -32,7 +32,6 @@ import HashSearchIC from '../../../../public/res/ic/outlined/hash-search.svg';
 import SpacePlusIC from '../../../../public/res/ic/outlined/space-plus.svg';
 import ChevronBottomIC from '../../../../public/res/ic/outlined/chevron-bottom.svg';
 import HashGlobeIC from '../../../../public/res/ic/outlined/hash-globe.svg'
-// import { SmartAccountAtom } from '../../state/smartAccount';
 
 export function HomeSpaceOptions({ spaceId, afterOptionSelect }) {
   const mx = initMatrix.matrixClient;
@@ -40,55 +39,6 @@ export function HomeSpaceOptions({ spaceId, afterOptionSelect }) {
   const canManage = room
     ? room.currentState.maySendStateEvent('m.space.child', mx.getUserId())
     : true;
-
-  // const [smartAccount] = useAtom(SmartAccountAtom);
-
-  // useEffect(() => {
-  //   if (!spaceId && smartAccount) {
-  //     const check = async () => {
-  //       const checking = async () => {
-  //         const contractAddress = import.meta.env.VITE_APP_CONTRACT_ADDRESS;
-  //         const address = await smartAccount.getAddress()
-  //         const ABICheck = [{
-  //           "inputs": [
-  //             {
-  //               "internalType": "address",
-  //               "name": "",
-  //               "type": "address"
-  //             }
-  //           ],
-  //           "name": "spaces",
-  //           "outputs": [
-  //             {
-  //               "internalType": "address",
-  //               "name": "spaceOwner",
-  //               "type": "address"
-  //             }
-  //           ],
-  //           "stateMutability": "view",
-  //           "type": "function"
-  //         },]
-
-  //         try {
-  //           const provider = new ethers.providers.WebSocketProvider('wss://sepolia.gateway.tenderly.co');
-  //           const contract = new ethers.Contract(contractAddress, ABICheck, provider)
-  //           const result = await contract.callStatic.spaces(address)
-  //           return hexValue(result).toLowerCase() !== address.toLowerCase();
-  //         }
-
-  //         catch (e) {
-  //           return false
-  //         }
-  //       }
-
-  //       setCancreate(await checking());
-  //     }
-
-  //     check()
-  //   }
-
-
-  // }, [smartAccount])
 
   return (
     <>

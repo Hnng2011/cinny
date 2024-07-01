@@ -21,8 +21,8 @@ import SegmentedControls from '../../atoms/segmented-controls/SegmentedControls'
 
 import PopupWindow from '../../molecules/popup-window/PopupWindow';
 import SettingTile from '../../molecules/setting-tile/SettingTile';
-// import ImportE2ERoomKeys from '../../molecules/import-export-e2e-room-keys/ImportE2ERoomKeys';
-// import ExportE2ERoomKeys from '../../molecules/import-export-e2e-room-keys/ExportE2ERoomKeys';
+import ImportE2ERoomKeys from '../../molecules/import-export-e2e-room-keys/ImportE2ERoomKeys';
+import ExportE2ERoomKeys from '../../molecules/import-export-e2e-room-keys/ExportE2ERoomKeys';
 import { ImagePackUser, ImagePackGlobal } from '../../molecules/image-pack/ImagePack';
 import GlobalNotification from '../../molecules/global-notification/GlobalNotification';
 import KeywordNotification from '../../molecules/global-notification/KeywordNotification';
@@ -35,7 +35,7 @@ import ProfileEditor from '../profile-editor/ProfileEditor';
 
 import SunIC from '../../../../public/res/ic/outlined/sun.svg';
 import EmojiIC from '../../../../public/res/ic/outlined/emoji.svg';
-// import LockIC from '../../../../public/res/ic/outlined/lock.svg';
+import LockIC from '../../../../public/res/ic/outlined/lock.svg';
 import BellIC from '../../../../public/res/ic/outlined/bell.svg';
 import InfoIC from '../../../../public/res/ic/outlined/info.svg';
 import PowerIC from '../../../../public/res/ic/outlined/power.svg';
@@ -60,7 +60,7 @@ function AppearanceSection() {
   const [hideNickAvatarEvents, setHideNickAvatarEvents] = useSetting(settingsAtom, 'hideNickAvatarEvents');
   const [mediaAutoLoad, setMediaAutoLoad] = useSetting(settingsAtom, 'mediaAutoLoad');
   const [urlPreview, setUrlPreview] = useSetting(settingsAtom, 'urlPreview');
-  // const [encUrlPreview, setEncUrlPreview] = useSetting(settingsAtom, 'encUrlPreview');
+  const [encUrlPreview, setEncUrlPreview] = useSetting(settingsAtom, 'encUrlPreview');
   const [showHiddenEvents, setShowHiddenEvents] = useSetting(settingsAtom, 'showHiddenEvents');
   const spacings = ['0', '100', '200', '300', '400', '500']
 
@@ -203,7 +203,7 @@ function AppearanceSection() {
           )}
           content={<Text variant="b3">Show url preview for link in messages.</Text>}
         />
-        {/* <SettingTile
+        <SettingTile
           title="Url Preview in Encrypted Room"
           options={(
             <Toggle
@@ -212,7 +212,7 @@ function AppearanceSection() {
             />
           )}
           content={<Text variant="b3">Show url preview for link in encrypted messages.</Text>}
-        /> */}
+        />
         <SettingTile
           title="Show hidden events"
           options={(
@@ -297,39 +297,39 @@ function EmojiSection() {
   );
 }
 
-// function SecuritySection() {
-//   return (
-//     <div className="settings-security">
-//       <div className="settings-security__card">
-//         <MenuHeader>Cross signing and backup</MenuHeader>
-//         <CrossSigning />
-//         <KeyBackup />
-//       </div>
-//       <DeviceManage />
-//       <div className="settings-security__card">
-//         <MenuHeader>Export/Import encryption keys</MenuHeader>
-//         <SettingTile
-//           title="Export E2E room keys"
-//           content={(
-//             <>
-//               <Text variant="b3">Export end-to-end encryption room keys to decrypt old messages in other session. In order to encrypt keys you need to set a password, which will be used while importing.</Text>
-//               <ExportE2ERoomKeys />
-//             </>
-//           )}
-//         />
-//         <SettingTile
-//           title="Import E2E room keys"
-//           content={(
-//             <>
-//               <Text variant="b3">{'To decrypt older messages, Export E2EE room keys from Element (Settings > Security & Privacy > Encryption > Cryptography) and import them here. Imported keys are encrypted so you\'ll have to enter the password you set in order to decrypt it.'}</Text>
-//               <ImportE2ERoomKeys />
-//             </>
-//           )}
-//         />
-//       </div>
-//     </div>
-//   );
-// }
+function SecuritySection() {
+  return (
+    <div className="settings-security">
+      {/* <div className="settings-security__card">
+        <MenuHeader>Cross signing and backup</MenuHeader>
+        <CrossSigning />
+        <KeyBackup />
+      </div>
+      <DeviceManage /> */}
+      <div className="settings-security__card">
+        <MenuHeader>Export/Import encryption keys</MenuHeader>
+        <SettingTile
+          title="Export E2E room keys"
+          content={(
+            <>
+              <Text variant="b3">Export end-to-end encryption room keys to decrypt old messages in other session. In order to encrypt keys you need to set a password, which will be used while importing.</Text>
+              <ExportE2ERoomKeys />
+            </>
+          )}
+        />
+        <SettingTile
+          title="Import E2E room keys"
+          content={(
+            <>
+              <Text variant="b3">{'To decrypt older messages, Export E2EE room keys from Element (Settings > Security & Privacy > Encryption > Cryptography) and import them here. Imported keys are encrypted so you\'ll have to enter the password you set in order to decrypt it.'}</Text>
+              <ImportE2ERoomKeys />
+            </>
+          )}
+        />
+      </div>
+    </div>
+  );
+}
 
 function AboutSection() {
   return (
@@ -403,12 +403,12 @@ const tabItems = [{
   disabled: false,
   render: () => <EmojiSection />,
 },
-// {
-//   text: tabText.SECURITY,
-//   iconSrc: LockIC,
-//   disabled: false,
-//   render: () => <SecuritySection />,
-// }, 
+{
+  text: tabText.SECURITY,
+  iconSrc: LockIC,
+  disabled: false,
+  render: () => <SecuritySection />,
+},
 {
   text: tabText.ABOUT,
   iconSrc: InfoIC,

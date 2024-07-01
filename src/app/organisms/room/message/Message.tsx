@@ -893,7 +893,7 @@ export const Message = as<'div', MessageProps>(
                             eventId={mEvent.getId() ?? ''}
                             onClose={closeMenu}
                           />
-                          <MessageSourceCodeItem room={room} mEvent={mEvent} onClose={closeMenu} />
+                          {/* <MessageSourceCodeItem room={room} mEvent={mEvent} onClose={closeMenu} /> */}
                         </Box>
                         {((!mEvent.isRedacted() && canDelete) ||
                           mEvent.getSender() !== mx.getUserId()) && (

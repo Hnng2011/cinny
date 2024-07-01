@@ -49,7 +49,7 @@ import generateRandomString from '../../../util/randomString';
 function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
   const [smartAccount] = useAtom(SmartAccountAtom);
   const [joinRule] = useState(parentId ? 'restricted' : 'public');
-  const [isEncrypted] = useState(false);
+  const [isEncrypted] = useState(!isSpace);
   const [isCreatingRoom, setIsCreatingRoom] = useState(false);
   const [creatingError, setCreatingError] = useState(null);
   const [isValidAddress, setIsValidAddress] = useState(null);
@@ -111,7 +111,6 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
         joinRule,
         alias: roomAlias,
         isEncrypted,
-        // (isSpace || joinRule === 'public') ? false : isEncrypted,
         powerLevel,
         isSpace,
         parentId,
