@@ -212,7 +212,12 @@ async function CreateSpaceByContract(smartAccount) {
   }
 
   catch (e) {
-    throw new Error(e?.data.extraMessage.message || e?.message || e)
+    const err = JSON.parse(String(e?.data.extraMessage.message).substring(String(e?.data.extraMessage.message).indexOf('{'))) || e?.message || e
+    if (err.error.message === 'execution reverted: Caller does not own the required NFT') {
+      throw new Error("Please claim your NFT first")
+    }
+    else { throw new Error(typeof err === 'object' ? err.error.message : err) }
+
   }
 }
 
@@ -389,7 +394,7 @@ async function leave(roomId) {
   const mx = initMatrix.matrixClient;
   const isDM = initMatrix.roomList.directs.has(roomId);
   try {
-    await mx.leave(roomId);
+    await mx.forget(roomId);
     appDispatcher.dispatch({
       type: cons.actions.room.LEAVE,
       roomId,
@@ -407,11 +412,13 @@ async function create(options, isDM = false) {
     if (isDM && typeof options.invite?.[0] === 'string') {
       await addRoomToMDirect(result.room_id, options.invite[0]);
     }
-    // appDispatcher.dispatch({
-    //   type: cons.actions.room.CREATE,
-    //   roomId: result.room_id,
-    //   isDM,
-    // });
+
+    isDM && appDispatcher.dispatch({
+      type: cons.actions.room.CREATE,
+      roomId: result.room_id,
+      isDM,
+    });
+
     return result;
   } catch (e) {
     const errcodes = ['M_UNKNOWN', 'M_BAD_JSON', 'M_ROOM_IN_USE', 'M_INVALID_ROOM_STATE', 'M_UNSUPPORTED_ROOM_VERSION'];
@@ -423,7 +430,9 @@ async function create(options, isDM = false) {
 }
 
 async function createDM(userIdOrIds, isEncrypted = true) {
+  const room_id = `${generateRandomString(18)}`;
   const options = {
+    room_id,
     is_direct: true,
     invite: Array.isArray(userIdOrIds) ? userIdOrIds : [userIdOrIds],
     visibility: 'private',

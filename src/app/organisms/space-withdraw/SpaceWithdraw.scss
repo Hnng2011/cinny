@@ -87,11 +87,12 @@
   margin: var(--sp-ultra-tight) var(--sp-extra-tight);
   padding: 0 var(--sp-extra-tight);
   border-radius: var(--bo-radius);
+  margin-bottom: 12px;
 
   & > div {
     min-height: 40px;
     display: flex;
-    align-items: center;
+    align-items: start;
   }
 
   &--space {

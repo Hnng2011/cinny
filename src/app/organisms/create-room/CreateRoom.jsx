@@ -45,6 +45,7 @@ import SpacePlusIC from '../../../../public/res/ic/outlined/space-plus.svg';
 import CrossIC from '../../../../public/res/ic/outlined/cross.svg';
 import { SmartAccountAtom } from '../../state/smartAccount';
 import generateRandomString from '../../../util/randomString';
+import { Link } from 'react-router-dom';
 
 function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
   const [smartAccount] = useAtom(SmartAccountAtom);
@@ -235,6 +236,7 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
         }
 
         {typeof creatingError === 'string' && <Text className="create-room__error" variant="b3">{creatingError}</Text>}
+        {creatingError === 'Please claim your NFT first' && <Link to="https://proof.ubiw.space" target='_blank'><Button variant="caution">Claim NFT</Button></Link>}
       </form >
     </div >
   );

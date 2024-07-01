@@ -131,16 +131,16 @@ function GlobalNotification() {
   return (
     <div className="global-notification">
       <MenuHeader>Global Notifications</MenuHeader>
-      {/* <SettingTile
+      <SettingTile
         title="Direct messages"
         options={(
           <Button onClick={(evt) => onSelect(evt, DM)} iconSrc={ChevronBottomIC}>
-            { typeToLabel[rulesToType[DM]] }
+            {typeToLabel[rulesToType[DM]]}
           </Button>
         )}
         content={<Text variant="b3">Default notification settings for all direct message.</Text>}
-      /> */}
-      {/* <SettingTile
+      />
+      <SettingTile
         title="Encrypted direct messages"
         options={(
           <Button onClick={(evt) => onSelect(evt, ENC_DM)} iconSrc={ChevronBottomIC}>
@@ -148,7 +148,7 @@ function GlobalNotification() {
           </Button>
         )}
         content={<Text variant="b3">Default notification settings for all encrypted direct message.</Text>}
-      /> */}
+      />
       <SettingTile
         title="Rooms messages"
         options={(

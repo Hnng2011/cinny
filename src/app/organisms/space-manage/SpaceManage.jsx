@@ -162,8 +162,8 @@ function SpaceManageItem({
 
       {votingStar !== '0' && votingStar &&
         <Box gap='100'>
-          <Text className='space-manage-item__star'>{votingStar / 10}</Text>
-          <ReactStars char='❤' activeColor="#e31b23" count={1} size={18} value={1} edit={false} />
+          <Text variant='b2' className='space-manage-item__star'>{votingStar / 10}</Text>
+          <ReactStars char='❤' activeColor="#e31b23" count={1} size={15} value={1} edit={false} />
         </Box>
       }
     </Box>
@@ -201,9 +201,9 @@ function SpaceManageItem({
           isJoined
             ? <Button onClick={handleOpen}>Open</Button>
             :
-            <Box direction='Row' alignItems='Center' gap='300'>
-              <Text>{fee} ETH</Text>
+            <Box direction='Column' alignItems='End' gap='300'>
               <Button variant="primary" onClick={handleJoin} disabled={isJoining || !fee}>{isJoining ? 'Joining...' : 'Join'}</Button>
+              <Text variant="b3" >Subscription: {fee} ETH</Text>
             </Box>
 
         }
