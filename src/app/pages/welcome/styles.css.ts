@@ -122,7 +122,7 @@ export const MainHeader = style({
       fontSize: toRem(50),
     },
     'screen and (max-width: 768px)': {
-      fontSize: toRem(35),
+      fontSize: toRem(32),
     },
   },
 });
@@ -172,6 +172,14 @@ export const FAQContent = style({
   width: '50%',
   margin: 'auto',
   marginTop: config.space.S700,
+  '@media': {
+    'screen and (max-width: 1200px)': {
+      width: '85%',
+    },
+    'screen and (max-width: 768px)': {
+      width: '95%',
+    },
+  },
 });
 
 export const Question = style({

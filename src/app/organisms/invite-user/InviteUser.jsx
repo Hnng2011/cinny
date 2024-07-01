@@ -37,6 +37,8 @@ function InviteUser({
   const usernameRef = useRef(null);
 
   const mx = initMatrix.matrixClient;
+  const spaceName = mx?.getRoom(roomId)?.isSpaceRoom() ? mx.getRoom(roomId).name : mx.getRoom(initMatrix.roomList.roomIdToParents.get(roomId)?.keys().next().value)?.name
+  const directName = mx.getRoom(roomId)?.getDefaultRoomName() || null;
 
   function getMapCopy(myMap) {
     const newMap = new Map();
@@ -227,7 +229,7 @@ function InviteUser({
   return (
     <PopupWindow
       isOpen={isOpen}
-      title={(typeof roomId === 'string' ? `Invite to ${mx?.getRoom(roomId)?.isSpaceRoom() ? mx.getRoom(roomId).name : `space - ${mx.getRoom(initMatrix.roomList.roomIdToParents.get(roomId)?.keys().next().value)?.name}`}` : 'Direct message')}
+      title={(typeof roomId === 'string' ? `Invite to ${spaceName ? `"${spaceName}" space` : `"${directName}" Direct message`}` : 'Direct message')}
       contentOptions={<IconButton src={CrossIC} onClick={onRequestClose} tooltip="Close" />}
       onRequestClose={onRequestClose}
     >
