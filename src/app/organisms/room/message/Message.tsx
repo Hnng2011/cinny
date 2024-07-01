@@ -216,89 +216,89 @@ export const MessageReadReceiptItem = as<
   );
 });
 
-export const MessageSourceCodeItem = as<
-  'button',
-  {
-    room: Room;
-    mEvent: MatrixEvent;
-    onClose?: () => void;
-  }
->(({ room, mEvent, onClose,
-  ...props
-}, ref) => {
-  const [open, setOpen] = useState(false);
+// export const MessageSourceCodeItem = as<
+//   'button',
+//   {
+//     room: Room;
+//     mEvent: MatrixEvent;
+//     onClose?: () => void;
+//   }
+// >(({ room, mEvent, onClose,
+//   ...props
+// }, ref) => {
+//   const [open, setOpen] = useState(false);
 
-  const getContent = (evt: MatrixEvent) =>
-    evt.isEncrypted()
-      ? {
-        [`<== DECRYPTED_EVENT ==>`]: evt.getEffectiveEvent(),
-        [`<== ORIGINAL_EVENT ==>`]: evt.event,
-      }
-      : evt.event;
+//   const getContent = (evt: MatrixEvent) =>
+//     evt.isEncrypted()
+//       ? {
+//         [`<== DECRYPTED_EVENT ==>`]: evt.getEffectiveEvent(),
+//         [`<== ORIGINAL_EVENT ==>`]: evt.event,
+//       }
+//       : evt.event;
 
-  const getText = (): string => {
-    const evtId = mEvent.getId()!;
-    const evtTimeline = room.getTimelineForEvent(evtId);
-    const edits =
-      evtTimeline &&
-      getEventEdits(evtTimeline.getTimelineSet(), evtId, mEvent.getType())?.getRelations();
+//   const getText = (): string => {
+//     const evtId = mEvent.getId()!;
+//     const evtTimeline = room.getTimelineForEvent(evtId);
+//     const edits =
+//       evtTimeline &&
+//       getEventEdits(evtTimeline.getTimelineSet(), evtId, mEvent.getType())?.getRelations();
 
-    if (!edits) return JSON.stringify(getContent(mEvent), null, 2);
+//     if (!edits) return JSON.stringify(getContent(mEvent), null, 2);
 
-    const content: Record<string, unknown> = {
-      '<== MAIN_EVENT ==>': getContent(mEvent),
-    };
+//     const content: Record<string, unknown> = {
+//       '<== MAIN_EVENT ==>': getContent(mEvent),
+//     };
 
-    edits.forEach((editEvt, index) => {
-      content[`<== REPLACEMENT_EVENT_${index + 1} ==>`] = getContent(editEvt);
-    });
+//     edits.forEach((editEvt, index) => {
+//       content[`<== REPLACEMENT_EVENT_${index + 1} ==>`] = getContent(editEvt);
+//     });
 
-    return JSON.stringify(content, null, 2);
-  };
+//     return JSON.stringify(content, null, 2);
+//   };
 
-  const handleClose = () => {
-    setOpen(false);
-    onClose?.();
-  };
+//   const handleClose = () => {
+//     setOpen(false);
+//     onClose?.();
+//   };
 
-  return (
-    <>
-      <Overlay open={open} backdrop={<OverlayBackdrop />}>
-        <OverlayCenter>
-          <FocusTrap
-            focusTrapOptions={{
-              initialFocus: false,
-              onDeactivate: handleClose,
-              clickOutsideDeactivates: true,
-            }}
-          >
-            <Modal variant="Surface" size="500">
-              <TextViewer
-                name="Source Code"
-                langName="json"
-                text={getText()}
-                requestClose={handleClose}
-              />
-            </Modal>
-          </FocusTrap>
-        </OverlayCenter>
-      </Overlay>
-      {/* <MenuItem
-        size="300"
-        after={<Icon size="100" src={Icons.BlockCode} />}
-        radii="300"
-        onClick={() => setOpen(true)}
-        {...props}
-        ref={ref}
-        aria-pressed={open}
-      >
-        <Text className={css.MessageMenuItemText} as="span" size="T300" truncate>
-          View Source
-        </Text>
-      </MenuItem> */}
-    </>
-  );
-});
+//   return (
+//     <>
+//       <Overlay open={open} backdrop={<OverlayBackdrop />}>
+//         <OverlayCenter>
+//           <FocusTrap
+//             focusTrapOptions={{
+//               initialFocus: false,
+//               onDeactivate: handleClose,
+//               clickOutsideDeactivates: true,
+//             }}
+//           >
+//             <Modal variant="Surface" size="500">
+//               <TextViewer
+//                 name="Source Code"
+//                 langName="json"
+//                 text={getText()}
+//                 requestClose={handleClose}
+//               />
+//             </Modal>
+//           </FocusTrap>
+//         </OverlayCenter>
+//       </Overlay>
+//       {/* <MenuItem
+//         size="300"
+//         after={<Icon size="100" src={Icons.BlockCode} />}
+//         radii="300"
+//         onClick={() => setOpen(true)}
+//         {...props}
+//         ref={ref}
+//         aria-pressed={open}
+//       >
+//         <Text className={css.MessageMenuItemText} as="span" size="T300" truncate>
+//           View Source
+//         </Text>
+//       </MenuItem> */}
+//     </>
+//   );
+// });
 
 export const MessageDeleteItem = as<
   'button',
@@ -1027,7 +1027,7 @@ export const Event = as<'div', EventProps>(
                             eventId={mEvent.getId() ?? ''}
                             onClose={closeMenu}
                           />
-                          <MessageSourceCodeItem room={room} mEvent={mEvent} onClose={closeMenu} />
+                          {/* <MessageSourceCodeItem room={room} mEvent={mEvent} onClose={closeMenu} /> */}
                         </Box>
                         {((!mEvent.isRedacted() && canDelete && !stateEvent) ||
                           (mEvent.getSender() !== mx.getUserId() && !stateEvent)) && (

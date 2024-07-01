@@ -906,6 +906,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor }: RoomTimeli
     },
     [room]
   );
+
   const handleUsernameClick: MouseEventHandler<HTMLButtonElement> = useCallback(
     (evt) => {
       evt.preventDefault();
@@ -915,17 +916,20 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor }: RoomTimeli
         return;
       }
       const name = getMemberDisplayName(room, userId) ?? getMxIdLocalPart(userId) ?? userId;
-      editor.insertNode(
-        createMentionElement(
-          userId,
-          name.startsWith('@') ? name : `@${name}`,
-          userId === mx.getUserId()
-        )
-      );
+      const editorElement = createMentionElement(
+        userId,
+        name.startsWith('@') ? name : `@${name}`,
+        userId === mx.getUserId()
+      )
+
+      if (!editor.above()?.[0]?.children?.some(item => JSON.stringify(item) === JSON.stringify(editorElement))) {
+        editor.insertNode(editorElement);
+      }
+
       ReactEditor.focus(editor);
       moveCursor(editor);
     },
-    [mx, room, editor]
+    [room, mx, editor]
   );
 
   const handleReplyClick: MouseEventHandler<HTMLButtonElement> = useCallback(

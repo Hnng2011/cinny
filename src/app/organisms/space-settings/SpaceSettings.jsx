@@ -11,8 +11,8 @@ import navigation from '../../../client/state/navigation';
 import {
   createSpaceShortcut,
   deleteSpaceShortcut,
-  categorizeSpace,
-  unCategorizeSpace,
+  // categorizeSpace,
+  // unCategorizeSpace,
 } from '../../../client/action/accountData';
 
 import Text from '../../atoms/text/Text';
@@ -34,8 +34,8 @@ import ShieldUserIC from '../../../../public/res/ic/outlined/shield-user.svg';
 // import LeaveArrowIC from '../../../../public/res/ic/outlined/leave-arrow.svg';
 import PinIC from '../../../../public/res/ic/outlined/pin.svg';
 import PinFilledIC from '../../../../public/res/ic/filled/pin.svg';
-import CategoryIC from '../../../../public/res/ic/outlined/category.svg';
-import CategoryFilledIC from '../../../../public/res/ic/filled/category.svg';
+// import CategoryIC from '../../../../public/res/ic/outlined/category.svg';
+// import CategoryFilledIC from '../../../../public/res/ic/filled/category.svg';
 import EmojiIC from '../../../../public/res/ic/outlined/emoji.svg';
 
 // import { confirmDialog } from '../../molecules/confirm-dialog/ConfirmDialog';
@@ -68,7 +68,7 @@ const tabItems = [{
 
 function GeneralSettings({ roomId }) {
   const isPinned = initMatrix.accountData.spaceShortcut.has(roomId);
-  const isCategorized = initMatrix.accountData.categorizedSpaces.has(roomId);
+  // const isCategorized = initMatrix.accountData.categorizedSpaces.has(roomId);
   // const roomName = initMatrix.matrixClient.getRoom(roomId)?.name;
   const [, forceUpdate] = useForceUpdate();
 
@@ -76,7 +76,7 @@ function GeneralSettings({ roomId }) {
     <>
       <div className="room-settings__card">
         <MenuHeader>Options</MenuHeader>
-        <MenuItem
+        {/* <MenuItem
           onClick={() => {
             if (isCategorized) unCategorizeSpace(roomId);
             else categorizeSpace(roomId);
@@ -85,7 +85,7 @@ function GeneralSettings({ roomId }) {
           iconSrc={isCategorized ? CategoryFilledIC : CategoryIC}
         >
           {isCategorized ? 'Uncategorize subspaces' : 'Categorize subspaces'}
-        </MenuItem>
+        </MenuItem> */}
         <MenuItem
           onClick={() => {
             if (isPinned) deleteSpaceShortcut(roomId);

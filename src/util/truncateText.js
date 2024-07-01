@@ -1,5 +1,6 @@
 const TruncateText = (text) => {
-    const truncatedText = (text?.length > 20) ? `...${text?.substring(text.length - 20)}` : text;
+    const width = window.innerWidth;
+    const truncatedText = (text?.length > 20) ? `...${text?.substring(text.length - (width < 768 ? 10 : 20))}` : text;
     return truncatedText
 }
 

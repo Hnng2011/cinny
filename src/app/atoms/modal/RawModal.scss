@@ -1,6 +1,6 @@
 .raw-modal {
   --small-modal-width: 525px;
-  --medium-modal-width: 712px;
+  --medium-modal-width: 768px;
   --large-modal-width: 1024px;
 
   position: relative;
@@ -49,7 +49,7 @@
 @keyframes raw-modal--content {
   0% {
     transform: translateY(100px);
-    opacity: .5;
+    opacity: 0.5;
   }
   100% {
     transform: translateY(0);
