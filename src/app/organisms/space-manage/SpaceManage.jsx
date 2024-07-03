@@ -91,11 +91,13 @@ function SpaceManageItem({
   let imageSrc = mx.mxcUrlToHttp(roomInfo.avatar_url, 24, 24, 'crop') || null;
   if (!imageSrc && room) {
     imageSrc = room.getAvatarFallbackMember()?.getAvatarUrl(mx.baseUrl, 24, 24, 'crop') || null;
-    if (imageSrc === null) imageSrc = room.getAvatarUrl(mx.baseUrl, 24, 24, 'crop') || null;
+    if (imageSrc === null) imageSrc = room?.getAvatarUrl(mx.baseUrl, 24, 24, 'crop') || null;
   }
-
   const isDM = directs.has(roomId);
   const [smartAccount] = useAtom(SmartAccountAtom)
+
+  let avatarSrc = mx.getRoom(roomId)?.getAvatarUrl(mx.baseUrl, 36, 36, 'crop');
+  avatarSrc = isDM ? mx.getRoom(roomId).getAvatarFallbackMember()?.getAvatarUrl(mx.baseUrl, 36, 36, 'crop') : avatarSrc;
 
   useEffect(() => {
     const callFeeAndStar = async () => {
@@ -142,7 +144,7 @@ function SpaceManageItem({
     <Avatar
       text={name}
       bgColor={colorMXID(roomId)}
-      imageSrc={isDM ? imageSrc : null}
+      imageSrc={avatarSrc}
       iconColor="var(--ic-surface-low)"
       iconSrc={
         isDM
@@ -159,14 +161,14 @@ function SpaceManageItem({
         {twemojify(name)}
         <Text variant="b3" span>{` • ${roomInfo.num_joined_members} members`}</Text>
       </Text>
-
-      {votingStar !== '0' && votingStar &&
+      {
+        votingStar !== '0' && votingStar &&
         <Box gap='100'>
           <Text variant='b2' className='space-manage-item__star'>{votingStar / 10}</Text>
           <ReactStars char='❤' activeColor="#e31b23" count={1} size={15} value={1} edit={false} />
         </Box>
       }
-    </Box>
+    </Box >
 
   );
 
@@ -194,7 +196,7 @@ function SpaceManageItem({
         >
           {roomAvatarJSX}
           {roomNameJSX}
-          {isSuggested && <Text variant="b2">Suggested</Text>}
+          {isSuggested && <Text variant="b2">Owner's refer</Text>}
         </button>
         {roomInfo.topic && expandBtnJsx}
         {
@@ -265,7 +267,7 @@ function SpaceManageFooter({ parentId, selected }) {
             onClick={() => handleToggleSuggested(!allSuggested)}
             variant={allSuggested ? 'surface' : 'primary'}
           >
-            {allSuggested ? 'Mark as not suggested' : 'Mark as suggested'}
+            {allSuggested ? 'Mark as not Refer' : 'Mark as Refer'}
           </Button>
         </>
       )}
@@ -398,11 +400,12 @@ function SpaceManageContent({ roomId, requestClose }) {
       {spacePath.length > 1 && (
         <SpaceManageBreadcrumb path={spacePath} onSelect={addPathItem} />
       )}
-      <Text variant="b3" weight="bold">Rooms and spaces</Text>
+      <Text variant="b3" weight="bold">Rooms</Text>
       <div className="space-manage__content-items">
         {!isLoading && currentHierarchy?.rooms?.length === 1 && (
           <Text>
-            Either the space contains private rooms or you need to join space to view it's rooms.
+            The space haven't have rooms yet
+            {/* Either the space contains private rooms or you need to join space to view it's rooms. */}
           </Text>
         )}
         {currentHierarchy && (currentHierarchy.rooms?.map((roomInfo) => (

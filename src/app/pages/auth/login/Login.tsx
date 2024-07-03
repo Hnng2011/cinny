@@ -25,6 +25,7 @@ import {
 import { SmartAccount } from '@particle-network/aa';
 import { EthereumSepolia } from '@particle-network/chains';
 import { MatrixError } from 'matrix-js-sdk';
+import { useSnackbar } from 'notistack';
 import { SmartAccountAtom } from '../../../state/smartAccount';
 import { useAutoDiscoveryInfo } from '../../../hooks/useAutoDiscoveryInfo';
 import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
@@ -71,7 +72,7 @@ const getNonce = async (address: any) => {
   return data.message;
 };
 
-async function postNonce(msg: any, setSignedMessage: any, setToken: any) {
+async function postNonce(msg: any, setSignedMessage: any, setToken: any, setErr: any) {
   const postData = async () => {
     try {
       const response = await fetch(`${import.meta.env.VITE_APP_AUTH_URL}/api/v1/get-jwt`, {
@@ -89,8 +90,12 @@ async function postNonce(msg: any, setSignedMessage: any, setToken: any) {
       const data = await response.json();
       setToken(data.token);
     } catch (error) {
-      console.log('error', error);
+      if (error)
+        throw new Error(error as unknown as string)
+      else
+        throw new Error('Undefined Error')
     }
+
   };
   postData();
 };
@@ -101,6 +106,7 @@ export function Login() {
   const [token, setToken] = useState<string | undefined>(undefined);
   const connectkit = useConnectKit()
   const { account, particleProvider }: { particleProvider: any, account: string | undefined } = useAccountInfo();
+  const { enqueueSnackbar } = useSnackbar()
 
   useEffect(() => {
     async function LoadToken() {
@@ -115,19 +121,20 @@ export function Login() {
 
       setSmartAccount(smartAccount);
 
-      const add = await smartAccount.getAddress();
-      const msg = await getNonce(add);
-
       try {
+        const add = await smartAccount.getAddress();
+        const msg = await getNonce(add);
+
         const signature = await particleProvider.request({
           method: 'personal_sign',
           params: [`0x${Buffer.from(msg).toString('hex')}`, account],
         });
 
-        await postNonce(msg, signature, setToken)
+        await postNonce(msg, signature, setToken, setErr)
       } catch (error: any) {
-        setErr(error?.message.toString());
-        connectkit.disconnect()
+        connectkit?.disconnect()
+        particleProvider?.disconnect()
+        setErr(error?.message)
       }
     }
 
@@ -137,11 +144,14 @@ export function Login() {
 
   }, [account, particleProvider]);
 
+  useEffect(() => {
+    if (err)
+      enqueueSnackbar(err, { variant: 'error' })
+  }, [err])
 
   function TokenLogin() {
     const discovery = useAutoDiscoveryInfo();
     const baseUrl = discovery['m.homeserver'].base_url;
-
     const [loginState, startLogin] = useAsyncCallback<
       CustomLoginResponse,
       MatrixError,
@@ -181,41 +191,17 @@ export function Login() {
     }, [loginState, setErr])
 
     return (
-      <>
-        {/* {loginState.status === AsyncStatus.Error && (
-          <>
-            {loginState.error.errcode === LoginError.Forbidden && (
-              <LoginTokenError message="Invalid login token." />
-            )}
-            {loginState.error.errcode === LoginError.UserDeactivated && (
-              <LoginTokenError message="This account has been deactivated." />
-            )}
-            {loginState.error.errcode === LoginError.InvalidRequest && (
-              <LoginTokenError message="Failed to login. Part of your request data is invalid." />
-            )}
-            {loginState.error.errcode === LoginError.RateLimited && (
-              <LoginTokenError message="Failed to login. Your login request has been rate-limited by server, Please try after some time." />
-            )}
-            {loginState.error.errcode === LoginError.Unknown && (
-              <LoginTokenError message="Failed to login. Unknown reason." />
-            )}
-          </>
-        )} */}
-        <Overlay open={loginState.status !== AsyncStatus.Error} backdrop={<OverlayBackdrop />}>
-          <OverlayCenter>
-            <Spinner size="600" variant="Secondary" />
-          </OverlayCenter>
-        </Overlay>
-      </>
+      <Overlay open={loginState.status !== AsyncStatus.Error} backdrop={<OverlayBackdrop />}>
+        <OverlayCenter>
+          <Spinner size="600" variant="Secondary" />
+        </OverlayCenter>
+      </Overlay>
     );
   }
 
   return (
     <>
       {account && !err && <Spinner />}
-      {err &&
-        <LoginTokenError message={err} />
-      }
       {!account && <ConnectButton />}
       {token && <TokenLogin />}
     </>

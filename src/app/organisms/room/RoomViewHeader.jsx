@@ -2,8 +2,9 @@ import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import './RoomViewHeader.scss';
 
+import { Box } from 'folds';
 import { twemojify } from '../../../util/twemojify';
-import { blurOnBubbling } from '../../atoms/button/script';
+// import { blurOnBubbling } from '../../atoms/button/script';
 
 import initMatrix from '../../../client/initMatrix';
 import cons from '../../../client/state/cons';
@@ -11,24 +12,26 @@ import navigation from '../../../client/state/navigation';
 import {
   toggleRoomSettings,
   openReusableContextMenu,
-  openNavigation,
+  // openNavigation,
 } from '../../../client/action/navigation';
 import colorMXID from '../../../util/colorMXID';
 import { getEventCords } from '../../../util/common';
 
 import { tabText } from './RoomSettings';
 import Text from '../../atoms/text/Text';
-import RawIcon from '../../atoms/system-icons/RawIcon';
+// import RawIcon from '../../atoms/system-icons/RawIcon';
 import IconButton from '../../atoms/button/IconButton';
-import Header, { TitleWrapper } from '../../atoms/header/Header';
+import Header
+  // , { TitleWrapper }
+  from '../../atoms/header/Header';
 import Avatar from '../../atoms/avatar/Avatar';
 import RoomOptions from '../../molecules/room-options/RoomOptions';
 
-import ChevronBottomIC from '../../../../public/res/ic/outlined/chevron-bottom.svg';
+// import ChevronBottomIC from '../../../../public/res/ic/outlined/chevron-bottom.svg';
 import SearchIC from '../../../../public/res/ic/outlined/search.svg';
 import UserIC from '../../../../public/res/ic/outlined/user.svg';
 import VerticalMenuIC from '../../../../public/res/ic/outlined/vertical-menu.svg';
-import BackArrowIC from '../../../../public/res/ic/outlined/chevron-left.svg';
+// import BackArrowIC from '../../../../public/res/ic/outlined/chevron-left.svg';
 
 import { useForceUpdate } from '../../hooks/useForceUpdate';
 import { useSetSetting } from '../../state/hooks/settings';
@@ -79,27 +82,23 @@ function RoomViewHeader({ roomId }) {
 
   return (
     <Header>
-      <IconButton
+      {/* <IconButton
         src={BackArrowIC}
         className="room-header__back-btn"
         tooltip="Return to navigation"
         onClick={() => openNavigation()}
-      />
-      <button
+      /> */}
+      <div
         ref={roomHeaderBtnRef}
         className="room-header__btn"
-        onClick={() => toggleRoomSettings()}
-        type="button"
-        onMouseUp={(e) => blurOnBubbling(e, '.room-header__btn')}
       >
-        <Avatar imageSrc={avatarSrc} text={roomName} bgColor={colorMXID(roomId)} size="small" />
-        <TitleWrapper>
+        <Box display='Flex' gap='400' alignItems='Center'>
+          <Avatar imageSrc={avatarSrc} text={roomName} bgColor={colorMXID(roomId)} size="small" />
           <Text variant="h2" weight="medium" primary>
             {twemojify(roomName)}
           </Text>
-        </TitleWrapper>
-        <RawIcon src={ChevronBottomIC} />
-      </button>
+        </Box>
+      </div>
       {mx.isRoomEncrypted(roomId) === false && (
         <IconButton
           onClick={() => toggleRoomSettings(tabText.SEARCH)}

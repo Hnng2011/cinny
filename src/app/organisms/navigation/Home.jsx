@@ -6,10 +6,20 @@ import cons from '../../../client/state/cons';
 import navigation from '../../../client/state/navigation';
 import Postie from '../../../util/Postie';
 import { roomIdByActivity, roomIdByAtoZ } from '../../../util/sort';
-
 import RoomsCategory from './RoomsCategory';
-
 import { useCategorizedSpaces } from '../../hooks/useCategorizedSpaces';
+import SpacePlusIC from '../../../../public/res/ic/outlined/space-plus.svg';
+import SpaceGlobeIC from '../../../../public/res/ic/outlined/space-globe.svg'
+import HashSearchIC from '../../../../public/res/ic/outlined/hash-search.svg';
+import HashPlusIC from '../../../../public/res/ic/outlined/hash-plus.svg';
+import {
+  MenuItem
+} from '../../atoms/context-menu/ContextMenu';
+import {
+  openCreateRoom,
+  openSpaceManage,
+  openPublicRooms
+} from '../../../client/action/navigation';
 
 const drawerPostie = new Postie();
 function Home({ spaceId }) {
@@ -68,19 +78,44 @@ function Home({ spaceId }) {
 
   return (
     <>
-      { !isCategorized && spaceIds.length !== 0 && (
-        <RoomsCategory name="Spaces" roomIds={spaceIds.sort(roomIdByAtoZ)} drawerPostie={drawerPostie} />
-      )}
+      {!spaceId &&
+        <div style={{ marginTop: 'var(--sp-extra-tight)' }}>
+          <MenuItem background onClick={() => { openCreateRoom(true, spaceId) }} iconSrc={SpacePlusIC}>
+            Create space
+          </MenuItem>
+          <MenuItem background onClick={() => openPublicRooms()} iconSrc={SpaceGlobeIC}>
+            Explore spaces
+          </MenuItem>
+        </div>}
+      {spaceId &&
+        <div style={{ marginTop: 'var(--sp-extra-tight)' }}>
+          {mx.getRoom(spaceId).getCreator() === mx.getUserId() && <MenuItem background onClick={() => { openCreateRoom(false, spaceId) }} iconSrc={HashPlusIC} >
+            Create Room
+          </MenuItem>}
+          <MenuItem onClick={() => openSpaceManage(spaceId)} background iconSrc={HashSearchIC} >
+            Explore Rooms
+          </MenuItem>
+        </div >}
 
-      { roomIds.length !== 0 && (
-        <RoomsCategory name="Rooms" roomIds={roomIds.sort(roomIdByAtoZ)} drawerPostie={drawerPostie} />
-      )}
+      {
+        !isCategorized && spaceIds.length !== 0 && (
+          <RoomsCategory name="Spaces" roomIds={spaceIds.sort(roomIdByAtoZ)} drawerPostie={drawerPostie} />
+        )
+      }
 
-      { directIds.length !== 0 && (
-        <RoomsCategory name="People" roomIds={directIds.sort(roomIdByActivity)} drawerPostie={drawerPostie} />
-      )}
+      {
+        roomIds.length !== 0 && (
+          <RoomsCategory name="Rooms" roomIds={roomIds.sort(roomIdByAtoZ)} drawerPostie={drawerPostie} />
+        )
+      }
 
-      { isCategorized && [...categories.keys()].sort(roomIdByAtoZ).map((catId) => {
+      {
+        directIds.length !== 0 && (
+          <RoomsCategory name="People" roomIds={directIds.sort(roomIdByActivity)} drawerPostie={drawerPostie} />
+        )
+      }
+
+      {/* {isCategorized && [...categories.keys()].sort(roomIdByAtoZ).map((catId) => {
         const rms = [];
         const dms = [];
         categories.get(catId).forEach((id) => {
@@ -98,7 +133,7 @@ function Home({ spaceId }) {
             drawerPostie={drawerPostie}
           />
         );
-      })}
+      })} */}
     </>
   );
 }

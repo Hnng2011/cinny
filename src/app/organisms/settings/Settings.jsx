@@ -29,9 +29,9 @@ import KeywordNotification from '../../molecules/global-notification/KeywordNoti
 import IgnoreUserList from '../../molecules/global-notification/IgnoreUserList';
 
 import ProfileEditor from '../profile-editor/ProfileEditor';
-// import CrossSigning from './CrossSigning';
-// import KeyBackup from './KeyBackup';
-// import DeviceManage from './DeviceManage';
+import CrossSigning from './CrossSigning';
+import KeyBackup from './KeyBackup';
+import DeviceManage from './DeviceManage';
 
 import SunIC from '../../../../public/res/ic/outlined/sun.svg';
 import EmojiIC from '../../../../public/res/ic/outlined/emoji.svg';
@@ -300,12 +300,11 @@ function EmojiSection() {
 function SecuritySection() {
   return (
     <div className="settings-security">
-      {/* <div className="settings-security__card">
-        <MenuHeader>Cross signing and backup</MenuHeader>
+      <div className="settings-security__card">
         <CrossSigning />
         <KeyBackup />
       </div>
-      <DeviceManage /> */}
+      <DeviceManage />
       <div className="settings-security__card">
         <MenuHeader>Export/Import encryption keys</MenuHeader>
         <SettingTile

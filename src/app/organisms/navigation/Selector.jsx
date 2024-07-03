@@ -9,12 +9,12 @@ import { openReusableContextMenu } from '../../../client/action/navigation';
 import { getEventCords, abbreviateNumber } from '../../../util/common';
 import { joinRuleToIconSrc } from '../../../util/matrixUtil';
 
-import IconButton from '../../atoms/button/IconButton';
+// import IconButton from '../../atoms/button/IconButton';
 import RoomSelector from '../../molecules/room-selector/RoomSelector';
 import RoomOptions from '../../molecules/room-options/RoomOptions';
 import SpaceOptions from '../../molecules/space-options/SpaceOptions';
 
-import VerticalMenuIC from '../../../../public/res/ic/outlined/vertical-menu.svg';
+// import VerticalMenuIC from '../../../../public/res/ic/outlined/vertical-menu.svg';
 
 import { useForceUpdate } from '../../hooks/useForceUpdate';
 
@@ -25,8 +25,8 @@ function Selector({
   const noti = initMatrix.notifications;
   const room = mx.getRoom(roomId);
 
-  let imageSrc = room.getAvatarFallbackMember()?.getAvatarUrl(mx.baseUrl, 24, 24, 'crop') || null;
-  if (imageSrc === null) imageSrc = room.getAvatarUrl(mx.baseUrl, 24, 24, 'crop') || null;
+  let imageSrc = mx.getRoom(roomId).getAvatarUrl(mx.baseUrl, 36, 36, 'crop');
+  imageSrc = isDM ? mx.getRoom(roomId).getAvatarFallbackMember()?.getAvatarUrl(mx.baseUrl, 36, 36, 'crop') : imageSrc;
 
   const isMuted = noti.getNotiType(roomId) === cons.notifs.MUTE;
 
@@ -57,7 +57,7 @@ function Selector({
       key={roomId}
       name={room.name}
       roomId={roomId}
-      imageSrc={isDM ? imageSrc : null}
+      imageSrc={imageSrc}
       iconSrc={isDM ? null : joinRuleToIconSrc(room.getJoinRule(), room.isSpaceRoom())}
       isSelected={navigation.selectedRoomId === roomId}
       isMuted={isMuted}
@@ -66,15 +66,15 @@ function Selector({
       isAlert={noti.getHighlightNoti(roomId) !== 0}
       onClick={onClick}
       onContextMenu={openOptions}
-      options={(
-        <IconButton
-          size="extra-small"
-          tooltip="Options"
-          tooltipPlacement="right"
-          src={VerticalMenuIC}
-          onClick={openOptions}
-        />
-      )}
+    // options={room?.isSpaceRoom() && (
+    //   <IconButton
+    //     size="extra-small"
+    //     tooltip="Options"
+    //     tooltipPlacement="right"
+    //     src={VerticalMenuIC}
+    //     onClick={openOptions}
+    //   />
+    // )}
     />
   );
 }

@@ -172,7 +172,7 @@ function SpaceAddExistingContent({ roomId }) {
         <div className="space-add-existing__footer">
           {process && <Spinner size="small" />}
           <Text weight="medium">{process || `${selected.length} item selected`}</Text>
-          { !process && (
+          {!process && (
             <Button onClick={handleAdd} variant="primary">Add</Button>
           )}
         </div>

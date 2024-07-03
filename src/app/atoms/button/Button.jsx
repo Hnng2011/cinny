@@ -8,14 +8,14 @@ import { blurOnBubbling } from './script';
 
 const Button = React.forwardRef(({
   id, className, variant, iconSrc,
-  type, onClick, children, disabled,
+  type, onClick, children, disabled, background
 }, ref) => {
   const iconClass = (iconSrc === null) ? '' : `btn-${variant}--icon`;
   return (
     <button
       ref={ref}
       id={id === '' ? undefined : id}
-      className={`${className ? `${className} ` : ''}btn-${variant} ${iconClass} noselect`}
+      className={`${className ? `${className} ` : ''}btn-${variant} ${background && 'background'} ${iconClass} noselect`}
       onMouseUp={(e) => blurOnBubbling(e, `.btn-${variant}`)}
       onClick={onClick}
       // eslint-disable-next-line react/button-has-type
@@ -23,8 +23,8 @@ const Button = React.forwardRef(({
       disabled={disabled}
     >
       {iconSrc !== null && <RawIcon size="small" src={iconSrc} />}
-      {typeof children === 'string' && <Text variant="b1">{ children }</Text>}
-      {typeof children !== 'string' && children }
+      {typeof children === 'string' && <Text variant="b1">{children}</Text>}
+      {typeof children !== 'string' && children}
     </button>
   );
 });
@@ -37,6 +37,7 @@ Button.defaultProps = {
   type: 'button',
   onClick: null,
   disabled: false,
+  background: false
 };
 
 Button.propTypes = {
@@ -48,6 +49,7 @@ Button.propTypes = {
   onClick: PropTypes.func,
   children: PropTypes.node.isRequired,
   disabled: PropTypes.bool,
+  background: PropTypes.bool,
 };
 
 export default Button;

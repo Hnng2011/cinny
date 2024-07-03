@@ -11,9 +11,10 @@ import cons from '../../../client/state/cons';
 import colorMXID from '../../../util/colorMXID';
 import {
   selectTab,
-  // openShortcutSpaces,
+  openShortcutSpaces,
   openInviteList,
   openSearch, openSettings, openReusableContextMenu,
+  openCreateRoom
 } from '../../../client/action/navigation';
 import { moveSpaceShortcut } from '../../../client/action/accountData';
 import { abbreviateNumber, getEventCords } from '../../../util/common';
@@ -27,7 +28,8 @@ import SpaceOptions from '../../molecules/space-options/SpaceOptions';
 
 import HomeIC from '../../../../public/res/ic/outlined/home.svg';
 import UserIC from '../../../../public/res/ic/outlined/user.svg';
-// import AddPinIC from '../../../../public/res/ic/outlined/add-pin.svg';
+import AddPinIC from '../../../../public/res/ic/outlined/add-pin.svg';
+import SpacPlusIC from '../../../../public/res/ic/outlined/space-plus.svg';
 import SearchIC from '../../../../public/res/ic/outlined/search.svg';
 import InviteIC from '../../../../public/res/ic/outlined/invite.svg';
 import ShieldUserIC from '../../../../public/res/ic/outlined/shield-user.svg';
@@ -359,11 +361,19 @@ function SideBar() {
             <div className="sidebar-divider" />
             <div className="space-container">
               <SpaceShortcut />
-              {/* <SidebarAvatar
+            </div>
+            <div className="sidebar-divider" />
+            <div className="featured-container">
+              <SidebarAvatar
                 tooltip="Pin spaces"
                 onClick={() => openShortcutSpaces()}
                 avatar={<Avatar iconSrc={AddPinIC} size="normal" />}
-              /> */}
+              />
+              <SidebarAvatar
+                tooltip="Add spaces"
+                onClick={() => openCreateRoom(true, undefined)}
+                avatar={<Avatar iconSrc={SpacPlusIC} size="normal" />}
+              />
             </div>
           </div>
         </ScrollView>

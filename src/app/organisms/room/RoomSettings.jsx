@@ -82,7 +82,7 @@ function GeneralSettings({ roomId }) {
 
   return (
     <>
-      {/* <div className="room-settings__card">
+      <div className="room-settings__card">
         <MenuHeader>Options</MenuHeader>
         <MenuItem
           disabled={!canInvite}
@@ -107,7 +107,7 @@ function GeneralSettings({ roomId }) {
         >
           Leave
         </MenuItem>
-      </div> */}
+      </div>
       <div className="room-settings__card">
         <MenuHeader>Notification (Changing this will only affect you)</MenuHeader>
         <RoomNotification roomId={roomId} />
@@ -179,18 +179,18 @@ function RoomSettings({ roomId }) {
       <ScrollView autoHide>
         <div className="room-settings__content">
           <Header>
+            <TitleWrapper>
+              <Text variant="s1" weight="medium" primary>
+                {`${room.name}`}
+                <span style={{ color: 'var(--tc-surface-low)' }}> — room settings</span>
+              </Text>
+            </TitleWrapper>
             <button
               className="room-settings__header-btn"
               onClick={() => toggleRoomSettings()}
               type="button"
               onMouseUp={(e) => blurOnBubbling(e, '.room-settings__header-btn')}
             >
-              <TitleWrapper>
-                <Text variant="s1" weight="medium" primary>
-                  {`${room.name}`}
-                  <span style={{ color: 'var(--tc-surface-low)' }}> — room settings</span>
-                </Text>
-              </TitleWrapper>
               <RawIcon size="small" src={ChevronTopIC} />
             </button>
           </Header>

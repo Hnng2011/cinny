@@ -2,22 +2,27 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 
-import { twemojify } from '../../../util/twemojify';
+// import { twemojify } from '../../../util/twemojify';
 
 import initMatrix from '../../../client/initMatrix';
-import { openInviteUser } from '../../../client/action/navigation';
+import { openInviteUser, toggleRoomSettings } from '../../../client/action/navigation';
 import * as roomActions from '../../../client/action/room';
 import { markAsRead } from '../../../client/action/notifications';
 
-import { MenuHeader, MenuItem } from '../../atoms/context-menu/ContextMenu';
-import RoomNotification from '../room-notification/RoomNotification';
+import {
+  // MenuHeader,
+  MenuItem
+} from '../../atoms/context-menu/ContextMenu';
+// import RoomNotification from '../room-notification/RoomNotification';
 
 import TickMarkIC from '../../../../public/res/ic/outlined/tick-mark.svg';
 import AddUserIC from '../../../../public/res/ic/outlined/add-user.svg';
 import LeaveArrowIC from '../../../../public/res/ic/outlined/leave-arrow.svg';
 import HeartSVG from '../../../../public/res/ic/filled/heart.svg'
+import SettingsIC from '../../../../public/res/ic/outlined/settings.svg';
 
 import { confirmDialog } from '../confirm-dialog/ConfirmDialog';
+
 
 function RoomOptions({ roomId, afterOptionSelect }) {
   const mx = initMatrix.matrixClient;
@@ -70,7 +75,7 @@ function RoomOptions({ roomId, afterOptionSelect }) {
 
   return (
     <div style={{ maxWidth: '256px' }}>
-      <MenuHeader>{twemojify(`Options for ${initMatrix.matrixClient.getRoom(roomId)?.name}`)}</MenuHeader>
+      {/* <MenuHeader>{twemojify(`Options for ${initMatrix.matrixClient.getRoom(roomId)?.name}`)}</MenuHeader> */}
       <MenuItem iconSrc={TickMarkIC} onClick={handleMarkAsRead}>Mark as read</MenuItem>
       <MenuItem
         iconSrc={AddUserIC}
@@ -81,8 +86,9 @@ function RoomOptions({ roomId, afterOptionSelect }) {
       </MenuItem>
       <MenuItem iconSrc={HeartSVG} onClick={handleVotingClick}>Voting</MenuItem>
       <MenuItem iconSrc={LeaveArrowIC} variant="danger" onClick={handleLeaveClick}>Leave</MenuItem>
-      <MenuHeader>Notification</MenuHeader>
-      <RoomNotification roomId={roomId} />
+      <MenuItem onClick={() => { toggleRoomSettings(); afterOptionSelect(); }} iconSrc={SettingsIC}>Settings</MenuItem>
+      {/* <MenuHeader>Notification</MenuHeader>
+      <RoomNotification roomId={roomId} /> */}
     </div>
   );
 }

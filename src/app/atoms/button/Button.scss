@@ -10,7 +10,6 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   min-width: 80px;
   padding: var(--sp-extra-tight) var(--sp-normal);
   background-color: transparent;
@@ -22,10 +21,9 @@
   & .text {
     @extend .cp-txt__ellipsis;
   }
-  
+
   &--icon {
     @include dir.side(padding, var(--sp-tight), var(--sp-loose));
-
   }
   .ic-raw {
     @include dir.side(margin, 0, var(--sp-extra-tight));
@@ -41,7 +39,6 @@
     background-color: $iconColor;
   }
 }
-
 
 .btn-surface {
   box-shadow: var(--bs-surface-border);
@@ -78,4 +75,27 @@
   @include state.hover(var(--bg-danger-hover));
   @include state.focus(var(--bs-danger-outline));
   @include state.active(var(--bg-danger-active));
+}
+
+.background {
+  &:hover .text {
+    color: var(--tc-surface-high);
+  }
+  &:hover .ic-raw {
+    background-color: var(--tc-surface-high) !important;
+  }
+
+  & .text {
+    color: var(--bg-surface);
+    font-weight: var(--fw-medium);
+  }
+  & .ic-raw {
+    background-color: var(--bg-surface);
+  }
+
+  &:hover {
+    background-color: var(--bg-surface-hover) !important;
+  }
+
+  background-color: var(--tc-surface-high);
 }

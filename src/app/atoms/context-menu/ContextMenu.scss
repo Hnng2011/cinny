@@ -45,13 +45,17 @@
 
 .context-menu__item {
   display: flex;
-  button[class^="btn"] {
+  padding: var(--sp-ultra-tight);
+
+  button[class^='btn'] {
     @extend .cp-fx__item-one;
     justify-content: flex-start;
     border-radius: 0;
     box-shadow: none;
     white-space: nowrap;
     padding: var(--sp-extra-tight) var(--sp-normal);
+    font-size: var(--fs-b3);
+    border-radius: var(--bo-radius);
 
     & > .ic-raw {
       @include dir.side(margin, 0, var(--sp-tight));
@@ -59,15 +63,15 @@
 
     // if item doesn't have icon
     .text:first-child {
-      @include dir.side(
-        margin,
-        calc(var(--ic-small) + var(--sp-tight)),
-        0
-      );
+      @include dir.side(margin, calc(var(--ic-small) + var(--sp-tight)), 0);
     }
   }
+
   .btn-surface:focus {
     background-color: var(--bg-surface-hover);
+  }
+  .btn-surface:hover {
+    background-color: var(--bg-surface-border);
   }
   .btn-positive:focus {
     background-color: var(--bg-positive-hover);

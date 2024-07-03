@@ -1,3 +1,4 @@
+/* eslint-disable react/button-has-type */
 /* eslint-disable no-unused-expressions */
 /* eslint-disable no-plusplus */
 /* eslint-disable no-await-in-loop */
@@ -10,6 +11,7 @@ import PropTypes from 'prop-types';
 import './CreateRoom.scss';
 
 import { useAtom } from 'jotai';
+import { useSnackbar } from 'notistack';
 import { twemojify } from '../../../util/twemojify';
 import initMatrix from '../../../client/initMatrix';
 import cons from '../../../client/state/cons';
@@ -45,7 +47,6 @@ import SpacePlusIC from '../../../../public/res/ic/outlined/space-plus.svg';
 import CrossIC from '../../../../public/res/ic/outlined/cross.svg';
 import { SmartAccountAtom } from '../../state/smartAccount';
 import generateRandomString from '../../../util/randomString';
-import { Link } from 'react-router-dom';
 
 function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
   const [smartAccount] = useAtom(SmartAccountAtom);
@@ -59,6 +60,7 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
   const addressRef = useRef(null);
   const mx = initMatrix.matrixClient;
   const userHs = getIdServer(mx.getUserId());
+  const { enqueueSnackbar } = useSnackbar()
 
   useEffect(() => {
     const { roomList } = initMatrix;
@@ -80,6 +82,19 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
   }, []);
 
 
+  const action = () => (
+    creatingError === 'Please claim your NFT first' ?
+      <button style={{ color: 'var(--tc-primary-high)', fontWeight: 'var(--fw-medium)', backgroundColor: 'var(--bg-primary)', padding: 'var(--sp-extra-tight)', borderRadius: 'var(--bo-radius)', cursor: 'pointer' }} onClick={() => { window.open(import.meta.env.VITE_APP_PROOF_URL, "_blank") }}>
+        Claim NFT
+      </button> : null
+  );
+
+
+  useEffect(() => {
+    if (creatingError)
+      enqueueSnackbar(creatingError, { variant: creatingError === 'Please claim your NFT first' ? 'warning' : 'error', action, autoHideDuration: '10000' })
+  }, [creatingError])
+
   const handleSubmit = async (evt) => {
     evt.preventDefault();
     const { target } = evt;
@@ -98,7 +113,7 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
     }
 
     else if (!isSpace) {
-      roomAlias = name.toLowerCase().trim('').replace(/\s+/g, '') + generateRandomString(6);
+      roomAlias = name.toLowerCase().trim('').replace(/\s+/g, '').concat('_').concat(generateRandomString(6, true));
     }
 
     // const powerLevel = roleIndex === 1 ? 101 : undefined;
@@ -119,7 +134,7 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
         smartAccount
       });
 
-      result && onRequestClose()
+      result && onRequestClose() && enqueueSnackbar('Create success', { variant: 'success' })
       !result && setCreatingError('Create Room Failed');
       setIsCreatingRoom(false)
     } catch (e) {
@@ -235,8 +250,6 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
           )
         }
 
-        {typeof creatingError === 'string' && <Text className="create-room__error" variant="b3">{creatingError}</Text>}
-        {creatingError === 'Please claim your NFT first' && <Link to="https://proof.ubiw.space" target='_blank'><Button variant="caution">Claim NFT</Button></Link>}
       </form >
     </div >
   );

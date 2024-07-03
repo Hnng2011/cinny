@@ -3,19 +3,21 @@ import './Drawer.scss';
 
 import initMatrix from '../../../client/initMatrix';
 import cons from '../../../client/state/cons';
-import navigation from '../../../client/state/navigation';
+// import navigation from '../../../client/state/navigation';
 
 import Text from '../../atoms/text/Text';
 import ScrollView from '../../atoms/scroll/ScrollView';
 
 import DrawerHeader from './DrawerHeader';
-import DrawerBreadcrumb from './DrawerBreadcrumb';
+// import DrawerBreadcrumb from './DrawerBreadcrumb';
 import Home from './Home';
 import Directs from './Directs';
 
 import { useForceUpdate } from '../../hooks/useForceUpdate';
 import { useSelectedTab } from '../../hooks/useSelectedTab';
 import { useSelectedSpace } from '../../hooks/useSelectedSpace';
+
+
 
 function useSystemState() {
   const [systemState, setSystemState] = useState(null);
@@ -66,9 +68,9 @@ function Drawer() {
     <div className="drawer">
       <DrawerHeader selectedTab={selectedTab} spaceId={spaceId} />
       <div className="drawer__content-wrapper">
-        {navigation.selectedSpacePath.length > 1 && selectedTab !== cons.tabs.DIRECTS && (
+        {/* {navigation.selectedSpacePath.length > 1 && selectedTab !== cons.tabs.DIRECTS && (
           <DrawerBreadcrumb spaceId={spaceId} />
-        )}
+        )} */}
         <div className="rooms__wrapper">
           <ScrollView ref={scrollRef} autoHide>
             <div className="rooms-container">

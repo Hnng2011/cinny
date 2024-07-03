@@ -9,6 +9,7 @@ import {
   redirect,
   useLocation,
 } from 'react-router-dom';
+import { SnackbarProvider } from 'notistack'
 
 import { EthereumSepolia } from '@particle-network/chains';
 import { ModalProvider } from '@particle-network/connectkit';
@@ -96,23 +97,24 @@ const createRouter = () => {
 // TODO: app crash boundary
 function App() {
   return (
-
-    <FeatureCheck>
-      <ClientConfigLoader
-        fallback={() => <ConfigConfigLoading />}
-        error={(err, retry, ignore) => (
-          <ConfigConfigError error={err} retry={retry} ignore={ignore} />
-        )}
-      >
-        {(clientConfig) => (
-          <ClientConfigProvider value={clientConfig}>
-            <JotaiProvider>
-              <RouterProvider router={createRouter()} />
-            </JotaiProvider>
-          </ClientConfigProvider>
-        )}
-      </ClientConfigLoader>
-    </FeatureCheck>
+    <SnackbarProvider maxSnack={5} autoHideDuration={5000} anchorOrigin={{ horizontal: 'right', vertical: 'top' }}>
+      <FeatureCheck>
+        <ClientConfigLoader
+          fallback={() => <ConfigConfigLoading />}
+          error={(err, retry, ignore) => (
+            <ConfigConfigError error={err} retry={retry} ignore={ignore} />
+          )}
+        >
+          {(clientConfig) => (
+            <ClientConfigProvider value={clientConfig}>
+              <JotaiProvider>
+                <RouterProvider router={createRouter()} />
+              </JotaiProvider>
+            </ClientConfigProvider>
+          )}
+        </ClientConfigLoader>
+      </FeatureCheck>
+    </SnackbarProvider >
   );
 }
 

@@ -2,11 +2,7 @@
 /* eslint-disable no-plusplus */
 
 function generateRandomString(length, number) {
-    const numberString = '0123456789';
-    let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-    if (number) {
-        characters = characters.concat(numberString);
-    }
+    const characters = number ? '0123456789' : 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
     let result = '';
     const charactersLength = characters.length;

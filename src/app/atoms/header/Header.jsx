@@ -15,7 +15,7 @@ Header.propTypes = {
 };
 
 function TitleWrapper({ children }) {
-  return (
+  return (  
     <div className="header__title-wrapper">
       {children}
     </div>

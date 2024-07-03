@@ -20,6 +20,9 @@ import appDispatcher from '../dispatcher';
 import cons from '../state/cons';
 import { getIdServer } from '../../util/matrixUtil';
 import generateRandomString from '../../util/randomString';
+import {
+  createSpaceShortcut
+} from "./accountData";
 
 const provider = new ethers.providers.WebSocketProvider('wss://eth-sepolia.g.alchemy.com/v2/eOLovQ082DFsqRNNckle5rVXwV7PeiyO')
 const contractAddress = import.meta.env.VITE_APP_CONTRACT_ADDRESS;
@@ -543,6 +546,10 @@ async function createRoom(opts) {
       suggested: false,
       via: [getIdServer(mx.getUserId())],
     }, result.room_id);
+  }
+
+  if (isSpace) {
+    createSpaceShortcut(result.room_id)
   }
 
   return result;

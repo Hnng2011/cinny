@@ -3,10 +3,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { twemojify } from '../../../util/twemojify';
+// import { twemojify } from '../../../util/twemojify';
 
 import initMatrix from '../../../client/initMatrix';
-import { openSpaceSettings, openSpaceManage, openInviteUser, openWithdrawManage } from '../../../client/action/navigation';
+import {
+  openSpaceSettings,
+  // openSpaceManage,
+  openInviteUser, openWithdrawManage
+} from '../../../client/action/navigation';
 import { markAsRead } from '../../../client/action/notifications';
 import { leave } from '../../../client/action/room';
 import {
@@ -16,14 +20,17 @@ import {
   // unCategorizeSpace,
 } from '../../../client/action/accountData';
 
-import { MenuHeader, MenuItem } from '../../atoms/context-menu/ContextMenu';
+import {
+  // MenuHeader,
+  MenuItem
+} from '../../atoms/context-menu/ContextMenu';
 
 // import CategoryIC from '../../../../public/res/ic/outlined/category.svg';
 // import CategoryFilledIC from '../../../../public/res/ic/filled/category.svg';
 import TickMarkIC from '../../../../public/res/ic/outlined/tick-mark.svg';
 import AddUserIC from '../../../../public/res/ic/outlined/add-user.svg';
 import SettingsIC from '../../../../public/res/ic/outlined/settings.svg';
-import HashSearchIC from '../../../../public/res/ic/outlined/hash-search.svg';
+// import HashSearchIC from '../../../../public/res/ic/outlined/hash-search.svg';
 import LeaveArrowIC from '../../../../public/res/ic/outlined/leave-arrow.svg';
 import WithdrawIc from '../../../../public/res/ic/outlined/withdraw.svg';
 import PinIC from '../../../../public/res/ic/outlined/pin.svg';
@@ -67,14 +74,15 @@ function SpaceOptions({ roomId, afterOptionSelect }) {
   //   else categorizeSpace(roomId);
   //   afterOptionSelect();
   // };
+
   const handleSettingsClick = () => {
     openSpaceSettings(roomId);
     afterOptionSelect();
   };
-  const handleManageRoom = () => {
-    openSpaceManage(roomId);
-    afterOptionSelect();
-  };
+  // const handleManageRoom = () => {
+  //   openSpaceManage(roomId);
+  //   afterOptionSelect();
+  // };
 
   const handleWithdrawSpace = () => {
     openWithdrawManage(roomId);
@@ -98,7 +106,7 @@ function SpaceOptions({ roomId, afterOptionSelect }) {
 
   return (
     <div style={{ maxWidth: 'calc(var(--navigation-drawer-width) - var(--sp-normal))' }}>
-      <MenuHeader>{twemojify(`Options for ${initMatrix.matrixClient.getRoom(roomId)?.name}`)}</MenuHeader>
+      {/* <MenuHeader>{twemojify(`Options for ${initMatrix.matrixClient.getRoom(roomId)?.name}`)}</MenuHeader> */}
       <MenuItem iconSrc={TickMarkIC} onClick={handleMarkAsRead}>Mark as read</MenuItem>
       {/* <MenuItem
         onClick={handleCategorizeClick}
@@ -119,7 +127,7 @@ function SpaceOptions({ roomId, afterOptionSelect }) {
       >
         Invite
       </MenuItem>
-      <MenuItem onClick={handleManageRoom} iconSrc={HashSearchIC}>Manage rooms</MenuItem>
+      {/* <MenuItem onClick={handleManageRoom} iconSrc={HashSearchIC}>Manage rooms</MenuItem> */}
       {(creatorId === mx.getUserId()) && <MenuItem onClick={handleWithdrawSpace} iconSrc={WithdrawIc}>Withdraw fee</MenuItem>}
       <MenuItem onClick={handleSettingsClick} iconSrc={SettingsIC}>Settings</MenuItem>
       {!(creatorId === mx.getUserId()) && <MenuItem

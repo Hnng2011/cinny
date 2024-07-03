@@ -61,7 +61,7 @@ ContextMenu.propTypes = {
 function MenuHeader({ children }) {
   return (
     <div className="context-menu__header">
-      <Text variant="b3">{ children }</Text>
+      <Text variant="b3">{children}</Text>
     </div>
   );
 }
@@ -72,18 +72,19 @@ MenuHeader.propTypes = {
 
 function MenuItem({
   variant, iconSrc, type,
-  onClick, children, disabled,
+  onClick, children, disabled, background
 }) {
   return (
-    <div className="context-menu__item">
+    <div id='menu-item' className="context-menu__item">
       <Button
         variant={variant}
         iconSrc={iconSrc}
         type={type}
         onClick={onClick}
         disabled={disabled}
+        background={background}
       >
-        { children }
+        {children}
       </Button>
     </div>
   );
@@ -95,6 +96,7 @@ MenuItem.defaultProps = {
   type: 'button',
   disabled: false,
   onClick: null,
+  background: false
 };
 
 MenuItem.propTypes = {
@@ -104,6 +106,7 @@ MenuItem.propTypes = {
   onClick: PropTypes.func,
   children: PropTypes.node.isRequired,
   disabled: PropTypes.bool,
+  background: PropTypes.bool
 };
 
 function MenuBorder() {

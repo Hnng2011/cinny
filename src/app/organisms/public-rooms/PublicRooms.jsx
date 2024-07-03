@@ -19,7 +19,7 @@ import RoomTile from '../../molecules/room-tile/RoomTile';
 import CrossIC from '../../../../public/res/ic/outlined/cross.svg';
 import HashSearchIC from '../../../../public/res/ic/outlined/hash-search.svg';
 
-const SEARCH_LIMIT = 20;
+
 
 function TryJoinWithAlias({ alias, onRequestClose }) {
   const [status, setStatus] = useState({
@@ -86,6 +86,7 @@ TryJoinWithAlias.propTypes = {
 };
 
 function PublicRooms({ isOpen, searchTerm, onRequestClose }) {
+  const SEARCH_LIMIT = 20;
   const [isSearching, updateIsSearching] = useState(false);
   const [isViewMore, updateIsViewMore] = useState(false);
   const [publicRooms, updatePublicRooms] = useState([]);
@@ -123,11 +124,12 @@ function PublicRooms({ isOpen, searchTerm, onRequestClose }) {
     updateIsSearching(true);
 
     try {
+
       const result = await initMatrix.matrixClient.publicRooms({
         server: inputHs,
         limit: SEARCH_LIMIT,
         since: viewMore ? nextBatch : undefined,
-        include_all_networks: true,
+        include_all_networks: false,
         filter: {
           generic_search_term: inputRoomName,
         },
@@ -219,7 +221,7 @@ function PublicRooms({ isOpen, searchTerm, onRequestClose }) {
   return (
     <PopupWindow
       isOpen={isOpen}
-      title="Public Spaces and Rooms"
+      title="Spaces on Ubiw.space"
       contentOptions={<IconButton src={CrossIC} onClick={onRequestClose} tooltip="Close" />}
       onRequestClose={onRequestClose}
     >
@@ -228,6 +230,7 @@ function PublicRooms({ isOpen, searchTerm, onRequestClose }) {
           <div className="public-rooms__input-wrapper">
             <Input value={searchTerm} forwardRef={roomNameRef} label="Name or alias" />
             <Input forwardRef={hsRef} value={userId.slice(userId.indexOf(':') + 1)} label="Homeserver" disabled />
+
           </div>
           <Button disabled={isSearching} iconSrc={HashSearchIC} variant="primary" type="submit">Search</Button>
         </form>
@@ -252,8 +255,11 @@ function PublicRooms({ isOpen, searchTerm, onRequestClose }) {
           {
             typeof searchQuery.name !== 'undefined' && !isSearching && (
               searchQuery.name === ''
-                ? <Text variant="b2">{`Public ${searchQuery.homeserver === 'ubiw.space' ? 'spaces' : 'rooms'} on  ${searchQuery.homeserver}.`}</Text>
-                : <Text variant="b2">{`Search result for "${searchQuery.name}" on ${searchQuery.homeserver}.`}</Text>
+                ?
+                // <Text variant="b2">{`Public ${searchQuery.homeserver === 'ubiw.space' ? 'spaces' : 'rooms'} on  ${searchQuery.homeserver}.`}</Text>
+                null
+                : <Text variant="b2">{`Search result for "${searchQuery.name}"`
+                }</Text>
             )
           }
           {searchQuery.error && (
