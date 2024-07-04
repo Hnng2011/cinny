@@ -277,7 +277,6 @@ function addRoomToMDirect(roomId, userId) {
   // (it can only be a DM room for one person)
   Object.keys(userIdToRoomIds).forEach((thisUserId) => {
     const roomIds = userIdToRoomIds[thisUserId];
-
     if (thisUserId !== userId) {
       const indexOfRoomId = roomIds.indexOf(roomId);
       if (indexOfRoomId > -1) {
@@ -352,27 +351,32 @@ function convertToRoom(roomId) {
  * @returns {Promise<boolean>} Returns true if the transaction was successful, false otherwise.
  */
 
-
 /**
  *
  * @param {string} roomId
  * @param {boolean} isDM
  * @param {string[]} via
  */
-async function join({ roomIdOrAlias, smartAccount, creator, isSpace = false, isDM = false, via = undefined, fee = 0 }) {
+async function join({ roomIdOrAlias, smartAccount, creator, isSpace = false, isDM = false, via = undefined, fee }) {
   const mx = initMatrix.matrixClient;
   const viaServers = via || [roomIdOrAlias.split(':')[1]];
 
   try {
-    const resultContract = !isSpace && await joinRoomByContract(roomIdOrAlias, creator, smartAccount, fee);
+    const resultContract = !isDM && !isSpace && await joinRoomByContract(roomIdOrAlias, creator, smartAccount, fee);
+    if (!isSpace && !isDM && !resultContract) throw new Error(resultContract);
 
-    if (!isSpace && !resultContract) return false;
-
-    const resultRoom = await mx.joinRoom(roomIdOrAlias, { viaServers });
+    let resultRoom;
 
     if (isDM) {
+      resultRoom = await mx.http.authedRequest("POST", `/join/${roomIdOrAlias}`, { "server_name": viaServers }, { "is_dm": isDM });
       const targetUserId = guessDMRoomTargetId(mx.getRoom(resultRoom.roomId), mx.getUserId());
       await addRoomToMDirect(resultRoom.roomId, targetUserId);
+    } else {
+      resultRoom = await mx.joinRoom(roomIdOrAlias, { viaServers });
+    }
+
+    if (isSpace) {
+      createSpaceShortcut(resultRoom.roomId)
     }
 
     appDispatcher.dispatch({
@@ -382,9 +386,8 @@ async function join({ roomIdOrAlias, smartAccount, creator, isSpace = false, isD
     });
 
     return resultRoom.roomId;
-
   } catch (error) {
-    return false;
+    throw new Error(error)
   }
 }
 
@@ -395,9 +398,10 @@ async function join({ roomIdOrAlias, smartAccount, creator, isSpace = false, isD
  */
 async function leave(roomId) {
   const mx = initMatrix.matrixClient;
+  const member = mx.getRoom(roomId)?.getMembers()?.length
   const isDM = initMatrix.roomList.directs.has(roomId);
   try {
-    await mx.forget(roomId);
+    member > 1 ? await mx.leave(roomId) : await mx.forget(roomId);
     appDispatcher.dispatch({
       type: cons.actions.room.LEAVE,
       roomId,
@@ -557,8 +561,7 @@ async function createRoom(opts) {
 
 async function invite(roomId, userId, reason) {
   const mx = initMatrix.matrixClient;
-  const parentId = initMatrix.roomList.roomIdToParents.get(roomId).keys().next().value
-  const result = await mx.invite(parentId, userId, undefined, reason);
+  const result = await mx.invite(roomId, userId, undefined, reason);
   return result;
 }
 

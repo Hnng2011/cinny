@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import './InviteList.scss';
 
 import { useAtom } from 'jotai';
+import { enqueueSnackbar } from 'notistack';
 import initMatrix from '../../../client/initMatrix';
 import cons from '../../../client/state/cons';
 import * as roomActions from '../../../client/action/room';
@@ -23,20 +24,26 @@ function InviteList({ isOpen, onRequestClose }) {
   const [smartAccount] = useAtom(SmartAccountAtom)
   const [procInvite, changeProcInvite] = useState(new Set());
 
-  function acceptInvite(roomId) {
+  function acceptInvite(roomId, isDM) {
     procInvite.add(roomId);
     changeProcInvite(new Set(Array.from(procInvite)));
-    roomActions.join({ roomIdOrAlias: roomId, smartAccount, isSpace: true });
+    try {
+      roomActions.join({ roomIdOrAlias: roomId, smartAccount, isSpace: !isDM, isDM });
+    }
+    catch (e) {
+      enqueueSnackbar(e, { variant: 'error' })
+    }
   }
+
   function rejectInvite(roomId, isDM) {
     procInvite.add(roomId);
     changeProcInvite(new Set(Array.from(procInvite)));
     roomActions.leave(roomId, isDM);
   }
+
   function updateInviteList(roomId) {
     if (procInvite.has(roomId)) procInvite.delete(roomId);
     changeProcInvite(new Set(Array.from(procInvite)));
-
     const rl = initMatrix.roomList;
     const totalInvites = rl.inviteDirects.size + rl.inviteRooms.size + rl.inviteSpaces.size;
     const room = initMatrix.matrixClient.getRoom(roomId);

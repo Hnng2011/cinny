@@ -84,11 +84,11 @@ function RoomOptions({ roomId, afterOptionSelect }) {
       >
         Invite
       </MenuItem>
-      <MenuItem iconSrc={HeartSVG} onClick={handleVotingClick}>Voting</MenuItem>
+      {!initMatrix.roomList.directs.has(roomId) && <MenuItem iconSrc={HeartSVG} onClick={handleVotingClick}>Voting</MenuItem>}
       <MenuItem iconSrc={LeaveArrowIC} variant="danger" onClick={handleLeaveClick}>Leave</MenuItem>
       <MenuItem onClick={() => { toggleRoomSettings(); afterOptionSelect(); }} iconSrc={SettingsIC}>Settings</MenuItem>
-      {/* <MenuHeader>Notification</MenuHeader>
-      <RoomNotification roomId={roomId} /> */}
+      {/* <MenuHeader>Notification</MenuHeader> */}
+      {/* <RoomNotification roomId={roomId} /> */}
     </div>
   );
 }

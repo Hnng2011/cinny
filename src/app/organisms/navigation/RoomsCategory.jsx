@@ -49,7 +49,6 @@ function RoomsCategory({
   const renderSelector = (roomId) => {
     const isSpace = spaces.has(roomId);
     const isDM = directs.has(roomId);
-
     return (
       <Selector
         key={roomId}
@@ -64,7 +63,7 @@ function RoomsCategory({
 
   return (
     <div className="room-category">
-
+      {roomIds && <Text className="cat-header" variant="b3" weight="medium">No rooms joined</Text>}
       {!hideHeader && (
         <div className="room-category__header">
           <button className="room-category__toggle" onClick={() => setIsOpen(!isOpen)} type="button">

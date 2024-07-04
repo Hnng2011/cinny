@@ -147,7 +147,7 @@ function JoinAlias() {
       contentOptions={<IconButton src={CrossIC} onClick={requestClose} tooltip="Close" />}
       onRequestClose={requestClose}
     >
-      { data ? <JoinAliasContent term={data.term} requestClose={requestClose} /> : <div /> }
+      {data ? <JoinAliasContent term={data.term} requestClose={requestClose} /> : <div />}
     </Dialog>
   );
 }

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import './InviteUser.scss';
 
+import { enqueueSnackbar } from 'notistack';
 import initMatrix from '../../../client/initMatrix';
 import cons from '../../../client/state/cons';
 import * as roomActions from '../../../client/action/room';
@@ -47,6 +48,7 @@ function InviteUser({
     });
     return newMap;
   }
+
   function addUserToProc(userId) {
     procUsers.add(userId);
     updateProcUsers(new Set(Array.from(procUsers)));
@@ -118,7 +120,6 @@ function InviteUser({
       addUserToProc(userId);
       procUserError.delete(userId);
       updateUserProcError(getMapCopy(procUserError));
-
       const result = await roomActions.createDM(userId, await hasDevices(userId));
       roomIdToUserId.set(result.room_id, userId);
       updateRoomIdToUserId(getMapCopy(roomIdToUserId));
@@ -136,16 +137,16 @@ function InviteUser({
       addUserToProc(userId);
       procUserError.delete(userId);
       updateUserProcError(getMapCopy(procUserError));
-
-      await roomActions.invite(roomId, userId);
-
+      const parentId = initMatrix.roomList.roomIdToParents.get(roomId)?.keys()?.next().value
+      await roomActions.invite(parentId, userId);
       invitedUserIds.add(userId);
       updateInvitedUserIds(new Set(Array.from(invitedUserIds)));
       deleteUserFromProc(userId);
     } catch (e) {
+
       deleteUserFromProc(userId);
-      if (typeof e.message === 'string') procUserError.set(userId, e.message);
-      else procUserError.set(userId, 'Something went wrong!');
+      if (typeof e.message === 'string') enqueueSnackbar(e.message, { variant: 'error' });
+      else enqueueSnackbar('Something went wrong!', { variant: 'error' });
       updateUserProcError(getMapCopy(procUserError));
     }
   }
@@ -184,10 +185,10 @@ function InviteUser({
         ? <Button onClick={() => inviteToRoom(userId)} variant="primary">Invite</Button>
         : <Button onClick={() => createDM(userId)} variant="primary">Message</Button>;
     };
-    const renderError = (userId) => {
-      if (!procUserError.has(userId)) return null;
-      return <Text variant="b2"><span style={{ color: 'var(--bg-danger)' }}>{procUserError.get(userId)}</span></Text>;
-    };
+    // const renderError = (userId) => {
+    //   if (!procUserError.has(userId)) return null;
+    //   return <Text variant="b2"><span style={{ color: 'var(--bg-danger)' }}>{procUserError.get(userId)}</span></Text>;
+    // };
 
     return users.map((user) => {
       const userId = user.user_id;
@@ -199,7 +200,7 @@ function InviteUser({
           name={name}
           id={userId}
           options={renderOptions(userId)}
-          desc={renderError(userId)}
+        // desc={renderError(userId)}
         />
       );
     });
