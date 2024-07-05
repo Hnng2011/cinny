@@ -17,19 +17,61 @@ import AAIC from '../../../../public/res/ic/outlined/aa.svg'
 import RealtimeIC from '../../../../public/res/ic/outlined/realtime.svg'
 import PeopleIC from '../../../../public/res/ic/outlined/many-people.svg'
 import ShareIC from '../../../../public/res/ic/outlined/share.svg'
+import XIC from '../../../../public/res/ic/outlined/x.svg';
 import RawIcon from '../../atoms/system-icons/RawIcon';
 
+
+const describes = [
+    {
+        icon: SpaceIC,
+        head: 'Rooms / Space',
+        body: 'Users can create/join a Space and many private rooms in that. Sharing unlimited contents.'
+    },
+    {
+        icon: EthIC,
+        head: 'Earn Money on Sepolia',
+        body: 'Users can earn money by creating a community on the blockchain-based Sepolia network.'
+    },
+    {
+        icon: NoFinancialIC,
+        head: 'ZK Email',
+        body: 'Verify your Twitter without access privacy information, just email.'
+    },
+    {
+        icon: ShareIC,
+        head: 'Use  with Any Account',
+        body: 'The platform supports various web3/web2 accounts, allowing easy connection.'
+    },
+    {
+        icon: RealtimeIC,
+        head: 'Real-Time Sharing',
+        body: 'Users can share content instantly and without limits, feel free to use.'
+    },
+    {
+        icon: AAIC,
+        head: 'Account Abstraction',
+        body: 'Provides a user-friendly bridge between traditional web2 and the decentralized web3.'
+    },
+    {
+        icon: WalletIC,
+        head: 'Integrated web3 wallet',
+        body: 'Our platform provide friendly UI and easy to use UX for Users.'
+    },
+    {
+        icon: PeopleIC,
+        head: 'Easy to use',
+        body: 'Provides a user-friendly bridge between traditional web2 and the decentralized web3.'
+    }
+]
 
 function Welcome() {
     const [, updateState] = useState({});
     const themeIndex = settings.getThemeIndex()
     const navigate = useNavigate()
 
-
     function LaunchApp() {
         navigate(APP_PATH, { replace: true })
     }
-
 
     return (
         <Box className={css.Welcome}>
@@ -54,6 +96,14 @@ function Welcome() {
                         <Text size='H1' className={css.SubHeader}>
                             Connect with everyone</Text>
                         <Box direction='Row' gap='600'>
+                            <Link to="https://proof.ubiw.space" target="_blank">
+                                <Button variant="Warning" size="500" onClick={() => (null)}>
+                                    <Text size='H6'>
+                                        Prove Twitter account
+                                    </Text>
+                                    <RawIcon color="var(--bg-surface)" size="small" src={XIC} />
+                                </Button>
+                            </Link>
                             <Button size="500" onClick={() => LaunchApp()} >
                                 <Text size='H6'>
                                     Launch App
@@ -69,84 +119,20 @@ function Welcome() {
                                 </Button>
                             </Link>
                         </Box>
-
                     </Box>
                     <Box direction='Column' gap='400' className={css.Grid}>
-                        <Box direction='Column' className={css.FlexItems} gap="200" >
-                            <RawIcon src={SpaceIC} />
-                            <Text size='H5'>
-                                Rooms / Space
-                            </Text>
-                            <Text>
-                                Users can create/join a Space and many private rooms in that. Sharing unlimited contents.
-                            </Text>
-                        </Box>
-                        <Box direction='Column' className={css.FlexItems} gap="200">
-                            <RawIcon src={EthIC} />
-                            <Text size='H5'>
-                                Earn Money on Sepolia
-                            </Text>
-                            <Text>
-                                Users can earn money by creating a community on the blockchain-based Sepolia network.
-                            </Text>
-                        </Box>
-                        <Box direction='Column' className={css.FlexItems} gap="200">
-                            <RawIcon src={NoFinancialIC} />
-                            <Text size='H5'>
-                                ZK Email
-                            </Text>
-                            <Text>
-                                Verify your Twitter without access privacy information, just email.
-                            </Text>
-                        </Box>
-                        <Box direction='Column' className={css.FlexItems} gap="200">
-                            <RawIcon src={ShareIC} />
-                            <Text size='H5'>
-                                Use  with Any Account
-                            </Text>
-                            <Text>
-                                The platform supports various web3/web2 accounts, allowing easy connection.
-                            </Text>
-                        </Box>
-
-
-                        <Box direction='Column' className={css.FlexItems} gap="200" >
-                            <RawIcon src={RealtimeIC} />
-                            <Text size='H5'>
-                                Real-Time Sharing
-                            </Text>
-                            <Text>
-                                Users can share content instantly and without limits, feel free to use.
-                            </Text>
-                        </Box>
-                        <Box direction='Column' className={css.FlexItems} gap="200">
-                            <RawIcon src={AAIC} />
-
-                            <Text size='H5'>
-                                Account Abstraction
-                            </Text>
-                            <Text>
-                                Provides a user-friendly bridge between traditional web2 and the decentralized web3.
-                            </Text>
-                        </Box>
-                        <Box direction='Column' className={css.FlexItems} gap="200">
-                            <RawIcon src={WalletIC} />
-                            <Text size='H5'>
-                                Integrated web3 wallet
-                            </Text>
-                            <Text>
-                                Use Web3 wallet features right within the platform with.
-                            </Text>
-                        </Box>
-                        <Box direction='Column' className={css.FlexItems} gap="200">
-                            <RawIcon src={PeopleIC} />
-                            <Text size='H5'>
-                                Easy to use
-                            </Text>
-                            <Text>
-                                Our platform provide friendly UI and easy to use UX for Users.
-                            </Text>
-                        </Box>
+                        {
+                            describes.map((item, index) =>
+                                <Box key={index} direction='Column' className={css.FlexItems} gap="200" >
+                                    <RawIcon src={item.icon} />
+                                    <Text size='H5'>
+                                        {item.head}
+                                    </Text>
+                                    <Text>
+                                        {item.body}
+                                    </Text>
+                                </Box>)
+                        }
 
                     </Box>
                     <Box direction='Column' className='FAQHeader'>

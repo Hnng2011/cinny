@@ -65,7 +65,7 @@ export const Content = style({
 });
 
 export const ContentMain = style({
-  margin: `${config.space.S700} 0 ${toRem(100)} 0`,
+  margin: `${config.space.S700} 0 ${config.space.S700} 0`,
 });
 
 export const Logo = style([

@@ -86,16 +86,16 @@
   }
 
   & .text {
-    color: var(--bg-surface);
+    color: var(--tc-surface-high);
     font-weight: var(--fw-medium);
   }
   & .ic-raw {
-    background-color: var(--bg-surface);
+    background-color: var(--tc-surface-high);
   }
 
   &:hover {
-    background-color: var(--bg-surface-hover) !important;
+    background-color: var(--bg-primary-hover) !important;
   }
 
-  background-color: var(--tc-surface-high);
+  background-color: var(--bg-primary);
 }

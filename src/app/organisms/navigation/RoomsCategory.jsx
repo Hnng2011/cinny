@@ -1,3 +1,4 @@
+/* eslint-disable no-plusplus */
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import './RoomsCategory.scss';
@@ -46,6 +47,18 @@ function RoomsCategory({
   //   );
   // };
 
+  const checkIsDM = () => {
+    let isDM = false;
+    for (let i = 0; i < roomIds.lenght; i++) {
+      isDM = directs.has(roomIds[i])
+      if (isDM) {
+        break
+      }
+    }
+
+    return isDM;
+  }
+
   const renderSelector = (roomId) => {
     const isSpace = spaces.has(roomId);
     const isDM = directs.has(roomId);
@@ -60,10 +73,9 @@ function RoomsCategory({
     );
   };
 
-
   return (
     <div className="room-category">
-      {roomIds && <Text className="cat-header" variant="b3" weight="medium">No rooms joined</Text>}
+      {!checkIsDM() && !roomIds && <Text className="cat-header" variant="b3" weight="medium">No rooms joined</Text>}
       {!hideHeader && (
         <div className="room-category__header">
           <button className="room-category__toggle" onClick={() => setIsOpen(!isOpen)} type="button">

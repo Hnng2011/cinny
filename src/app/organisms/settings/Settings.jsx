@@ -29,9 +29,10 @@ import KeywordNotification from '../../molecules/global-notification/KeywordNoti
 import IgnoreUserList from '../../molecules/global-notification/IgnoreUserList';
 
 import ProfileEditor from '../profile-editor/ProfileEditor';
-import CrossSigning from './CrossSigning';
-import KeyBackup from './KeyBackup';
-import DeviceManage from './DeviceManage';
+// import CrossSigning from './CrossSigning';
+// import KeyBackup from './KeyBackup';
+// import DeviceManage from './DeviceManage';
+
 
 import SunIC from '../../../../public/res/ic/outlined/sun.svg';
 import EmojiIC from '../../../../public/res/ic/outlined/emoji.svg';
@@ -40,6 +41,8 @@ import BellIC from '../../../../public/res/ic/outlined/bell.svg';
 import InfoIC from '../../../../public/res/ic/outlined/info.svg';
 import PowerIC from '../../../../public/res/ic/outlined/power.svg';
 import CrossIC from '../../../../public/res/ic/outlined/cross.svg';
+import WarningIC from '../../../../public/res/ic/filled/icons8-warning.svg'
+import RawIcon from '../../atoms/system-icons/RawIcon';
 
 import CinnySVG from '../../../../public/res/svg/cinny.svg';
 import { confirmDialog } from '../../molecules/confirm-dialog/ConfirmDialog';
@@ -47,6 +50,7 @@ import { useSetting } from '../../state/hooks/settings';
 import { settingsAtom } from '../../state/settings';
 import { isMacOS } from '../../utils/user-agent';
 import { KeySymbol } from '../../utils/key-symbol';
+
 
 function AppearanceSection() {
   const [, updateState] = useState({});
@@ -300,11 +304,11 @@ function EmojiSection() {
 function SecuritySection() {
   return (
     <div className="settings-security">
-      <div className="settings-security__card">
+      {/* <div className="settings-security__card">
         <CrossSigning />
         <KeyBackup />
       </div>
-      <DeviceManage />
+      <DeviceManage /> */}
       <div className="settings-security__card">
         <MenuHeader>Export/Import encryption keys</MenuHeader>
         <SettingTile
@@ -441,7 +445,7 @@ function Settings() {
 
   const handleTabChange = (tabItem) => setSelectedTab(tabItem);
   const handleLogout = async () => {
-    if (await confirmDialog('Logout', 'Are you sure that you want to logout your session?', 'Logout', 'danger')) {
+    if (await confirmDialog('Logout', <div style={{ display: 'flex' }}><div style={{ flexBasis: '4' }}><div>Export E2E key to prevent lost data!!!!!!</div><div>Are you sure that you want to logout your session ?</div></div><img style={{ height: '55px', flexBasis: '1' }} alt="icon" src={WarningIC} /></div>, 'Logout', 'danger')) {
       initMatrix.logout();
     }
   };
