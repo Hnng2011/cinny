@@ -95,8 +95,8 @@ function Welcome() {
                         <Text size='D400' className={css.MainHeader}>Wallet-to-Wallets</Text>
                         <Text size='H1' className={css.SubHeader}>
                             Connect with everyone</Text>
-                        <Box direction='Row' gap='600'>
-                            <Link to="https://proof.ubiw.space" target="_blank">
+                        <Box direction='Row' gap='600' wrap='Wrap' justifyContent='Center'>
+                            <Link style={{ flexBasis: '2' }} to="https://proof.ubiw.space" target="_blank">
                                 <Button variant="Warning" size="500" onClick={() => (null)}>
                                     <Text size='H6'>
                                         Prove Twitter account
@@ -104,13 +104,13 @@ function Welcome() {
                                     <RawIcon color="var(--bg-surface)" size="small" src={XIC} />
                                 </Button>
                             </Link>
-                            <Button size="500" onClick={() => LaunchApp()} >
+                            <Button style={{ flexBasis: '1' }} size="500" onClick={() => LaunchApp()} >
                                 <Text size='H6'>
                                     Launch App
                                 </Text>
                                 <RawIcon color="var(--bg-surface)" size="small" src={ArrowIC} />
                             </Button>
-                            <Link to="https://github.com/ubiwdotspace" target="_blank">
+                            <Link style={{ flexBasis: '1' }} to="https://github.com/ubiwdotspace" target="_blank">
                                 <Button variant="Secondary" size="500" onClick={() => (null)}>
                                     <Text size='H6'>
                                         Github

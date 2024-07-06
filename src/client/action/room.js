@@ -365,7 +365,7 @@ async function join({ roomIdOrAlias, smartAccount, creator, isSpace = false, isD
     const resultContract = !isDM && !isSpace && await joinRoomByContract(roomIdOrAlias, creator, smartAccount, fee);
     if (!isSpace && !isDM && !resultContract) throw new Error(resultContract);
 
-    const resultRoom = await mx.joinRoom(roomIdOrAlias, { viaServers });;
+    const resultRoom = await mx.joinRoom(roomIdOrAlias, { viaServers });
 
     if (isDM) {
       // resultRoom = await mx.http.authedRequest("POST", `/join/${roomIdOrAlias}`, { "server_name": viaServers }, { "is_dm": isDM });
@@ -376,9 +376,6 @@ async function join({ roomIdOrAlias, smartAccount, creator, isSpace = false, isD
     //   resultRoom = await mx.joinRoom(roomIdOrAlias, { viaServers });
     // }
 
-    if (isSpace) {
-      createSpaceShortcut(resultRoom.roomId)
-    }
 
     appDispatcher.dispatch({
       type: cons.actions.room.JOIN,
