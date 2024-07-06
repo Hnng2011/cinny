@@ -140,7 +140,7 @@ function Client() {
 
         <div className="loading__appname">
           <Text variant="h2" weight="medium">
-            Cinny
+            Ubiw.space
           </Text>
         </div>
       </div>

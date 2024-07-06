@@ -134,7 +134,7 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
         smartAccount
       });
 
-      result && onRequestClose() && enqueueSnackbar('Create success', { variant: 'success' })
+      result && enqueueSnackbar('Create success', { variant: 'success' }) && onRequestClose()
       !result && setCreatingError('Create Room Failed');
       setIsCreatingRoom(false)
     } catch (e) {

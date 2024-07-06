@@ -316,14 +316,14 @@ function RoomAliases({ roomId }) {
       </div>
       {isLocalVisible && (
         <div className="room-aliases__content">
-          <MenuHeader>Local addresses</MenuHeader>
-          {(aliases.local.length === 0) && <Text className="room-aliases__message">No local addresses</Text>}
+          <MenuHeader>Unpublished space addresses</MenuHeader>
+          {(aliases.local.length === 0) && <Text className="room-aliases__message">No unpublished space addresses</Text>}
           {aliases.local.map(renderAlias)}
           <Text className="room-aliases__message" variant="b3">
-            {`Set local addresses for this ${room.isSpaceRoom() ? 'space' : 'room'} so users can find this ${room.isSpaceRoom() ? 'space' : 'room'} through your homeserver.`}
+            {`Set new addresses for this ${room.isSpaceRoom() ? 'space' : 'room'} so users can find this ${room.isSpaceRoom() ? 'space' : 'room'} through your homeserver.`}
           </Text>
 
-          <Text className="room-aliases__form-label" variant="b2">Add local address</Text>
+          <Text className="room-aliases__form-label" variant="b2">Add new address</Text>
           <form className="room-aliases__form" onSubmit={handleAliasSubmit}>
             <div className="room-aliases__input-wrapper">
               <Input
