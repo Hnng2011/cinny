@@ -38,6 +38,7 @@ import InfoIC from '../../../../public/res/ic/outlined/info.svg';
 import { useForceUpdate } from '../../hooks/useForceUpdate';
 import { useStore } from '../../hooks/useStore';
 import { SmartAccountAtom } from '../../state/smartAccount';
+import { enqueueSnackbar } from 'notistack';
 
 
 function SpaceManageBreadcrumb({ path, onSelect }) {
@@ -70,10 +71,9 @@ SpaceManageBreadcrumb.propTypes = {
 
 function SpaceManageItem({
   parentId, roomInfo, onSpaceClick, requestClose,
-  isSelected, onSelect, roomHierarchy,
+  isSelected, onSelect, roomHierarchy, isJoining, setIsJoining
 }) {
   const [isExpand, setIsExpand] = useState(false);
-  const [isJoining, setIsJoining] = useState(false);
   const [fee, setFee] = useState(undefined)
   const [votingStar, setVotingStar] = useState(undefined)
   const { directs } = initMatrix.roomList;
@@ -122,7 +122,14 @@ function SpaceManageItem({
       const joinRoom = async () => {
         const viaSet = roomHierarchy.viaMap.get(roomId);
         const via = viaSet ? [...viaSet] : undefined;
-        await join({ roomIdOrAlias: roomId, via, smartAccount, creator, fee });
+        try {
+          await join({ roomIdOrAlias: roomId, via, smartAccount, creator, fee });
+          enqueueSnackbar('Join room success', { variant: 'success' })
+        }
+        catch (e) {
+          enqueueSnackbar(e, { variant: 'error' })
+        }
+
         setIsJoining(false)
       }
 
@@ -204,7 +211,7 @@ function SpaceManageItem({
             ? <Button onClick={handleOpen}>Open</Button>
             :
             <Box direction='Column' alignItems='End' gap='300'>
-              <Button variant="primary" onClick={handleJoin} disabled={isJoining || !fee}>{isJoining ? 'Joining...' : 'Join'}</Button>
+              <Button variant="primary" onClick={handleJoin} disabled={isJoining || !fee}>{isJoining === roomId ? 'Joining...' : 'Join'}</Button>
               <Text variant="b3" >Subscription: {fee} ETH</Text>
             </Box>
 
@@ -222,6 +229,8 @@ SpaceManageItem.propTypes = {
   requestClose: PropTypes.func.isRequired,
   isSelected: PropTypes.bool.isRequired,
   onSelect: PropTypes.func.isRequired,
+  isJoining: PropTypes.bool.isRequired || PropTypes.string.isRequired,
+  setIsJoining: PropTypes.func,
 };
 
 function SpaceManageFooter({ parentId, selected }) {
@@ -342,6 +351,7 @@ function useChildUpdate(roomId, roomsHierarchy) {
 
 function SpaceManageContent({ roomId, requestClose }) {
   const mx = initMatrix.matrixClient;
+  const [isJoining, setIsJoining] = useState(false);
   useUpdateOnJoin(roomId);
   const [, forceUpdate] = useForceUpdate();
   const [roomsHierarchy] = useState(new RoomsHierarchy(mx, 30));
@@ -421,6 +431,8 @@ function SpaceManageContent({ roomId, requestClose }) {
                 onSpaceClick={addPathItem}
                 requestClose={requestClose}
                 onSelect={handleSelected}
+                isJoining={isJoining}
+                setIsJoining={setIsJoining}
               />
             )
         )))}
