@@ -9,6 +9,8 @@ import './SpaceWithdraw.scss';
 
 import { Box } from 'folds';
 import { useAtom } from 'jotai';
+import { enqueueSnackbar } from 'notistack';
+import { Link } from 'react-router-dom';
 import { twemojify } from '../../../util/twemojify';
 import initMatrix from '../../../client/initMatrix';
 import cons from '../../../client/state/cons';
@@ -30,12 +32,11 @@ import PopupWindow from '../../molecules/popup-window/PopupWindow';
 
 import CrossIC from '../../../../public/res/ic/outlined/cross.svg';
 import ChevronRightIC from '../../../../public/res/ic/outlined/chevron-right.svg';
-import InfoIC from '../../../../public/res/ic/outlined/info.svg';
+// import InfoIC from '../../../../public/res/ic/outlined/info.svg';
 
 import { useForceUpdate } from '../../hooks/useForceUpdate';
 import { useStore } from '../../hooks/useStore';
 import { SmartAccountAtom } from '../../state/smartAccount';
-
 
 function SpaceWithdrawBreadcrumb({ path, onSelect }) {
   return (
@@ -110,16 +111,16 @@ function SpaceWithdrawItem({
     </Text>
   );
 
-  const expandBtnJsx = (
-    <IconButton
-      variant={isExpand ? 'primary' : 'surface'}
-      size="extra-small"
-      src={InfoIC}
-      tooltip="Topic"
-      tooltipPlacement="top"
-      onClick={() => setIsExpand(!isExpand)}
-    />
-  );
+  // const expandBtnJsx = (
+  //   <IconButton
+  //     variant={isExpand ? 'primary' : 'surface'}
+  //     size="extra-small"
+  //     src={InfoIC}
+  //     tooltip="Topic"
+  //     tooltipPlacement="top"
+  //     onClick={() => setIsExpand(!isExpand)}
+  //   />
+  // );
 
   return (
     <div
@@ -134,9 +135,9 @@ function SpaceWithdrawItem({
           {roomAvatarJSX}
           {roomNameJSX}
         </button>
-        {roomInfo.topic && expandBtnJsx}
+        {/* {roomInfo.topic && expandBtnJsx} */}
         <Box direction='Row' alignItems='Center' gap='300'>
-          <Text>{fee} ETH</Text>
+          <Text variant='b3' weight='bold'>{fee} ETH</Text>
         </Box>
       </div>
       {isExpand && roomInfo.topic && <Text variant="b2">{twemojify(roomInfo.topic, undefined, true)}</Text>}
@@ -220,7 +221,7 @@ function SpaceWithdrawContent({ roomId }) {
   const [spacePath, addPathItem] = useSpacePath(roomId);
   const [isLoading, setIsLoading] = useState(true);
   const [withDrawing, setWithDrawing] = useState(false)
-  const [resultWitdraw, setResultWitdraw] = useState(undefined)
+  const [error, setError] = useState(undefined)
   const mountStore = useStore();
   const currentPath = spacePath[spacePath.length - 1];
   useChildUpdate(currentPath.roomId, roomsHierarchy);
@@ -253,28 +254,41 @@ function SpaceWithdrawContent({ roomId }) {
     }
   };
 
+
+
   const withDraw = async () => {
     setWithDrawing(true)
-    const result = await Withdraw(smartAccount)
-    setResultWitdraw(result)
+    try {
+      const result = await Withdraw(smartAccount)
+      const action = () => (
+        <button type='button' style={{ color: 'var(--tc-primary-high)', fontWeight: 'var(--fw-medium)', backgroundColor: 'var(--bg-primary)', padding: 'var(--sp-extra-tight)', borderRadius: 'var(--bo-radius)', cursor: 'pointer' }} onClick={() => { window.open(`https://sepolia.etherscan.io/tx/${result}`, "_blank") }}>
+          View txHash
+        </button>
+      );
+
+      enqueueSnackbar('Withdraw success', { variant: 'success', action, autoHideDuration: '10000' })
+    }
+
+    catch (e) {
+      setError(e.message || e)
+    }
     setWithDrawing(false)
   }
 
-  if (!currentHierarchy) loadRoomHierarchy();
+  useEffect(() => { if (error) enqueueSnackbar(error, { variant: 'error' }) }, [error])
 
-  function isValidTxHash(txHash) {
-    // Kiểm tra độ dài của chuỗi và định dạng bắt đầu là '0x'
-    const re = /^0x[a-fA-F0-9]{64}$/;
-    return re.test(txHash);
-  }
+  if (!currentHierarchy) loadRoomHierarchy();
 
   return (
     <div className="space-manage__content">
       {spacePath.length > 1 && (
         <SpaceWithdrawBreadcrumb path={spacePath} onSelect={addPathItem} />
       )}
-      <Text variant="b3" weight="bold">Withdraw Percentage : {percentage}%</Text>
-      <Text variant="b3" weight="bold">Rooms</Text>
+      <Text variant="b2" weight="bold">Withdraw Percentage : {percentage}%</Text>
+      <Box className='space-manage__content' direction='Row' justifyContent='SpaceBetween'>
+        <Text variant="b3" weight="bold">Rooms</Text>
+        <Text variant="b3" weight="bold">Rooms FEE</Text>
+      </Box>
       <div className="space-manage__content-items">
         {!isLoading && currentHierarchy?.rooms?.length === 1 && (
           <Text>
@@ -302,14 +316,6 @@ function SpaceWithdrawContent({ roomId }) {
       <Box className='withdraw' direction='Row' gap='300' alignItems='Center' justifyContent='End'>
         <Button disabled={withDrawing} variant='primary' onClick={withDraw}>Withdraw</Button>
       </Box>
-      {
-        resultWitdraw && (
-          <Box className='withdraw' direction='Row' gap='300' alignItems='Center' justifyContent='Center'>
-            {!isValidTxHash(resultWitdraw) && <Text className='space-manage__content-error' >{resultWitdraw}</Text>}
-            {isValidTxHash(resultWitdraw) && <a target='_blank' href={`https://sepolia.etherscan.io/tx/${resultWitdraw}`} rel="noreferrer"> {resultWitdraw}</a>}
-          </Box>
-        )
-      }
       {
         isLoading && (
           <div className="space-manage__content-loading">

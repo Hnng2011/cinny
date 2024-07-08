@@ -170,12 +170,12 @@ function Search() {
 
   const noti = initMatrix.notifications;
   const renderRoomSelector = (item) => {
-    let imageSrc = null;
+    let imageSrc = mx.getRoom(item.roomId).getAvatarUrl(mx.baseUrl, 24, 24, 'crop');
     let iconSrc = null;
     if (item.type === 'direct') {
       imageSrc = item.room.getAvatarFallbackMember()?.getAvatarUrl(mx.baseUrl, 24, 24, 'crop') || null;
     } else {
-      iconSrc = joinRuleToIconSrc(item.room.getJoinRule(), item.type === 'space');
+      iconSrc = imageSrc;
     }
 
     return (
@@ -216,12 +216,12 @@ function Search() {
         <div className="search-dialog__content-wrapper">
           <ScrollView autoHide>
             <div className="search-dialog__content">
-              { Array.isArray(result?.chunk) && result.chunk.map(renderRoomSelector) }
+              {Array.isArray(result?.chunk) && result.chunk.map(renderRoomSelector)}
             </div>
           </ScrollView>
         </div>
         <div className="search-dialog__footer">
-          <Text variant="b3">Type # for rooms, @ for DMs and * for spaces. Hotkey: Ctrl + k</Text>
+          <Text variant="b3"># for rooms, @ for DMs, * for spaces. Hotkey: Ctrl + k</Text>
         </div>
       </div>
     </RawModal>

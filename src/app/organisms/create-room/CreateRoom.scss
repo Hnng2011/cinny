@@ -66,6 +66,7 @@
     display: flex;
     align-items: flex-end;
     justify-content: center;
+    margin-top: calc(var(--sp-normal) * 2);
 
     & .input-container {
       flex: 1;

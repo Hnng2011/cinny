@@ -77,7 +77,6 @@ async function checkTransactionStatus(txHash) {
     // Single event handler for all events
     const eventHandler = (log) => {
       if (txHash === log.transactionHash) {
-        console.log(log);
         filters.forEach(f => provider.off(f.filter, eventHandler));
         resolve(true);
       }
@@ -88,7 +87,7 @@ async function checkTransactionStatus(txHash) {
     setTimeout(() => {
       filters.forEach(f => provider.off(f.filter, eventHandler));
       reject(new Error('Transaction status check timed out'));
-    }, 60000);  // Timeout after 60 seconds
+    }, 60000);
   });
 }
 
@@ -163,7 +162,8 @@ export async function Withdraw(smartAccount) {
   }
 
   catch (e) {
-    return e?.data.extraMessage.message.match(/"(.*?)"/)[1] || e.message
+    const err = JSON.parse(String(e?.data.extraMessage.message).substring(String(e?.data.extraMessage.message).indexOf('{'))) || e?.message || e
+    throw new Error(typeof err === 'object' ? err.error.message : err)
   }
 }
 
@@ -171,7 +171,7 @@ async function joinRoomByContract(roomId, creator, smartAccount, fee) {
   const address = await smartAccount.getAddress();
 
   if (creator.toLowerCase() === address.toLowerCase()) {
-    return null;
+    return true;
   }
 
   try {
@@ -190,12 +190,17 @@ async function joinRoomByContract(roomId, creator, smartAccount, fee) {
     const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
     const txHash = await smartAccount.sendUserOperation(feeQuotesResult.verifyingPaymasterGasless);
 
-    const result = await checkTransactionStatus(txHash)
+    await checkTransactionStatus(txHash)
       .then(receipt => receipt)
+      .catch(e => { throw new Error(e) })
 
-    return result
-  } catch (error) {
-    throw new Error(error);
+    return true
+  } catch (e) {
+    const err = JSON.parse(String(e?.data.extraMessage.message).substring(String(e?.data.extraMessage.message).indexOf('{'))) || e?.message || e
+    if (err.error.message === 'execution reverted') {
+      throw new Error("Please check your wallet balance")
+    }
+    throw new Error(err);
   }
 }
 
@@ -217,10 +222,9 @@ async function CreateSpaceByContract(smartAccount) {
   catch (e) {
     const err = JSON.parse(String(e?.data.extraMessage.message).substring(String(e?.data.extraMessage.message).indexOf('{'))) || e?.message || e
     if (err.error.message === 'execution reverted: Caller does not own the required NFT') {
-      throw new Error("Please claim your NFT first")
+      throw new Error("Please verify your twitter first")
     }
     else { throw new Error(typeof err === 'object' ? err.error.message : err) }
-
   }
 }
 
@@ -231,8 +235,6 @@ async function CreateRoomByContract(room_id, fee, smartAccount) {
     }
 
     const value = parseEther(fee);
-
-
     const callData = new Interface(ABI).encodeFunctionData('addRoomToSpace', [room_id, value]);
 
     const tx = {
@@ -247,16 +249,8 @@ async function CreateRoomByContract(room_id, fee, smartAccount) {
   }
 
   catch (e) {
-    const errlog = e?.data?.extraMessage?.message || null;
-    if (errlog?.match(/"(.*?)"/)?.[1] === "Room ID already exists") {
-      return true
-    }
-
-    if (errlog === "Simulate user operation failed: AA21 didn't pay prefund") {
-      throw new Error("Don't have enough fund in your account")
-    }
-
-    throw new Error(errlog?.match(/"(.*?)"/)?.[1] || errlog || e?.message || e)
+    const err = JSON.parse(String(e?.data.extraMessage.message).substring(String(e?.data.extraMessage.message).indexOf('{'))) || e?.message || e
+    throw new Error(err)
   }
 }
 
@@ -362,20 +356,13 @@ async function join({ roomIdOrAlias, smartAccount, creator, isSpace = false, isD
   const viaServers = via || [roomIdOrAlias.split(':')[1]];
 
   try {
-    const resultContract = !isDM && !isSpace && await joinRoomByContract(roomIdOrAlias, creator, smartAccount, fee);
-    if (!isSpace && !isDM && !resultContract) throw new Error(resultContract);
-
+    !isDM && !isSpace && await joinRoomByContract(roomIdOrAlias, creator, smartAccount, fee);
     const resultRoom = await mx.joinRoom(roomIdOrAlias, { viaServers });
 
     if (isDM) {
-      // resultRoom = await mx.http.authedRequest("POST", `/join/${roomIdOrAlias}`, { "server_name": viaServers }, { "is_dm": isDM });
       const targetUserId = guessDMRoomTargetId(mx.getRoom(resultRoom.roomId), mx.getUserId());
       await addRoomToMDirect(resultRoom.roomId, targetUserId);
     }
-    // else {
-    //   resultRoom = await mx.joinRoom(roomIdOrAlias, { viaServers });
-    // }
-
 
     appDispatcher.dispatch({
       type: cons.actions.room.JOIN,
@@ -385,7 +372,7 @@ async function join({ roomIdOrAlias, smartAccount, creator, isSpace = false, isD
 
     return resultRoom.roomId;
   } catch (error) {
-    throw new Error(error)
+    throw new Error(error.message)
   }
 }
 
@@ -399,7 +386,7 @@ async function leave(roomId) {
   const member = mx.getRoom(roomId)?.getMembers()?.length
   const isDM = initMatrix.roomList.directs.has(roomId);
   try {
-    member > 1 ? await mx.leave(roomId) : await mx.forget(roomId);
+    member > 1 ? await mx.leave(roomId) : await mx.leave(roomId) && await mx.forget(roomId);
     appDispatcher.dispatch({
       type: cons.actions.room.LEAVE,
       roomId,

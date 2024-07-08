@@ -9,6 +9,7 @@ import './SpaceManage.scss';
 import { useAtom } from 'jotai';
 import { Box } from 'folds';
 import ReactStars from "react-rating-stars-component";
+import { enqueueSnackbar } from 'notistack';
 import { twemojify } from '../../../util/twemojify';
 
 import initMatrix from '../../../client/initMatrix';
@@ -38,7 +39,6 @@ import InfoIC from '../../../../public/res/ic/outlined/info.svg';
 import { useForceUpdate } from '../../hooks/useForceUpdate';
 import { useStore } from '../../hooks/useStore';
 import { SmartAccountAtom } from '../../state/smartAccount';
-import { enqueueSnackbar } from 'notistack';
 
 
 function SpaceManageBreadcrumb({ path, onSelect }) {
@@ -74,6 +74,7 @@ function SpaceManageItem({
   isSelected, onSelect, roomHierarchy, isJoining, setIsJoining
 }) {
   const [isExpand, setIsExpand] = useState(false);
+  const [error, setError] = useState(false)
   const [fee, setFee] = useState(undefined)
   const [votingStar, setVotingStar] = useState(undefined)
   const { directs } = initMatrix.roomList;
@@ -109,16 +110,18 @@ function SpaceManageItem({
 
         setFee(feeRes);
         setVotingStar(starRes);
-      } catch (error) {
-        console.error("Error fetching data:", error);
+      } catch (e) {
+        setError(`Error fetching data for ${roomId}`)
       }
     };
 
     callFeeAndStar();
   }, [creator, roomId]);
 
+
+
   useEffect(() => {
-    if (isJoining) {
+    if (isJoining === roomId) {
       const joinRoom = async () => {
         const viaSet = roomHierarchy.viaMap.get(roomId);
         const via = viaSet ? [...viaSet] : undefined;
@@ -127,7 +130,7 @@ function SpaceManageItem({
           enqueueSnackbar('Join room success', { variant: 'success' })
         }
         catch (e) {
-          enqueueSnackbar(e, { variant: 'error' })
+          setError(e?.message || e)
         }
 
         setIsJoining(false)
@@ -138,13 +141,19 @@ function SpaceManageItem({
 
   }, [isJoining])
 
+  useEffect(() => {
+    if (error) {
+      enqueueSnackbar(error, { variant: 'error' })
+    }
+  }, [error])
+
   const handleOpen = () => {
     if (isSpace) selectTab(roomId);
     else selectRoom(roomId);
     requestClose();
   };
   const handleJoin = () => {
-    setIsJoining(true);
+    setIsJoining(roomId);
   };
 
   const roomAvatarJSX = (

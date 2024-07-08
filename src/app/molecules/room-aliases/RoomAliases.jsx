@@ -11,11 +11,12 @@ import Text from '../../atoms/text/Text';
 import Button from '../../atoms/button/Button';
 import Input from '../../atoms/input/Input';
 import Checkbox from '../../atoms/button/Checkbox';
-import Toggle from '../../atoms/button/Toggle';
+// import Toggle from '../../atoms/button/Toggle';
 import { MenuHeader } from '../../atoms/context-menu/ContextMenu';
-import SettingTile from '../setting-tile/SettingTile';
+// import SettingTile from '../setting-tile/SettingTile';
 
 import { useStore } from '../../hooks/useStore';
+import generateRandomString from '../../../util/randomString';
 
 function useValidate(hsString) {
   const [debounce] = useState(new Debounce());
@@ -53,7 +54,7 @@ function useValidate(hsString) {
 
     debounce._(async () => {
       const { value } = input;
-      const alias = `#${value}:${hsString}`;
+      const alias = `#${value}_${generateRandomString(6, true)}:${hsString}`;
       if (checkValueOK(value) === false) return;
 
       setValidate({
@@ -101,8 +102,8 @@ function RoomAliases({ roomId }) {
   const hsString = userId.slice(userId.indexOf(':') + 1);
 
   const isMountedStore = useStore();
-  const [isPublic, setIsPublic] = useState(false);
-  const [isLocalVisible, setIsLocalVisible] = useState(true);
+  const [, setIsPublic] = useState(false);
+  const [isLocalVisible,] = useState(true);
   const [aliases, setAliases] = useState(getAliases(roomId));
   const [selectedAlias, setSelectedAlias] = useState(null);
   const [deleteAlias, setDeleteAlias] = useState(null);
@@ -315,7 +316,7 @@ function RoomAliases({ roomId }) {
         </Text>
       </div>
       {isLocalVisible && (
-        <div className="room-aliases__content">
+        <div className="room-aliases__content__local">
           <MenuHeader>Unpublished space addresses</MenuHeader>
           {(aliases.local.length === 0) && <Text className="room-aliases__message">No unpublished space addresses</Text>}
           {aliases.local.map(renderAlias)}

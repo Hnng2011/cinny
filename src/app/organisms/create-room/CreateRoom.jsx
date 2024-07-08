@@ -26,14 +26,14 @@ import { isRoomAliasAvailable, getIdServer } from '../../../util/matrixUtil';
 
 import Text from '../../atoms/text/Text';
 import Button from '../../atoms/button/Button';
-// import Toggle from '../../atoms/button/Toggle';
+import Toggle from '../../atoms/button/Toggle';
 import IconButton from '../../atoms/button/IconButton';
 // import { MenuHeader, MenuItem } from '../../atoms/context-menu/ContextMenu';
 import Input from '../../atoms/input/Input';
 import Spinner from '../../atoms/spinner/Spinner';
 // import SegmentControl from '../../atoms/segmented-controls/SegmentedControls';
 import Dialog from '../../molecules/dialog/Dialog';
-// import SettingTile from '../../molecules/setting-tile/SettingTile';
+import SettingTile from '../../molecules/setting-tile/SettingTile';
 
 import HashPlusIC from '../../../../public/res/ic/outlined/hash-plus.svg';
 import SpacePlusIC from '../../../../public/res/ic/outlined/space-plus.svg';
@@ -51,7 +51,7 @@ import generateRandomString from '../../../util/randomString';
 function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
   const [smartAccount] = useAtom(SmartAccountAtom);
   const [joinRule] = useState(parentId ? 'restricted' : 'public');
-  const [isEncrypted] = useState(!isSpace);
+  const [isEncrypted, setIsEncrypted] = useState(!isSpace);
   const [isCreatingRoom, setIsCreatingRoom] = useState(false);
   const [creatingError, setCreatingError] = useState(null);
   const [isValidAddress, setIsValidAddress] = useState(null);
@@ -83,16 +83,16 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
 
 
   const action = () => (
-    creatingError === 'Please claim your NFT first' ?
+    creatingError === 'Please verify your twitter first' ?
       <button style={{ color: 'var(--tc-primary-high)', fontWeight: 'var(--fw-medium)', backgroundColor: 'var(--bg-primary)', padding: 'var(--sp-extra-tight)', borderRadius: 'var(--bo-radius)', cursor: 'pointer' }} onClick={() => { window.open(import.meta.env.VITE_APP_PROOF_URL, "_blank") }}>
-        Claim NFT
+        Verify Now
       </button> : null
   );
 
 
   useEffect(() => {
     if (creatingError)
-      enqueueSnackbar(creatingError, { variant: creatingError === 'Please claim your NFT first' ? 'warning' : 'error', action, autoHideDuration: '10000' })
+      enqueueSnackbar(creatingError, { variant: creatingError === 'Please verify your twitter first' ? 'warning' : 'error', action, autoHideDuration: '10000' })
   }, [creatingError])
 
   const handleSubmit = async (evt) => {
@@ -185,13 +185,13 @@ function CreateRoomContent({ isSpace, parentId, onRequestClose }) {
           content={<Text variant="b3">{`Select who can join this ${isSpace ? 'space' : 'room'}.`}</Text>}
         /> */}
 
-        {/* {!isSpace && joinRule !== 'public' && (
+        {!isSpace && joinRule !== 'public' && (
           <SettingTile
-            title="Enable end-to-end encryption"
+            title="Enable E2E encryption"
             options={<Toggle isActive={isEncrypted} onToggle={setIsEncrypted} />}
-            content={<Text variant="b3">You can’t disable this later. Bridges & most bots won’t work yet.</Text>}
+            content={<Text variant="b3">You can’t disable this later. <br /> Room with Encrypted will lost history when user don't storing session.</Text>}
           />
-        )} */}
+        )}
         {/* <SettingTile
           title="Select your role"
           options={(
