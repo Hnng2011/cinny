@@ -45,8 +45,10 @@
   --bg-ping-hover: hsla(137deg, 100%, 68%, 50%);
   --bg-divider: hsla(0, 0%, 0%, 0.1);
 
-  --bg-function: rgba(178, 170, 233, 0.5);
-  --bg-function-hover: rgba(178, 170, 233, 1);
+  --bg-function: #4943704d;
+  --bg-function-hover: #50497b83;
+  --bg-function-active: #5750869c;
+  --bg-function-border: #e3e1f7;
 
   /* text color | --tc-[background type]-[priority]: value */
   --tc-surface-high: #000000;
@@ -70,7 +72,7 @@
   --tc-danger-normal: rgba(240, 71, 71, 88%);
   --tc-danger-low: rgba(240, 71, 71, 60%);
 
-  --tc-function-high : #2C2843
+  --tc-function-high: #494370;
 
   --tc-code: #e62498;
   --tc-link: hsl(213deg 76% 56%);
@@ -230,6 +232,11 @@
   --bg-primary-active: rgba(42, 98, 166, 70%);
   --bg-primary-border: rgba(42, 98, 166, 38%);
 
+  --bg-function: #b3aae94d;
+  --bg-function-hover: #b3aae983;
+  --bg-function-active: #ada3e89c;
+  --bg-function-border: #a79de6;
+
   --bg-tooltip: #000;
   --bg-badge: hsl(0, 0%, 75%);
   --bg-ping: hsla(137deg, 100%, 38%, 40%);
@@ -249,6 +256,7 @@
   --tc-code: #e565b1;
   --tc-link: hsl(213deg 94% 73%);
   --tc-badge: black;
+  --tc-function-high: #bdb6ec;
 
   /* system icons | --ic-[background type]-[priority]: value */
   --ic-surface-high: rgb(255, 255, 255);

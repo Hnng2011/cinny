@@ -6,7 +6,8 @@
 .btn-primary,
 .btn-positive,
 .btn-caution,
-.btn-danger {
+.btn-danger,
+.btn-function {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -40,22 +41,15 @@
   }
 }
 
-.btn-surface {
-  box-shadow: var(--bs-surface-border);
-  @include color(var(--tc-surface-high), var(--ic-surface-normal));
-  @include state.hover(var(--bg-surface-hover));
-  @include state.focus(var(--bs-surface-outline));
-  @include state.active(var(--bg-surface-active));
-}
-
 .btn-primary {
-  background-color: var(--bg-primary);
+  background-color: var(--bg-primary-active);
   @include color(var(--tc-primary-high), var(--ic-primary-normal));
   @include state.hover(var(--bg-primary-hover));
   @include state.focus(var(--bs-primary-outline));
   @include state.active(var(--bg-primary-active));
 }
 .btn-positive {
+  background-color: var(--bg-positive-active);
   box-shadow: var(--bs-positive-border);
   @include color(var(--tc-positive-high), var(--ic-positive-normal));
   @include state.hover(var(--bg-positive-hover));
@@ -63,6 +57,7 @@
   @include state.active(var(--bg-positive-active));
 }
 .btn-caution {
+  background-color: var(--bg-caution-active);
   box-shadow: var(--bs-caution-border);
   @include color(var(--tc-caution-high), var(--ic-caution-normal));
   @include state.hover(var(--bg-caution-hover));
@@ -70,32 +65,17 @@
   @include state.active(var(--bg-caution-active));
 }
 .btn-danger {
+  background-color: var(--bg-danger-active);
   box-shadow: var(--bs-danger-border);
   @include color(var(--tc-danger-high), var(--ic-danger-normal));
   @include state.hover(var(--bg-danger-hover));
   @include state.focus(var(--bs-danger-outline));
   @include state.active(var(--bg-danger-active));
 }
-
-.background {
-  &:hover .text {
-    color: var(--tc-surface-high);
-  }
-  &:hover .ic-raw {
-    background-color: var(--tc-surface-high) !important;
-  }
-
-  & .text {
-    color: var(--tc-surface-high);
-    font-weight: var(--fw-medium);
-  }
-  & .ic-raw {
-    background-color: var(--tc-surface-high);
-  }
-
-  &:hover {
-    background-color: var(--bg-primary-hover) !important;
-  }
-
-  background-color: var(--bg-primary);
+.btn-function {
+  background-color: var(--bg-function);
+  @include color(var(--tc-function-high), var(--tc-function-high));
+  @include state.hover(var(--bg-function-hover));
+  @include state.focus(var(--bs-function-boder));
+  @include state.active(var(--bg-function-active));
 }

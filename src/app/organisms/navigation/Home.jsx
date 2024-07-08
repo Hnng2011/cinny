@@ -80,22 +80,27 @@ function Home({ spaceId }) {
     <>
       {!spaceId &&
         <div style={{ marginTop: 'var(--sp-extra-tight)' }}>
-          <MenuItem background onClick={() => { openCreateRoom(true, spaceId) }} iconSrc={SpacePlusIC}>
+          <MenuItem variant='function' onClick={() => { openCreateRoom(true, spaceId) }} iconSrc={SpacePlusIC}>
             Create space
           </MenuItem>
-          <MenuItem background onClick={() => openPublicRooms()} iconSrc={SpaceGlobeIC}>
+          <MenuItem variant='function' onClick={() => openPublicRooms()} iconSrc={SpaceGlobeIC}>
             Explore spaces
           </MenuItem>
-        </div>}
-      {spaceId &&
+        </div >}
+      {
+        spaceId &&
         <div style={{ marginTop: 'var(--sp-extra-tight)' }}>
-          {mx.getRoom(spaceId).getCreator() === mx.getUserId() && <MenuItem background onClick={() => { openCreateRoom(false, spaceId) }} iconSrc={HashPlusIC} >
-            Create Room
-          </MenuItem>}
-          <MenuItem onClick={() => openSpaceManage(spaceId)} background iconSrc={HashSearchIC} >
+          {mx.getRoom(spaceId).getCreator() === mx.getUserId()
+            &&
+            <MenuItem variant='caution' onClick={() => { openCreateRoom(false, spaceId) }} iconSrc={HashPlusIC} >
+              Create Room
+            </MenuItem>}
+
+          <MenuItem variant='caution' onClick={() => openSpaceManage(spaceId)} iconSrc={HashSearchIC} >
             Explore Rooms
           </MenuItem>
-        </div >}
+        </div >
+      }
 
       {
         !isCategorized && spaceIds.length !== 0 && (
