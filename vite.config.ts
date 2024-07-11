@@ -89,22 +89,11 @@ export default defineConfig({
       define: {
         global: 'globalThis',
       },
-      // plugins: [
-      //   NodeGlobalsPolyfillPlugin({
-      //     process: false,
-      //     buffer: true,
-      //   }),
-      // ]
     },
   },
   build: {
     outDir: 'dist',
     sourcemap: true,
     copyPublicDir: false,
-    // rollupOptions: {
-    //   plugins: [
-    //     inject({ Buffer: ['buffer', 'Buffer'] })
-    //   ]
-    // }
   },
 });

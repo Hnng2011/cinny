@@ -133,7 +133,8 @@ export async function votingForRoom(creator, roomId, stars, smartAccount) {
   }
 
   catch (e) {
-    return false
+    const err = JSON.parse(String(e?.data.extraMessage.message).substring(String(e?.data.extraMessage.message).indexOf('{'))) || e?.message || e
+    throw new Error(typeof err === 'object' ? err.error.message : err)
   }
 }
 

@@ -6,6 +6,7 @@ import './ConfirmDialog.scss';
 
 import ReactStars from "react-rating-stars-component";
 import { useAtom } from 'jotai';
+import { enqueueSnackbar } from 'notistack';
 import { openReusableDialog } from '../../../client/action/navigation';
 
 import Text from '../../atoms/text/Text';
@@ -27,8 +28,14 @@ function ConfirmDialog({
 
   const handleVote = async () => {
     setVoting(true)
-    const result = await votingForRoom(isVoting[2], isVoting[3], rating, smartAccount)
-    onComplete(result)
+    try {
+      const result = await votingForRoom(isVoting[2], isVoting[3], rating, smartAccount)
+      onComplete(result)
+      enqueueSnackbar('Vote success', { variant: 'success' })
+    }
+    catch (e) {
+      enqueueSnackbar(e?.message, { variant: 'error' })
+    }
   }
 
   return (

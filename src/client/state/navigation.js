@@ -412,6 +412,7 @@ class Navigation extends EventEmitter {
         );
       },
     };
+
     actions[action.type]?.();
   }
 }
