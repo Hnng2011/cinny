@@ -158,7 +158,7 @@ function GlobalNotification() {
         )}
         content={<Text variant="b3">Default notification settings for all room message.</Text>}
       />
-      {/* <SettingTile
+      <SettingTile
         title="Encrypted rooms messages"
         options={(
           <Button onClick={(evt) => onSelect(evt, ENC_ROOM)} iconSrc={ChevronBottomIC}>
@@ -166,7 +166,7 @@ function GlobalNotification() {
           </Button>
         )}
         content={<Text variant="b3">Default notification settings for all encrypted room message.</Text>}
-      /> */}
+      />
     </div>
   );
 }

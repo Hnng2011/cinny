@@ -49,7 +49,7 @@ import {
 import colorMXID from '../../../../util/colorMXID';
 import {
   canEditEvent,
-  getEventEdits,
+  // getEventEdits,
   getMemberAvatarMxc,
   getMemberDisplayName,
 } from '../../../utils/room';
@@ -59,7 +59,7 @@ import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { useRecentEmoji } from '../../../hooks/useRecentEmoji';
 import * as css from './styles.css';
 import { EventReaders } from '../../../components/event-readers';
-import { TextViewer } from '../../../components/text-viewer';
+// import { TextViewer } from '../../../components/text-viewer';
 import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
 import { EmojiBoard } from '../../../components/emoji-board';
 import { ReactionViewer } from '../reaction-viewer';

@@ -22,7 +22,7 @@ import RoomNotification from '../../molecules/room-notification/RoomNotification
 // import RoomVisibility from '../../molecules/room-visibility/RoomVisibility';
 // import RoomAliases from '../../molecules/room-aliases/RoomAliases';
 import RoomHistoryVisibility from '../../molecules/room-history-visibility/RoomHistoryVisibility';
-// import RoomEncryption from '../../molecules/room-encryption/RoomEncryption';
+import RoomEncryption from '../../molecules/room-encryption/RoomEncryption';
 import RoomPermissions from '../../molecules/room-permissions/RoomPermissions';
 import RoomMembers from '../../molecules/room-members/RoomMembers';
 import RoomEmojis from '../../molecules/room-emojis/RoomEmojis';
@@ -131,10 +131,10 @@ GeneralSettings.propTypes = {
 function SecuritySettings({ roomId }) {
   return (
     <>
-      {/* <div className="room-settings__card">
+      <div className="room-settings__card">
         <MenuHeader>Encryption</MenuHeader>
         <RoomEncryption roomId={roomId} />
-      </div> */}
+      </div>
       <div className="room-settings__card">
         <MenuHeader>Message history visibility</MenuHeader>
         <RoomHistoryVisibility roomId={roomId} />

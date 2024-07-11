@@ -144,7 +144,7 @@ function PublicRooms({ isOpen, searchTerm, onRequestClose }) {
         updateSearchQuery({
           error: inputRoomName === ''
             ? `No public rooms on ${inputHs}`
-            : `No result found for "${inputRoomName}" on ${inputHs}`,
+            : `No result found for "${inputRoomName}"`,
           alias: isInputAlias ? inputRoomName : null,
         });
       }
