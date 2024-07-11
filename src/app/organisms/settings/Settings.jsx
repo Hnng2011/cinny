@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Settings.scss';
 
+import { Box } from 'folds';
 import initMatrix from '../../../client/initMatrix';
 import cons from '../../../client/state/cons';
 import settings from '../../../client/state/settings';
@@ -42,9 +43,8 @@ import InfoIC from '../../../../public/res/ic/outlined/info.svg';
 import PowerIC from '../../../../public/res/ic/outlined/power.svg';
 import CrossIC from '../../../../public/res/ic/outlined/cross.svg';
 import WarningIC from '../../../../public/res/ic/filled/icons8-warning.svg'
-import RawIcon from '../../atoms/system-icons/RawIcon';
-
 import CinnySVG from '../../../../public/res/svg/cinny.svg';
+import UbiwJPG from '../../../../public/logo.jpg'
 import { confirmDialog } from '../../molecules/confirm-dialog/ConfirmDialog';
 import { useSetting } from '../../state/hooks/settings';
 import { settingsAtom } from '../../state/settings';
@@ -337,24 +337,41 @@ function SecuritySection() {
 function AboutSection() {
   return (
     <div className="settings-about">
+
       <div className="settings-about__card">
         <MenuHeader>Application</MenuHeader>
-        <div className="settings-about__branding">
-          <img width="60" height="60" src={CinnySVG} alt="Ubiw.space logo" />
-          <div>
-            <Text variant="h2" weight="medium">
-              Ubiw.space
-              <span className="text text-b3" style={{ margin: '0 var(--sp-extra-tight)' }}>{`v${cons.version}`}</span>
-            </Text>
-            <Text>Yet another matrix client | Base on Cinny</Text>
+        <Box display="Flex" direction='Row'>
+          <div className="settings-about__branding">
+            <img style={{ borderRadius: '50%' }} width="60" height="60" src={UbiwJPG} alt="Ubiw.space logo" />
+            <div>
+              <Text variant="h2" weight="medium">
+                Ubiw.space
+              </Text>
+              <Text>Base on Cinny</Text>
 
-            <div className="settings-about__btns">
-              <Button onClick={() => window.open('https://github.com/ajbura/cinny')}>Source code</Button>
-              <Button onClick={() => window.open('https://cinny.in/#sponsor')}>Support</Button>
-              <Button onClick={() => initMatrix.clearCacheAndReload()} variant="danger">Clear cache & reload</Button>
+              <div className="settings-about__btns">
+                {/* <Button onClick={() => window.open('https://github.com/ajbura/cinny')}>Source code</Button>
+              <Button onClick={() => window.open('https://cinny.in/#sponsor')}>Support</Button> */}
+                <Button onClick={() => initMatrix.clearCacheAndReload()} variant="danger">Clear cache & reload</Button>
+              </div>
             </div>
           </div>
-        </div>
+          <div className="settings-about__branding">
+            <img width="60" height="60" src={CinnySVG} alt="Ubiw.space logo" />
+            <div>
+              <Text variant="h2" weight="medium">
+                Cinny
+                <span className="text text-b3" style={{ margin: '0 var(--sp-extra-tight)' }}>{`v${cons.version}`}</span>
+              </Text>
+              <Text>Yet another matrix client</Text>
+
+              <div className="settings-about__btns">
+                <Button onClick={() => window.open('https://github.com/ajbura/cinny')}>Source code</Button>
+                <Button onClick={() => window.open('https://cinny.in/#sponsor')}>Support</Button>
+              </div>
+            </div>
+          </div>
+        </Box>
       </div>
       <div className="settings-about__card">
         <MenuHeader>Credits</MenuHeader>
@@ -379,7 +396,8 @@ function AboutSection() {
           </ul>
         </div>
       </div>
-    </div>
+
+    </div >
   );
 }
 

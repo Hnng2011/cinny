@@ -10,8 +10,9 @@
     max-width: 600px;
   }
   &__logo {
-    width: 64px;
-    height: 64px;
+    width: 120px;
+    height: 120px;
+    border-radius: 12%;
   }
   &__heading {
     margin: var(--sp-extra-loose) 0 var(--sp-tight);

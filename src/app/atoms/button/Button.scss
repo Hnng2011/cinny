@@ -41,6 +41,14 @@
   }
 }
 
+.btn-surface {
+  box-shadow: var(--bs-surface-border);
+  @include color(var(--tc-surface-high), var(--ic-surface-normal));
+  @include state.hover(var(--bg-surface-hover));
+  @include state.focus(var(--bs-surface-outline));
+  @include state.active(var(--bg-surface-active));
+}
+
 .btn-primary {
   background-color: var(--bg-primary-active);
   @include color(var(--tc-primary-high), var(--ic-primary-normal));
