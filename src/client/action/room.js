@@ -24,7 +24,7 @@ import {
   createSpaceShortcut
 } from "./accountData";
 
-const provider = new ethers.providers.WebSocketProvider('wss://eth-sepolia.g.alchemy.com/v2/eOLovQ082DFsqRNNckle5rVXwV7PeiyO')
+const provider = new ethers.providers.WebSocketProvider(import.meta.env.VITE_APP_PUBLIC_RPC)
 const contractAddress = import.meta.env.VITE_APP_CONTRACT_ADDRESS;
 const contractAddressVoting = import.meta.env.VITE_APP_CONTRACT_ADDRESS_VOTING;
 const ABI = [
@@ -127,7 +127,7 @@ export async function votingForRoom(creator, roomId, stars, smartAccount) {
 
   try {
     const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
-    const txhash = await smartAccount.sendTransaction(feeQuotesResult.verifyingPaymasterGasless);
+    const txhash = await smartAccount.sendTransaction(feeQuotesResult.verifyingPaymasterGasless || feeQuotesResult.verifyingPaymasterNative);
     const result = checkTransactionStatus(txhash).then(receipt => receipt)
     return result;
   }
@@ -158,7 +158,7 @@ export async function Withdraw(smartAccount) {
 
   try {
     const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
-    const txHash = await smartAccount.sendTransaction(feeQuotesResult.verifyingPaymasterGasless);
+    const txHash = await smartAccount.sendTransaction(feeQuotesResult.verifyingPaymasterGasless || feeQuotesResult.verifyingPaymasterNative);
     return txHash;
   }
 
@@ -189,7 +189,7 @@ async function joinRoomByContract(roomId, creator, smartAccount, fee) {
     };
 
     const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
-    const txHash = await smartAccount.sendUserOperation(feeQuotesResult.verifyingPaymasterGasless);
+    const txHash = await smartAccount.sendUserOperation(feeQuotesResult.verifyingPaymasterGasless || feeQuotesResult.verifyingPaymasterNative);
 
     await checkTransactionStatus(txHash)
       .then(receipt => receipt)
@@ -215,7 +215,7 @@ async function CreateSpaceByContract(smartAccount) {
 
   try {
     const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
-    const txHash = await smartAccount.sendUserOperation(feeQuotesResult.verifyingPaymasterGasless);
+    const txHash = await smartAccount.sendUserOperation(feeQuotesResult.verifyingPaymasterGasless || feeQuotesResult.verifyingPaymasterNative);
     const result = await checkTransactionStatus(txHash).then(recipe => recipe)
     return result
   }
@@ -244,7 +244,7 @@ async function CreateRoomByContract(room_id, fee, smartAccount) {
     }
 
     const feeQuotesResult = await smartAccount.getFeeQuotes(tx);
-    const txHash = await smartAccount.sendUserOperation(feeQuotesResult.verifyingPaymasterGasless);
+    const txHash = await smartAccount.sendUserOperation(feeQuotesResult.verifyingPaymasterGasless || feeQuotesResult.verifyingPaymasterNative);
     const result = await checkTransactionStatus(txHash).then(recipe => recipe)
     return result
   }
