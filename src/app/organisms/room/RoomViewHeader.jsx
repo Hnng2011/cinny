@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import './RoomViewHeader.scss';
@@ -51,10 +52,7 @@ function RoomViewHeader({ roomId }) {
 
   const roomHeaderBtnRef = useRef(null);
   useEffect(() => {
-    const settingsToggle = (isVisibile) => {
-      const rawIcon = roomHeaderBtnRef.current.lastElementChild;
-      rawIcon.style.transform = isVisibile ? 'rotateX(180deg)' : 'rotateX(0deg)';
-    };
+    const settingsToggle = () => null;
     navigation.on(cons.events.navigation.ROOM_SETTINGS_TOGGLED, settingsToggle);
     return () => {
       navigation.removeListener(cons.events.navigation.ROOM_SETTINGS_TOGGLED, settingsToggle);
