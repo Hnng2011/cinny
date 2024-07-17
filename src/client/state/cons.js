@@ -1,13 +1,13 @@
 const cons = {
   version: '3.2.0',
   secretKey: {
-    ACCESS_TOKEN: 'cinny_access_token',
-    DEVICE_ID: 'cinny_device_id',
-    USER_ID: 'cinny_user_id',
-    BASE_URL: 'cinny_hs_base_url',
+    ACCESS_TOKEN: 'ubiw_access_token',
+    DEVICE_ID: 'ubiw_device_id',
+    USER_ID: 'ubiw_user_id',
+    BASE_URL: 'ubiw_hs_base_url',
   },
   DEVICE_DISPLAY_NAME: 'Ubiw Web',
-  IN_CINNY_SPACES: 'in.cinny.spaces',
+  IN_UBIW_SPACES: 'in.ubiw.spaces',
   tabs: {
     HOME: 'home',
     DIRECTS: 'dm',

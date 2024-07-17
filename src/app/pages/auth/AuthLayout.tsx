@@ -22,7 +22,8 @@ import {
 } from '../../hooks/useClientConfig';
 import { AsyncStatus, useAsyncCallback } from '../../hooks/useAsyncCallback';
 import { LOGIN_PATH, REGISTER_PATH } from '../paths';
-import CinnySVG from '../../../../public/res/svg/cinny.svg';
+// import CinnySVG from '../../../../public/res/svg/cinny.svg';
+import UbiwJPG from '../../../../public/logo.jpg'
 import { ServerPicker } from './ServerPicker';
 import { AutoDiscoveryAction, autoDiscovery } from '../../cs-api';
 import { SpecVersionsLoader } from '../../components/SpecVersionsLoader';
@@ -136,7 +137,7 @@ export function AuthLayout() {
         <Box direction="Column" className={css.AuthCard}>
           <Header className={css.AuthHeader} size="600" variant="Surface">
             <Box grow="Yes" direction="Row" gap="300" alignItems="Center">
-              <img className={css.AuthLogo} src={CinnySVG} alt="Cinny Logo" />
+              <img className={css.AuthLogo} src={UbiwJPG} alt="Ubiw.space Logo" />
               <Text size="H3">Ubiw.space</Text>
             </Box>
           </Header>

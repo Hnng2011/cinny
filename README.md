@@ -1,4 +1,4 @@
-# Ubiw.space | Cinny
+<!-- # Ubiw.space | Cinny
 <p>
     <a href="https://github.com/ajbura/cinny/releases">
         <img alt="GitHub release downloads" src="https://img.shields.io/github/downloads/ajbura/cinny/total?logo=github&style=social"></a>
@@ -111,4 +111,4 @@ You can then run the container you've built with a command similar to this:
 docker run -p 8080:80 cinny:latest
 ```
 
-This will forward your `localhost` port 8080 to the container's port 80. You can visit the app in your browser by navigating to `http://localhost:8080`.
+This will forward your `localhost` port 8080 to the container's port 80. You can visit the app in your browser by navigating to `http://localhost:8080`. -->

@@ -118,22 +118,14 @@ function Client() {
     return (
       <div className="loading-display">
         <div className="loading__menu">
-          <ContextMenu
-            placement="bottom"
-            content={
-              <>
-                <MenuItem onClick={() => initMatrix.clearCacheAndReload()}>
-                  Clear cache & reload
-                </MenuItem>
-                <MenuItem onClick={() => initMatrix.logout()}>Logout</MenuItem>
-              </>
-            }
-            render={(toggle) => (
-              <IconButton size="extra-small" onClick={toggle} src={VerticalMenuIC} />
-            )}
-          />
+          <MenuItem variant='danger' onClick={() => initMatrix.clearCacheAndReload()}>
+            Clear cache & reload
+          </MenuItem>
+
         </div>
         <Spinner />
+        <div style={{ height: 'var(--sp-normal)' }} />
+
         <Text className="loading__message" variant="b2">
           {loadingMsg}
         </Text>
