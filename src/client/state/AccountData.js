@@ -44,7 +44,7 @@ class AccountData extends EventEmitter {
   _updateSpaceShortcutData(shortcutList) {
     const spaceContent = this._getAccountData();
     spaceContent.shortcut = shortcutList;
-    this.matrixClient.setAccountData(cons.IN_ubiw_SPACES, spaceContent);
+    this.matrixClient.setAccountData(cons.IN_UBIW_SPACES, spaceContent);
   }
 
   _populateCategorizedSpaces() {
@@ -65,7 +65,7 @@ class AccountData extends EventEmitter {
   _updateCategorizedSpacesData(categorizedSpaceList) {
     const spaceContent = this._getAccountData();
     spaceContent.categorized = categorizedSpaceList;
-    this.matrixClient.setAccountData(cons.IN_ubiw_SPACES, spaceContent);
+    this.matrixClient.setAccountData(cons.IN_UBIW_SPACES, spaceContent);
   }
 
   accountActions(action) {
@@ -118,7 +118,7 @@ class AccountData extends EventEmitter {
 
   _listenEvents() {
     this.matrixClient.on('accountData', (event) => {
-      if (event.getType() !== cons.IN_ubiw_SPACES) return;
+      if (event.getType() !== cons.IN_UBIW_SPACES) return;
       this._populateSpaceShortcut();
       this.emit(cons.events.accountData.SPACE_SHORTCUT_UPDATED);
       this._populateCategorizedSpaces();
