@@ -7,20 +7,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useEffect, useState, useCallback } from 'react';
 
-import { ConnectButton, useAccountInfo, useConnectKit } from '@particle-network/connectkit';
+import { ConnectButton, useAccountInfo, useNetwork, useParticleConnect } from '@particle-network/connectkit';
 import { Buffer } from 'buffer';
 import { useAtom } from 'jotai';
 import {
-  Box,
-  Icon,
-  Icons,
+  // Box,
+  // Icon,
+  // Icons,
   Overlay,
   OverlayBackdrop,
   OverlayCenter,
   Spinner,
-  Text,
-  color,
-  config,
+  // Text,
+  // color,
+  // config,
 } from 'folds';
 import { SmartAccount } from '@particle-network/aa';
 import { EthereumSepolia } from '@particle-network/chains';
@@ -31,29 +31,29 @@ import { useAutoDiscoveryInfo } from '../../../hooks/useAutoDiscoveryInfo';
 import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
 import { CustomLoginResponse, LoginError, login, useLoginComplete } from './loginUtil';
 
-function LoginTokenError({ message }: { message: string }) {
-  return (
-    <Box
-      style={{
-        backgroundColor: color.Critical.Container,
-        color: color.Critical.OnContainer,
-        padding: config.space.S300,
-        borderRadius: config.radii.R400,
-      }}
-      justifyContent="Start"
-      alignItems="Start"
-      gap="300"
-    >
-      <Icon size="300" filled src={Icons.Warning} />
-      <Box direction="Column" gap="100">
-        <Text size="L400">Login Failed</Text>
-        <Text size="T300">
-          <b>{message}</b>
-        </Text>
-      </Box>
-    </Box>
-  );
-}
+// function LoginTokenError({ message }: { message: string }) {
+//   return (
+//     <Box
+//       style={{
+//         backgroundColor: color.Critical.Container,
+//         color: color.Critical.OnContainer,
+//         padding: config.space.S300,
+//         borderRadius: config.radii.R400,
+//       }}
+//       justifyContent="Start"
+//       alignItems="Start"
+//       gap="300"
+//     >
+//       <Icon size="300" filled src={Icons.Warning} />
+//       <Box direction="Column" gap="100">
+//         <Text size="L400">Login Failed</Text>
+//         <Text size="T300">
+//           <b>{message}</b>
+//         </Text>
+//       </Box>
+//     </Box>
+//   );
+// }
 
 const getNonce = async (address: any) => {
   const add = address.toString().toLowerCase();
@@ -104,9 +104,22 @@ export function Login() {
   const [_, setSmartAccount] = useAtom(SmartAccountAtom);
   const [err, setErr] = useState<string | null>(null);
   const [token, setToken] = useState<string | undefined>(undefined);
-  const connectkit = useConnectKit()
+  const { disconnect, connectKit: connectkit } = useParticleConnect()
   const { account, particleProvider }: { particleProvider: any, account: string | undefined } = useAccountInfo();
+  const { chain } = useNetwork()
   const { enqueueSnackbar } = useSnackbar()
+
+
+  useEffect(() => {
+    if (chain && chain.id !== EthereumSepolia.id) {
+      const switching = async () => {
+        await connectkit.switchChain(EthereumSepolia);
+        disconnect()
+      }
+
+      switching()
+    }
+  }, [chain])
 
   useEffect(() => {
     async function LoadToken() {
@@ -132,8 +145,7 @@ export function Login() {
 
         await postNonce(msg, signature, setToken, setErr)
       } catch (error: any) {
-        connectkit?.disconnect()
-        particleProvider?.disconnect()
+        disconnect()
         setErr(error?.message)
       }
     }
@@ -186,7 +198,7 @@ export function Login() {
           setErr("Failed to login. Unknown reason.")
         }
 
-        connectkit.disconnect()
+        disconnect()
       }
     }, [loginState, setErr])
 
@@ -201,7 +213,7 @@ export function Login() {
 
   return (
     <>
-      {account && !err && <Spinner />}
+      {account && <Spinner />}
       {!account && <ConnectButton />}
       {token && <TokenLogin />}
     </>

@@ -1,9 +1,10 @@
+/* eslint-disable no-restricted-globals */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-expressions */
 import React, { useState, useEffect, useRef } from 'react';
 import './Client.scss';
 
-import { useAccountInfo, useParticleConnect } from '@particle-network/connectkit';
+import { useAccountInfo, useParticleConnect, useNetwork } from '@particle-network/connectkit';
 import { SmartAccount } from '@particle-network/aa';
 import { EthereumSepolia } from '@particle-network/chains';
 import { useAtom } from 'jotai';
@@ -13,8 +14,10 @@ import { initRoomListListener } from '../../../client/event/roomList';
 import Text from '../../atoms/text/Text';
 import Spinner from '../../atoms/spinner/Spinner';
 import Navigation from '../../organisms/navigation/Navigation';
-import ContextMenu, { MenuItem } from '../../atoms/context-menu/ContextMenu';
-import IconButton from '../../atoms/button/IconButton';
+import
+// ContextMenu,
+{ MenuItem } from '../../atoms/context-menu/ContextMenu';
+// import IconButton from '../../atoms/button/IconButton';
 import ReusableContextMenu from '../../atoms/context-menu/ReusableContextMenu';
 import Windows from '../../organisms/pw/Windows';
 import Dialogs from '../../organisms/pw/Dialogs';
@@ -23,7 +26,7 @@ import initMatrix from '../../../client/initMatrix';
 import navigation from '../../../client/state/navigation';
 import cons from '../../../client/state/cons';
 
-import VerticalMenuIC from '../../../../public/res/ic/outlined/vertical-menu.svg';
+// import VerticalMenuIC from '../../../../public/res/ic/outlined/vertical-menu.svg';
 import { MatrixClientProvider } from '../../hooks/useMatrixClient';
 import { ClientContent } from './ClientContent';
 import { useSetting } from '../../state/hooks/settings';
@@ -44,10 +47,10 @@ function SystemEmojiFeature() {
 }
 
 function Client() {
-  const particleConnect = useParticleConnect();
+  const { cacheconnect, connectKit: connectkit } = useParticleConnect();
+  const { chain } = useNetwork()
   const { particleProvider, account } = useAccountInfo();
   const [smartAccount, setSmartAccount] = useAtom(SmartAccountAtom);
-
   const [isLoading, changeLoading] = useState(true);
   const [loadingMsg, setLoadingMsg] = useState('Heating up');
   const classNameHidden = 'client__item-hidden';
@@ -77,28 +80,40 @@ function Client() {
 
   useEffect(() => {
     changeLoading(true);
-    let counter = 0;
-    const iId = setInterval(() => {
-      const msgList = ['Almost there...', 'Looks like you have a lot of stuff to heat up!'];
-      if (counter === msgList.length - 1) {
-        setLoadingMsg(msgList[msgList.length - 1]);
-        clearInterval(iId);
-        return;
+    if (!chain && !account)
+      cacheconnect();
+
+    if (chain && chain.id !== EthereumSepolia.id) {
+      const switchchain = async () => {
+        await connectkit.switchChain(EthereumSepolia)
       }
-      setLoadingMsg(msgList[counter]);
-      counter += 1;
-    }, 15000);
 
-    initMatrix.once('init_loading_finished', async () => {
-      clearInterval(iId);
-      initHotkeys();
-      initRoomListListener(initMatrix.roomList);
-      !account && await particleConnect.cacheconnect();
-      changeLoading(false);
-    });
+      switchchain()
+    }
 
-    initMatrix.init();
-  }, []);
+    if (chain && chain.id === EthereumSepolia.id) {
+      let counter = 0;
+      const iId = setInterval(() => {
+        const msgList = ['Almost there...', 'Looks like you have a lot of stuff to heat up!'];
+        if (counter === msgList.length - 1) {
+          setLoadingMsg(msgList[msgList.length - 1]);
+          clearInterval(iId);
+          return;
+        }
+        setLoadingMsg(msgList[counter]);
+        counter += 1;
+      }, 15000);
+
+      initMatrix.once('init_loading_finished', async () => {
+        clearInterval(iId);
+        initHotkeys();
+        initRoomListListener(initMatrix.roomList);
+        changeLoading(false);
+      });
+
+      initMatrix.init();
+    }
+  }, [chain]);
 
   useEffect(() => {
     !smartAccount && particleProvider &&
@@ -118,7 +133,7 @@ function Client() {
     return (
       <div className="loading-display">
         <div className="loading__menu">
-          <MenuItem variant='danger' onClick={() => initMatrix.clearCacheAndReload()}>
+          <MenuItem variant='danger' onClick={() => location.reload()}>
             Clear cache & reload
           </MenuItem>
 
