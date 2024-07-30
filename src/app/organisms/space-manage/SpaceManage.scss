@@ -22,6 +22,11 @@
   }
 
   &-items {
+    ::-webkit-scrollbar {
+      width: 5px;
+      background-color: bisque;
+    }
+
     @include dir.side(padding, var(--sp-extra-tight), 0);
     & > .text:first-child {
       padding: var(--sp-extra-tight);

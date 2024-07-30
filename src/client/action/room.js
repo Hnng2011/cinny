@@ -197,8 +197,10 @@ async function joinRoomByContract(roomId, creator, smartAccount, fee) {
 
     return true
   } catch (e) {
+    console.log(e)
     const err = JSON.parse(String(e?.data.extraMessage.message).substring(String(e?.data.extraMessage.message).indexOf('{'))) || e?.message || e
-    if (err.error.message === 'execution reverted') {
+
+    if (err.error.message === 'execution reverted' || err.error.message.includes('insufficient funds')) {
       throw new Error("Please check your wallet balance")
     }
     throw new Error(err);
@@ -222,7 +224,7 @@ async function CreateSpaceByContract(smartAccount) {
 
   catch (e) {
     const err = JSON.parse(String(e?.data.extraMessage.message).substring(String(e?.data.extraMessage.message).indexOf('{'))) || e?.message || e
-    if (err.error.message === 'execution reverted: Caller does not own the required NFT') {
+    if (err.error.message.includes('Caller does not own the required NFT')) {
       throw new Error("Please verify your twitter first")
     }
     else { throw new Error(typeof err === 'object' ? err.error.message : err) }

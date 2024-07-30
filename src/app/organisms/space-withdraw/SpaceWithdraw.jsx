@@ -309,11 +309,12 @@ function SpaceWithdrawContent({ roomId }) {
         ))}
         {!currentHierarchy && <Text>loading...</Text>}
       </div>
-      {currentHierarchy?.canLoadMore && !isLoading && (
-        <Button onClick={loadRoomHierarchy}>Load more</Button>
-      )}
 
       <Box className='withdraw' direction='Row' gap='300' alignItems='Center' justifyContent='End'>
+        {currentHierarchy?.canLoadMore && !isLoading && (
+          <Button onClick={loadRoomHierarchy}>Load more</Button>
+        )}
+
         <Button disabled={withDrawing} variant='primary' onClick={withDraw}>Withdraw</Button>
       </Box>
       {

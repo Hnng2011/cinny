@@ -80,7 +80,7 @@ function PopupWindow({
               {drawerOptions}
             </Header>
             <div className="pw__drawer__content__wrapper">
-              <ScrollView invisible>
+              <ScrollView autoHide>
                 <div className="pw__drawer__content">
                   {drawer}
                 </div>
